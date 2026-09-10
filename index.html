@@ -1198,6 +1198,14 @@
         saveState();
         renderStudentsList();
         applyUserSession();
+
+        if (supabaseClient) {
+          supabaseClient.from('users').update({
+            name: approvedName,
+            pending_name: null
+          }).eq('id', userId).then(() => {});
+        }
+
         showToast(`Nome de ${u.username} aprovado como "${approvedName}"!`);
       }
     }
@@ -1211,6 +1219,13 @@
         }
         saveState();
         renderStudentsList();
+
+        if (supabaseClient) {
+          supabaseClient.from('users').update({
+            pending_name: null
+          }).eq('id', userId).then(() => {});
+        }
+
         showToast("Pedido de alteração de nome rejeitado.");
       }
     }
@@ -1601,6 +1616,14 @@
       saveState();
       closeEnrolledModal();
       renderGrades();
+
+      if (supabaseClient) {
+        supabaseClient.from('student_enrolled').upsert({
+          student_id: userId,
+          subjects: selectedIds
+        }).then(() => {});
+      }
+
       showToast("Cadeiras atualizadas com sucesso!");
     }
 
@@ -1880,6 +1903,11 @@
       saveState();
       renderSubjectInfoBody(subjectId);
       renderGrades();
+
+      if (supabaseClient) {
+        supabaseClient.from('subjects').update({ professors: subject.professors }).eq('id', subjectId).then(() => {});
+      }
+
       showToast("Dados do docente atualizados!");
     }
 
@@ -1892,6 +1920,11 @@
         saveState();
         renderSubjectInfoBody(subjectId);
         renderGrades();
+
+        if (supabaseClient) {
+          supabaseClient.from('subjects').update({ professors: subject.professors }).eq('id', subjectId).then(() => {});
+        }
+
         showToast("Docente removido com sucesso.");
       }
     }
@@ -1922,6 +1955,11 @@
       document.getElementById('docent-name').value = '';
       document.getElementById('docent-email').value = '';
       document.getElementById('docent-role').value = '';
+
+      if (supabaseClient) {
+        supabaseClient.from('subjects').update({ professors: subject.professors }).eq('id', subjectId).then(() => {});
+      }
+
       showToast(`Docente ${name} registado em ${subject.name}!`);
     }
 
@@ -1999,6 +2037,14 @@
 
       saveState();
       renderAbsenceCards();
+
+      if (supabaseClient) {
+        supabaseClient.from('subjects').update({
+          max_absences_theory: subject.maxAbsencesTheory,
+          max_absences_practice: subject.maxAbsencesPractice
+        }).eq('id', subjectId).then(() => {});
+      }
+
       showToast(`Limites de faltas guardados para ${subject.name}!`);
     }
 
@@ -2055,6 +2101,13 @@
       saveState();
       renderAbsences();
 
+      if (supabaseClient) {
+        supabaseClient.from('student_absences').upsert({
+          student_id: userId,
+          absences: state.absences[userId]
+        }).then(() => {});
+      }
+
       showToast(`Falta registada à aula ${typeLabel} de ${subName}!`);
     }
 
@@ -2094,6 +2147,13 @@
       state.absences[userId].push(newAbsence);
       saveState();
       renderAbsences();
+
+      if (supabaseClient) {
+        supabaseClient.from('student_absences').upsert({
+          student_id: userId,
+          absences: state.absences[userId]
+        }).then(() => {});
+      }
 
       showToast(`Falta registada: ${typeLabel} (${subName})`);
     }
@@ -2157,6 +2217,14 @@
       saveState();
       closeDeleteAbsenceModal();
       renderAbsences();
+
+      if (supabaseClient) {
+        supabaseClient.from('student_absences').upsert({
+          student_id: userId,
+          absences: state.absences[userId]
+        }).then(() => {});
+      }
+
       showToast(`Falta ${typeLabel} de ${subName} removida.`);
     }
 
@@ -2448,6 +2516,20 @@
       updateSubjectSelects();
       renderGrades();
       renderArchiveTabs();
+
+      if (supabaseClient) {
+        supabaseClient.from('subjects').insert({
+          id: newSub.id,
+          name: newSub.name,
+          max_absences_theory: newSub.maxAbsencesTheory,
+          max_absences_practice: newSub.maxAbsencesPractice,
+          professors: newSub.professors,
+          tests: newSub.tests
+        }).then(({ error }) => {
+          if (error) console.error("Erro ao guardar cadeira no Supabase:", error);
+        });
+      }
+
       showToast(`Cadeira "${name}" criada!`);
     }
 
@@ -2456,12 +2538,36 @@
       const name = subject ? subject.name : 'a cadeira';
       if (confirm(`Tens a certeza de que pretendes eliminar "${name}"?`)) {
         state.subjects = state.subjects.filter(s => s.id !== subjectId);
+        
+        // Limpar ficheiros associados à cadeira
+        state.files = state.files.filter(f => f.subjectId !== subjectId);
+        if (Array.isArray(state.fileRequests)) {
+          state.fileRequests = state.fileRequests.filter(r => r.subjectId !== subjectId);
+        }
+
+        // Limpar inscrições dos alunos
+        Object.keys(state.enrolledSubjects).forEach(uId => {
+          if (Array.isArray(state.enrolledSubjects[uId])) {
+            state.enrolledSubjects[uId] = state.enrolledSubjects[uId].filter(id => id !== subjectId);
+          }
+        });
+
         saveState();
         updateSubjectSelects();
         renderGrades();
         renderArchiveTabs();
         renderFiles();
-        showToast("Cadeira eliminada.");
+
+        // ELIMINAR PERMANENTEMENTE NO SUPABASE (CLOUD)
+        if (supabaseClient) {
+          supabaseClient.from('subjects').delete().eq('id', subjectId).then(({ error }) => {
+            if (error) console.error("Erro ao apagar cadeira no Supabase:", error);
+          });
+          supabaseClient.from('files').delete().eq('subject_id', subjectId).then(() => {});
+          supabaseClient.from('file_requests').delete().eq('subject_id', subjectId).then(() => {});
+        }
+
+        showToast("Cadeira eliminada com sucesso.", "success");
       }
     }
 
@@ -2486,6 +2592,13 @@
         document.getElementById('new-test-weight').value = '';
         document.getElementById('new-test-opendate').value = '';
         renderGrades();
+
+        if (supabaseClient) {
+          supabaseClient.from('subjects').update({ tests: subject.tests }).eq('id', subjectId).then(({ error }) => {
+            if (error) console.error("Erro ao sincronizar testes no Supabase:", error);
+          });
+        }
+
         showToast(`Avaliação "${testName}" adicionada!`);
       }
     }
@@ -2497,6 +2610,13 @@
           subject.tests = subject.tests.filter(t => t.id !== testId);
           saveState();
           renderGrades();
+
+          if (supabaseClient) {
+            supabaseClient.from('subjects').update({ tests: subject.tests }).eq('id', subjectId).then(({ error }) => {
+              if (error) console.error("Erro ao atualizar testes no Supabase:", error);
+            });
+          }
+
           showToast("Avaliação eliminada.");
         }
       }
@@ -3488,6 +3608,13 @@ ${480 + streamLen}
         saveState();
         renderArchiveTabs();
         renderFiles();
+
+        if (supabaseClient) {
+          supabaseClient.from('files').delete().eq('id', fileId).then(({ error }) => {
+            if (error) console.error("Erro ao apagar ficheiro no Supabase:", error);
+          });
+        }
+
         showToast("Documento removido.");
       }
     }
@@ -3716,26 +3843,34 @@ ${480 + streamLen}
       try {
         // 0. Cadeiras / Disciplinas
         const { data: cloudSubjects, error: subErr } = await supabaseClient.from('subjects').select('*');
-        if (!subErr && cloudSubjects && cloudSubjects.length > 0) {
-          state.subjects = cloudSubjects.map(cs => ({
-            id: cs.id,
-            name: cs.name,
-            maxAbsencesTheory: cs.max_absences_theory,
-            maxAbsencesPractice: cs.max_absences_practice,
-            professors: cs.professors || [],
-            tests: cs.tests || []
-          }));
-        } else if (!subErr && (!cloudSubjects || cloudSubjects.length === 0)) {
-          // Semear cadeiras de fábrica na cloud
-          for (const s of state.subjects) {
-            await supabaseClient.from('subjects').insert({
-              id: s.id,
-              name: s.name,
-              max_absences_theory: s.maxAbsencesTheory || 4,
-              max_absences_practice: s.maxAbsencesPractice || 3,
-              professors: s.professors || [],
-              tests: s.tests || []
-            });
+        if (!subErr && cloudSubjects) {
+          const hasSeededSubjects = localStorage.getItem('study_supabase_subjects_seeded');
+          if (cloudSubjects.length > 0) {
+            state.subjects = cloudSubjects.map(cs => ({
+              id: cs.id,
+              name: cs.name,
+              maxAbsencesTheory: cs.max_absences_theory,
+              maxAbsencesPractice: cs.max_absences_practice,
+              professors: cs.professors || [],
+              tests: cs.tests || []
+            }));
+            localStorage.setItem('study_supabase_subjects_seeded', 'true');
+          } else if (!hasSeededSubjects) {
+            // Apenas semeia na primeira execução da história do projeto
+            for (const s of state.subjects) {
+              await supabaseClient.from('subjects').insert({
+                id: s.id,
+                name: s.name,
+                max_absences_theory: s.maxAbsencesTheory || 4,
+                max_absences_practice: s.maxAbsencesPractice || 3,
+                professors: s.professors || [],
+                tests: s.tests || []
+              });
+            }
+            localStorage.setItem('study_supabase_subjects_seeded', 'true');
+          } else {
+            // Se o admin apagou todas as cadeiras da cloud, respeita a lista vazia
+            state.subjects = [];
           }
         }
 
