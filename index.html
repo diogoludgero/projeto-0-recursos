@@ -538,7 +538,26 @@
                 <input type="text" id="docent-name" placeholder="Nome (Ex: Prof. João Silva)" required class="w-full px-3 py-2 border rounded-xl text-xs outline-none focus:border-indigo-600 bg-white transition">
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   <input type="email" id="docent-email" placeholder="Email institucional" required class="w-full px-3 py-2 border rounded-xl text-xs outline-none focus:border-indigo-600 bg-white transition">
-                  <input type="text" id="docent-role" placeholder="Cargo (Ex: Regente)" class="w-full px-3 py-2 border rounded-xl text-xs outline-none focus:border-indigo-600 bg-white transition">
+                  <input type="text" id="docent-role" placeholder="Cargo / Outras funções (Ex: Regente)" class="w-full px-3 py-2 border rounded-xl text-xs outline-none focus:border-indigo-600 bg-white transition">
+                </div>
+                <div>
+                  <label class="block text-[11px] font-bold text-slate-600 mb-1.5 flex items-center gap-1">
+                    <i class="fa-solid fa-layer-group text-indigo-600"></i> Tipo de Aulas (pode selecionar várias):
+                  </label>
+                  <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    <label class="flex items-center gap-2 p-2 rounded-xl border border-slate-200 bg-white hover:bg-indigo-50/50 cursor-pointer transition select-none">
+                      <input type="checkbox" name="docent-type-admin" value="Teóricas" class="rounded text-indigo-600 focus:ring-indigo-500 w-4 h-4 cursor-pointer">
+                      <span class="text-xs font-semibold text-slate-700">Teóricas</span>
+                    </label>
+                    <label class="flex items-center gap-2 p-2 rounded-xl border border-slate-200 bg-white hover:bg-indigo-50/50 cursor-pointer transition select-none">
+                      <input type="checkbox" name="docent-type-admin" value="Teórico-Práticas" class="rounded text-indigo-600 focus:ring-indigo-500 w-4 h-4 cursor-pointer">
+                      <span class="text-xs font-semibold text-slate-700">Teórico-Práticas</span>
+                    </label>
+                    <label class="flex items-center gap-2 p-2 rounded-xl border border-slate-200 bg-white hover:bg-indigo-50/50 cursor-pointer transition select-none">
+                      <input type="checkbox" name="docent-type-admin" value="Práticas-Laboratoriais" class="rounded text-indigo-600 focus:ring-indigo-500 w-4 h-4 cursor-pointer">
+                      <span class="text-xs font-semibold text-slate-700">Práticas-Lab.</span>
+                    </label>
+                  </div>
                 </div>
               </div>
             </div>
@@ -880,8 +899,8 @@
           maxAbsencesTheory: 4,
           maxAbsencesPractice: 3,
           professors: [
-            { id: 'prof_1', name: 'Prof. Doutor Ademar Aguiar', email: 'ademar@fe.up.pt', role: 'Regente' },
-            { id: 'prof_2', name: 'Prof. Hugo Sereno Ferreira', email: 'hsereno@fe.up.pt', role: 'Docente Teórico-Prático' }
+            { id: 'prof_1', name: 'Prof. Doutor Ademar Aguiar', email: 'ademar@fe.up.pt', role: 'Regente', types: ['Teóricas'] },
+            { id: 'prof_2', name: 'Prof. Hugo Sereno Ferreira', email: 'hsereno@fe.up.pt', role: '', types: ['Teórico-Práticas', 'Práticas-Laboratoriais'] }
           ],
           tests: [
             { id: 'test_1', name: '1º Teste Teórico', weight: 40, openDate: '' },
@@ -894,7 +913,7 @@
           maxAbsencesTheory: 4,
           maxAbsencesPractice: 3,
           professors: [
-            { id: 'prof_3', name: 'Prof.ª Doutora Maria João Rodrigues', email: 'mjr@fe.up.pt', role: 'Regente' }
+            { id: 'prof_3', name: 'Prof.ª Doutora Maria João Rodrigues', email: 'mjr@fe.up.pt', role: 'Regente', types: ['Teóricas', 'Teórico-Práticas'] }
           ],
           tests: [
             { id: 'test_3', name: 'Frequência 1', weight: 50, openDate: '' },
@@ -907,7 +926,7 @@
           maxAbsencesTheory: 4,
           maxAbsencesPractice: 3,
           professors: [
-            { id: 'prof_4', name: 'Prof. Doutor Jaime Villate', email: 'villate@fe.up.pt', role: 'Regente' }
+            { id: 'prof_4', name: 'Prof. Doutor Jaime Villate', email: 'villate@fe.up.pt', role: 'Regente', types: ['Teóricas'] }
           ],
           tests: [
             { id: 'test_5', name: 'Mini-Teste 1', weight: 30, openDate: '' },
@@ -1703,6 +1722,35 @@
       currentEditingProfId = null;
     }
 
+    function renderProfessorBadges(prof) {
+      let badgesHtml = '';
+      if (Array.isArray(prof.types) && prof.types.length > 0) {
+        prof.types.forEach(t => {
+          if (t === 'Teóricas') {
+            badgesHtml += `<span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-md bg-blue-100 text-blue-800 border border-blue-200 flex items-center gap-1"><i class="fa-solid fa-book-open text-[9px]"></i> Teóricas</span>`;
+          } else if (t === 'Teórico-Práticas') {
+            badgesHtml += `<span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800 border border-emerald-200 flex items-center gap-1"><i class="fa-solid fa-pen-ruler text-[9px]"></i> Teórico-Práticas</span>`;
+          } else if (t === 'Práticas-Laboratoriais') {
+            badgesHtml += `<span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-md bg-amber-100 text-amber-800 border border-amber-200 flex items-center gap-1"><i class="fa-solid fa-flask text-[9px]"></i> Práticas-Lab.</span>`;
+          } else {
+            badgesHtml += `<span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-md bg-indigo-100 text-indigo-700 border border-indigo-200">${t}</span>`;
+          }
+        });
+      }
+
+      if (prof.role && prof.role !== 'Docente') {
+        const isRedundant = prof.types && prof.types.join(', ') === prof.role;
+        if (!isRedundant) {
+          badgesHtml += `<span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-md bg-purple-100 text-purple-800 border border-purple-200 flex items-center gap-1"><i class="fa-solid fa-award text-[9px]"></i> ${prof.role}</span>`;
+        }
+      }
+
+      if (!badgesHtml) {
+        badgesHtml = `<span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-md bg-indigo-100/80 text-indigo-700 border border-indigo-200/50">Docente</span>`;
+      }
+      return badgesHtml;
+    }
+
     function renderSubjectInfoBody(subjectId) {
       const subject = state.subjects.find(s => s.id === subjectId);
       if (!subject) return;
@@ -1730,11 +1778,9 @@
                     <i class="fa-solid fa-user-tie"></i>
                   </div>
                   <div class="min-w-0">
-                    <div class="flex items-center gap-2 flex-wrap">
+                    <div class="flex items-center gap-1.5 flex-wrap">
                       <h4 class="font-bold text-slate-800 text-sm truncate">${prof.name}</h4>
-                      <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-md bg-indigo-100/80 text-indigo-700 border border-indigo-200/50">
-                        ${prof.role || 'Docente'}
-                      </span>
+                      ${renderProfessorBadges(prof)}
                     </div>
                     <div class="flex items-center gap-1.5 text-xs text-slate-600 mt-1">
                       <i class="fa-regular fa-envelope text-slate-400"></i>
@@ -1772,6 +1818,10 @@
       if (isAdmin) {
         const editingProf = currentEditingProfId ? professors.find(p => p.id === currentEditingProfId) : null;
         if (editingProf) {
+          const profTypes = Array.isArray(editingProf.types) ? editingProf.types : [];
+          const hasT = profTypes.includes('Teóricas') || (editingProf.role && editingProf.role.toLowerCase().includes('teórica') && !editingProf.role.toLowerCase().includes('teórico-prática'));
+          const hasTP = profTypes.includes('Teórico-Práticas') || (editingProf.role && editingProf.role.toLowerCase().includes('teórico-prática'));
+          const hasPL = profTypes.includes('Práticas-Laboratoriais') || (editingProf.role && (editingProf.role.toLowerCase().includes('laborat') || (editingProf.role.toLowerCase().includes('prática') && !editingProf.role.toLowerCase().includes('teórico-prática'))));
           adminSectionHtml = `
             <div class="mt-5 p-4 sm:p-5 bg-amber-50/70 border border-amber-200 rounded-2xl">
               <div class="flex items-center justify-between mb-3">
@@ -1793,8 +1843,27 @@
                     <input type="email" id="modal-edit-prof-email" value="${editingProf.email}" required class="w-full px-3 py-2 border rounded-xl text-xs bg-white outline-none focus:border-indigo-600 transition">
                   </div>
                   <div>
-                    <label class="block text-[11px] font-bold text-slate-600 mb-1">Cargo / Função (Ex: Regente)</label>
+                    <label class="block text-[11px] font-bold text-slate-600 mb-1">Cargo / Outras Funções (Ex: Regente)</label>
                     <input type="text" id="modal-edit-prof-role" value="${editingProf.role || ''}" placeholder="Ex: Regente" class="w-full px-3 py-2 border rounded-xl text-xs bg-white outline-none focus:border-indigo-600 transition">
+                  </div>
+                </div>
+                <div>
+                  <label class="block text-[11px] font-bold text-slate-600 mb-1.5 flex items-center gap-1">
+                    <i class="fa-solid fa-layer-group text-amber-600"></i> Tipo de Aulas (pode selecionar várias):
+                  </label>
+                  <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    <label class="flex items-center gap-2 p-2 rounded-xl border border-slate-200 bg-white hover:bg-amber-50/50 cursor-pointer transition select-none">
+                      <input type="checkbox" name="modal-edit-prof-types" value="Teóricas" ${hasT ? 'checked' : ''} class="rounded text-indigo-600 focus:ring-indigo-500 w-4 h-4 cursor-pointer">
+                      <span class="text-xs font-semibold text-slate-700">Teóricas</span>
+                    </label>
+                    <label class="flex items-center gap-2 p-2 rounded-xl border border-slate-200 bg-white hover:bg-amber-50/50 cursor-pointer transition select-none">
+                      <input type="checkbox" name="modal-edit-prof-types" value="Teórico-Práticas" ${hasTP ? 'checked' : ''} class="rounded text-indigo-600 focus:ring-indigo-500 w-4 h-4 cursor-pointer">
+                      <span class="text-xs font-semibold text-slate-700">Teórico-Práticas</span>
+                    </label>
+                    <label class="flex items-center gap-2 p-2 rounded-xl border border-slate-200 bg-white hover:bg-amber-50/50 cursor-pointer transition select-none">
+                      <input type="checkbox" name="modal-edit-prof-types" value="Práticas-Laboratoriais" ${hasPL ? 'checked' : ''} class="rounded text-indigo-600 focus:ring-indigo-500 w-4 h-4 cursor-pointer">
+                      <span class="text-xs font-semibold text-slate-700">Práticas-Lab.</span>
+                    </label>
                   </div>
                 </div>
                 <div class="flex justify-end gap-2 pt-1">
@@ -1825,8 +1894,27 @@
                     <input type="email" id="modal-new-prof-email" placeholder="Ex: csilva@fe.up.pt" required class="w-full px-3 py-2 border rounded-xl text-xs bg-white outline-none focus:border-indigo-600 transition">
                   </div>
                   <div>
-                    <label class="block text-[11px] font-bold text-slate-600 mb-1">Cargo / Função (Opcional)</label>
-                    <input type="text" id="modal-new-prof-role" placeholder="Ex: Regente ou Práticas" class="w-full px-3 py-2 border rounded-xl text-xs bg-white outline-none focus:border-indigo-600 transition">
+                    <label class="block text-[11px] font-bold text-slate-600 mb-1">Cargo / Outras Funções (Opcional)</label>
+                    <input type="text" id="modal-new-prof-role" placeholder="Ex: Regente" class="w-full px-3 py-2 border rounded-xl text-xs bg-white outline-none focus:border-indigo-600 transition">
+                  </div>
+                </div>
+                <div>
+                  <label class="block text-[11px] font-bold text-slate-600 mb-1.5 flex items-center gap-1">
+                    <i class="fa-solid fa-layer-group text-indigo-600"></i> Tipo de Aulas (pode selecionar várias):
+                  </label>
+                  <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    <label class="flex items-center gap-2 p-2 rounded-xl border border-slate-200 bg-white hover:bg-indigo-50/50 cursor-pointer transition select-none">
+                      <input type="checkbox" name="modal-new-prof-types" value="Teóricas" class="rounded text-indigo-600 focus:ring-indigo-500 w-4 h-4 cursor-pointer">
+                      <span class="text-xs font-semibold text-slate-700">Teóricas</span>
+                    </label>
+                    <label class="flex items-center gap-2 p-2 rounded-xl border border-slate-200 bg-white hover:bg-indigo-50/50 cursor-pointer transition select-none">
+                      <input type="checkbox" name="modal-new-prof-types" value="Teórico-Práticas" class="rounded text-indigo-600 focus:ring-indigo-500 w-4 h-4 cursor-pointer">
+                      <span class="text-xs font-semibold text-slate-700">Teórico-Práticas</span>
+                    </label>
+                    <label class="flex items-center gap-2 p-2 rounded-xl border border-slate-200 bg-white hover:bg-indigo-50/50 cursor-pointer transition select-none">
+                      <input type="checkbox" name="modal-new-prof-types" value="Práticas-Laboratoriais" class="rounded text-indigo-600 focus:ring-indigo-500 w-4 h-4 cursor-pointer">
+                      <span class="text-xs font-semibold text-slate-700">Práticas-Lab.</span>
+                    </label>
                   </div>
                 </div>
                 <div class="flex justify-end pt-1">
@@ -1871,19 +1959,28 @@
 
       const name = document.getElementById('modal-new-prof-name').value.trim();
       const email = document.getElementById('modal-new-prof-email').value.trim();
-      const role = document.getElementById('modal-new-prof-role').value.trim() || 'Docente';
+      const role = document.getElementById('modal-new-prof-role').value.trim();
+
+      const checkedBoxes = document.querySelectorAll('input[name="modal-new-prof-types"]:checked');
+      const types = Array.from(checkedBoxes).map(cb => cb.value);
 
       if (!Array.isArray(subject.professors)) subject.professors = [];
       subject.professors.push({
         id: 'prof_' + Date.now(),
         name: name,
         email: email,
-        role: role
+        role: role || (types.length > 0 ? types.join(', ') : 'Docente'),
+        types: types
       });
 
       saveState();
       renderSubjectInfoBody(subjectId);
       renderGrades();
+
+      if (supabaseClient) {
+        supabaseClient.from('subjects').update({ professors: subject.professors }).eq('id', subjectId).then(() => {});
+      }
+
       showToast(`Docente ${name} associado a ${subject.name}!`);
     }
 
@@ -1895,9 +1992,14 @@
       const prof = subject.professors.find(p => p.id === profId);
       if (!prof) return;
 
+      const checkedBoxes = document.querySelectorAll('input[name="modal-edit-prof-types"]:checked');
+      const types = Array.from(checkedBoxes).map(cb => cb.value);
+
       prof.name = document.getElementById('modal-edit-prof-name').value.trim();
       prof.email = document.getElementById('modal-edit-prof-email').value.trim();
-      prof.role = document.getElementById('modal-edit-prof-role').value.trim() || 'Docente';
+      const roleInput = document.getElementById('modal-edit-prof-role').value.trim();
+      prof.role = roleInput || (types.length > 0 ? types.join(', ') : 'Docente');
+      prof.types = types;
 
       currentEditingProfId = null;
       saveState();
@@ -1934,7 +2036,10 @@
       const subjectId = document.getElementById('docent-subject-select').value;
       const name = document.getElementById('docent-name').value.trim();
       const email = document.getElementById('docent-email').value.trim();
-      const role = document.getElementById('docent-role').value.trim() || 'Docente';
+      const role = document.getElementById('docent-role').value.trim();
+
+      const checkedBoxes = document.querySelectorAll('input[name="docent-type-admin"]:checked');
+      const types = Array.from(checkedBoxes).map(cb => cb.value);
 
       const subject = state.subjects.find(s => s.id === subjectId);
       if (!subject) {
@@ -1947,7 +2052,8 @@
         id: 'prof_' + Date.now(),
         name: name,
         email: email,
-        role: role
+        role: role || (types.length > 0 ? types.join(', ') : 'Docente'),
+        types: types
       });
 
       saveState();
@@ -1955,6 +2061,7 @@
       document.getElementById('docent-name').value = '';
       document.getElementById('docent-email').value = '';
       document.getElementById('docent-role').value = '';
+      document.querySelectorAll('input[name="docent-type-admin"]').forEach(cb => cb.checked = false);
 
       if (supabaseClient) {
         supabaseClient.from('subjects').update({ professors: subject.professors }).eq('id', subjectId).then(() => {});
