@@ -1325,8 +1325,9 @@
       state.currentUser = null;
       state.rememberMe = false;
       localStorage.removeItem('study_current_user');
-        sessionStorage.removeItem('study_current_user');
       sessionStorage.removeItem('study_current_user');
+      sessionStorage.removeItem('study_active_tab');
+      localStorage.removeItem('study_active_tab');
       saveState();
       closeProfileModal();
       const menu = document.getElementById('profile-dropdown-menu');
@@ -1348,6 +1349,11 @@
 
       // Se mudar para estudante e estiver na aba de alunos, redireciona para cadeiras
       if (newRole === 'student') {
+        const savedTab = sessionStorage.getItem('study_active_tab') || localStorage.getItem('study_active_tab');
+        if (savedTab === 'students') {
+          sessionStorage.setItem('study_active_tab', 'grades');
+          localStorage.setItem('study_active_tab', 'grades');
+        }
         const studentsTab = document.getElementById('tab-students');
         if (studentsTab && !studentsTab.classList.contains('hidden')) {
           switchTab('grades');
@@ -1527,6 +1533,13 @@
       renderArchiveTabs();
       renderFiles();
       renderStudentsList();
+
+      // Restaurar o separador ativo (preservar ao fazer F5 / recarregar)
+      let activeTab = sessionStorage.getItem('study_active_tab') || localStorage.getItem('study_active_tab') || 'grades';
+      if (activeTab === 'students' && !isAdmin) {
+        activeTab = 'grades';
+      }
+      switchTab(activeTab);
     }
 
     // MODAL DE CADEIRAS FREQUENTADAS
@@ -1593,19 +1606,35 @@
 
     // NAVEGAÇÃO DE ABAS
     function switchTab(tab) {
+      const activeRole = getActiveRole();
+      const isAdmin = activeRole === 'admin';
+
+      // Proteção: estudantes nunca podem ver ou aceder à aba de alunos
+      if (tab === 'students' && !isAdmin) {
+        tab = 'grades';
+      }
+
+      state.activeTab = tab;
+      try {
+        sessionStorage.setItem('study_active_tab', tab);
+        localStorage.setItem('study_active_tab', tab);
+      } catch(e) {}
+
       const tabs = ['grades', 'files', 'absences', 'students'];
       tabs.forEach(t => {
         const el = document.getElementById('tab-' + t);
         if (el) el.classList.add('hidden');
         
+        const isStudentHidden = (t === 'students' && !isAdmin);
+
         const btnDesktop = document.getElementById('tab-btn-' + t);
         if (btnDesktop) {
-          btnDesktop.className = "py-3 px-5 border-b-2 border-transparent font-medium text-slate-500 hover:text-indigo-600 flex items-center gap-2 text-sm transition";
+          btnDesktop.className = `py-3 px-5 border-b-2 border-transparent font-medium text-slate-500 hover:text-indigo-600 flex items-center gap-2 text-sm transition ${isStudentHidden ? 'hidden' : ''}`;
         }
         
         const btnMobile = document.getElementById('mob-btn-' + t);
         if (btnMobile) {
-          btnMobile.className = "flex flex-col items-center gap-1 text-slate-400 px-2.5 py-1 text-[11px] font-medium";
+          btnMobile.className = `flex flex-col items-center gap-1 text-slate-400 px-2.5 py-1 text-[11px] font-medium ${isStudentHidden ? 'hidden' : ''}`;
         }
       });
 
@@ -1614,17 +1643,20 @@
 
       const activeBtn = document.getElementById('tab-btn-' + tab);
       if (activeBtn) {
-        activeBtn.className = "py-3 px-5 border-b-2 border-indigo-600 font-bold text-indigo-600 flex items-center gap-2 text-sm transition";
+        const isStudentHidden = (tab === 'students' && !isAdmin);
+        activeBtn.className = `py-3 px-5 border-b-2 border-indigo-600 font-bold text-indigo-600 flex items-center gap-2 text-sm transition ${isStudentHidden ? 'hidden' : ''}`;
       }
 
       const activeMob = document.getElementById('mob-btn-' + tab);
       if (activeMob) {
-        activeMob.className = "flex flex-col items-center gap-1 text-indigo-600 px-2.5 py-1 text-[11px] font-bold";
+        const isStudentHidden = (tab === 'students' && !isAdmin);
+        activeMob.className = `flex flex-col items-center gap-1 text-indigo-600 px-2.5 py-1 text-[11px] font-bold ${isStudentHidden ? 'hidden' : ''}`;
       }
 
       if (tab === 'students') renderStudentsList();
       if (tab === 'files') { renderArchiveTabs(); renderFiles(); }
       if (tab === 'absences') renderAbsences();
+      if (tab === 'grades') renderGrades();
     }
 
 
