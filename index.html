@@ -559,6 +559,22 @@
                     </label>
                   </div>
                 </div>
+
+                <div>
+                  <label class="block text-[11px] font-bold text-slate-600 mb-1 flex items-center gap-1">
+                    <i class="fa-solid fa-camera text-indigo-600"></i> Fotografia do Docente (Opcional):
+                  </label>
+                  <div class="flex items-center gap-2">
+                    <label class="px-3 py-2 bg-white hover:bg-indigo-50 text-indigo-700 border border-slate-200 hover:border-indigo-300 rounded-xl text-xs font-bold cursor-pointer transition flex items-center gap-1.5 shrink-0 shadow-sm">
+                      <i class="fa-solid fa-upload"></i> Foto
+                      <input type="file" id="docent-admin-file" accept="image/*" class="hidden" onchange="handleProfPhotoUpload(event, 'docent-admin')">
+                    </label>
+                    <input type="text" id="docent-admin-photo" placeholder="Ou URL da foto (ex: https://...)" oninput="handleProfPhotoUrlChange('docent-admin')" class="w-full px-3 py-2 border rounded-xl text-xs outline-none focus:border-indigo-600 bg-white transition">
+                    <div id="docent-admin-preview-container" class="shrink-0 hidden">
+                      <img id="docent-admin-preview" src="" class="w-8 h-8 rounded-full object-cover border border-indigo-300 shadow-sm">
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
             <div class="mt-4 flex justify-end">
@@ -1722,6 +1738,89 @@
       currentEditingProfId = null;
     }
 
+    function renderProfessorAvatar(prof, sizeClass = 'w-11 h-11', iconSize = 'text-base') {
+      if (prof.photo) {
+        return `<img src="${prof.photo}" alt="${prof.name}" class="${sizeClass} rounded-full object-cover border border-indigo-200 shadow-sm shrink-0" onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'${sizeClass} rounded-full bg-indigo-100 text-indigo-700 font-bold flex items-center justify-center ${iconSize} shrink-0 border border-indigo-200 shadow-inner\'><i class=\'fa-solid fa-user-tie\'></i></div>';">`;
+      }
+      return `<div class="${sizeClass} rounded-full bg-indigo-100 text-indigo-700 font-bold flex items-center justify-center ${iconSize} shrink-0 border border-indigo-200 shadow-inner"><i class="fa-solid fa-user-tie"></i></div>`;
+    }
+
+    function handleProfPhotoUpload(event, prefix) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const img = new Image();
+        img.onload = function() {
+          const canvas = document.createElement('canvas');
+          const maxDim = 256;
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height) {
+            if (width > maxDim) {
+              height = Math.round((height * maxDim) / width);
+              width = maxDim;
+            }
+          } else {
+            if (height > maxDim) {
+              width = Math.round((width * maxDim) / height);
+              height = maxDim;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+
+          const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.85);
+
+          const input = document.getElementById(prefix + '-photo');
+          if (input) input.value = compressedDataUrl;
+
+          updateProfPhotoPreview(prefix, compressedDataUrl);
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function handleProfPhotoUrlChange(prefix) {
+      const input = document.getElementById(prefix + '-photo');
+      const val = input ? input.value.trim() : '';
+      updateProfPhotoPreview(prefix, val);
+    }
+
+    function clearProfPhoto(prefix) {
+      const input = document.getElementById(prefix + '-photo');
+      if (input) input.value = '';
+      const fileInput = document.getElementById(prefix + '-file');
+      if (fileInput) fileInput.value = '';
+      updateProfPhotoPreview(prefix, '');
+    }
+
+    function updateProfPhotoPreview(prefix, url) {
+      const preview = document.getElementById(prefix + '-preview');
+      const placeholder = document.getElementById(prefix + '-placeholder');
+      const container = document.getElementById(prefix + '-preview-container');
+
+      if (preview) {
+        if (url) {
+          preview.src = url;
+          preview.classList.remove('hidden');
+          if (placeholder) placeholder.classList.add('hidden');
+          if (container) container.classList.remove('hidden');
+        } else {
+          preview.src = '';
+          preview.classList.add('hidden');
+          if (placeholder) placeholder.classList.remove('hidden');
+          if (container && prefix === 'docent-admin') container.classList.add('hidden');
+        }
+      }
+    }
+
     function renderProfessorBadges(prof) {
       let badgesHtml = '';
       if (Array.isArray(prof.types) && prof.types.length > 0) {
@@ -1774,8 +1873,13 @@
             ${professors.map(prof => `
               <div class="p-4 bg-slate-50 hover:bg-slate-100/70 border border-slate-200 rounded-2xl flex flex-col sm:flex-row justify-between sm:items-center gap-3 transition shadow-sm">
                 <div class="flex items-center gap-3 min-w-0">
-                  <div class="w-10 h-10 rounded-full bg-indigo-100 text-indigo-700 font-bold flex items-center justify-center text-sm shrink-0 border border-indigo-200 shadow-inner">
-                    <i class="fa-solid fa-user-tie"></i>
+                  <div class="relative shrink-0">
+                    ${renderProfessorAvatar(prof, 'w-11 h-11', 'text-base')}
+                    ${isAdmin ? `
+                      <button type="button" onclick="startEditProfessor('${subject.id}', '${prof.id}')" title="Alterar foto / editar docente" class="absolute -bottom-1 -right-1 w-5 h-5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full flex items-center justify-center text-[9px] shadow cursor-pointer transition">
+                        <i class="fa-solid fa-camera"></i>
+                      </button>
+                    ` : ''}
                   </div>
                   <div class="min-w-0">
                     <div class="flex items-center gap-1.5 flex-wrap">
@@ -1866,6 +1970,32 @@
                     </label>
                   </div>
                 </div>
+
+                <div>
+                  <label class="block text-[11px] font-bold text-slate-600 mb-1 flex items-center gap-1">
+                    <i class="fa-solid fa-camera text-amber-600"></i> Fotografia do Docente:
+                  </label>
+                  <div class="flex items-center gap-3 p-3 bg-white rounded-xl border border-slate-200">
+                    <div id="modal-edit-prof-preview-container" class="relative shrink-0">
+                      <img id="modal-edit-prof-preview" src="${editingProf.photo || ''}" alt="Foto" class="w-14 h-14 rounded-full object-cover border-2 border-amber-300 shadow-sm ${editingProf.photo ? '' : 'hidden'}">
+                      <div id="modal-edit-prof-placeholder" class="w-14 h-14 rounded-full bg-amber-100 text-amber-700 font-bold flex items-center justify-center text-xl border-2 border-amber-200 ${editingProf.photo ? 'hidden' : ''}">
+                        <i class="fa-solid fa-user-tie"></i>
+                      </div>
+                    </div>
+                    <div class="flex-1 space-y-1.5 min-w-0">
+                      <div class="flex items-center gap-2">
+                        <label class="px-3 py-1.5 bg-amber-100 hover:bg-amber-200 text-amber-900 rounded-lg text-xs font-bold cursor-pointer transition flex items-center gap-1.5 shrink-0 shadow-sm">
+                          <i class="fa-solid fa-upload"></i> Escolher Foto
+                          <input type="file" id="modal-edit-prof-file" accept="image/*" class="hidden" onchange="handleProfPhotoUpload(event, 'modal-edit-prof')">
+                        </label>
+                        <button type="button" onclick="clearProfPhoto('modal-edit-prof')" class="px-2.5 py-1.5 text-xs text-rose-600 hover:bg-rose-50 rounded-lg transition font-semibold flex items-center gap-1">
+                          <i class="fa-regular fa-trash-can"></i> Remover
+                        </button>
+                      </div>
+                      <input type="text" id="modal-edit-prof-photo" value="${editingProf.photo || ''}" oninput="handleProfPhotoUrlChange('modal-edit-prof')" placeholder="Ou cola aqui o link / URL da foto (ex: https://...)" class="w-full px-3 py-1.5 border rounded-lg text-xs bg-slate-50 outline-none focus:border-amber-600 transition">
+                    </div>
+                  </div>
+                </div>
                 <div class="flex justify-end gap-2 pt-1">
                   <button type="button" onclick="cancelEditProfessor('${subject.id}')" class="px-3.5 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-bold rounded-xl transition">
                     Cancelar
@@ -1917,6 +2047,32 @@
                     </label>
                   </div>
                 </div>
+
+                <div>
+                  <label class="block text-[11px] font-bold text-slate-600 mb-1 flex items-center gap-1">
+                    <i class="fa-solid fa-camera text-indigo-600"></i> Fotografia do Docente (Opcional):
+                  </label>
+                  <div class="flex items-center gap-3 p-3 bg-white rounded-xl border border-slate-200">
+                    <div id="modal-new-prof-preview-container" class="relative shrink-0">
+                      <img id="modal-new-prof-preview" src="" alt="Foto" class="w-14 h-14 rounded-full object-cover border-2 border-indigo-300 shadow-sm hidden">
+                      <div id="modal-new-prof-placeholder" class="w-14 h-14 rounded-full bg-indigo-100 text-indigo-700 font-bold flex items-center justify-center text-xl border-2 border-indigo-200">
+                        <i class="fa-solid fa-user-tie"></i>
+                      </div>
+                    </div>
+                    <div class="flex-1 space-y-1.5 min-w-0">
+                      <div class="flex items-center gap-2">
+                        <label class="px-3 py-1.5 bg-indigo-100 hover:bg-indigo-200 text-indigo-900 rounded-lg text-xs font-bold cursor-pointer transition flex items-center gap-1.5 shrink-0 shadow-sm">
+                          <i class="fa-solid fa-upload"></i> Escolher Foto
+                          <input type="file" id="modal-new-prof-file" accept="image/*" class="hidden" onchange="handleProfPhotoUpload(event, 'modal-new-prof')">
+                        </label>
+                        <button type="button" onclick="clearProfPhoto('modal-new-prof')" class="px-2.5 py-1.5 text-xs text-rose-600 hover:bg-rose-50 rounded-lg transition font-semibold flex items-center gap-1">
+                          <i class="fa-regular fa-trash-can"></i> Limpar
+                        </button>
+                      </div>
+                      <input type="text" id="modal-new-prof-photo" oninput="handleProfPhotoUrlChange('modal-new-prof')" placeholder="Ou cola aqui o link / URL da foto (ex: https://...)" class="w-full px-3 py-1.5 border rounded-lg text-xs bg-slate-50 outline-none focus:border-indigo-600 transition">
+                    </div>
+                  </div>
+                </div>
                 <div class="flex justify-end pt-1">
                   <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow transition flex items-center gap-1.5">
                     <i class="fa-solid fa-plus"></i> Adicionar Docente
@@ -1960,6 +2116,7 @@
       const name = document.getElementById('modal-new-prof-name').value.trim();
       const email = document.getElementById('modal-new-prof-email').value.trim();
       const role = document.getElementById('modal-new-prof-role').value.trim();
+      const photo = document.getElementById('modal-new-prof-photo') ? document.getElementById('modal-new-prof-photo').value.trim() : '';
 
       const checkedBoxes = document.querySelectorAll('input[name="modal-new-prof-types"]:checked');
       const types = Array.from(checkedBoxes).map(cb => cb.value);
@@ -1970,7 +2127,8 @@
         name: name,
         email: email,
         role: role || (types.length > 0 ? types.join(', ') : 'Docente'),
-        types: types
+        types: types,
+        photo: photo
       });
 
       saveState();
@@ -2001,6 +2159,11 @@
       prof.role = roleInput || (types.length > 0 ? types.join(', ') : 'Docente');
       prof.types = types;
 
+      const photoInput = document.getElementById('modal-edit-prof-photo');
+      if (photoInput) {
+        prof.photo = photoInput.value.trim();
+      }
+
       currentEditingProfId = null;
       saveState();
       renderSubjectInfoBody(subjectId);
@@ -2010,7 +2173,7 @@
         supabaseClient.from('subjects').update({ professors: subject.professors }).eq('id', subjectId).then(() => {});
       }
 
-      showToast("Dados do docente atualizados!");
+      showToast("Dados e foto do docente atualizados!");
     }
 
     function deleteProfessorFromSubject(subjectId, profId) {
@@ -2037,6 +2200,7 @@
       const name = document.getElementById('docent-name').value.trim();
       const email = document.getElementById('docent-email').value.trim();
       const role = document.getElementById('docent-role').value.trim();
+      const photo = document.getElementById('docent-admin-photo') ? document.getElementById('docent-admin-photo').value.trim() : '';
 
       const checkedBoxes = document.querySelectorAll('input[name="docent-type-admin"]:checked');
       const types = Array.from(checkedBoxes).map(cb => cb.value);
@@ -2053,7 +2217,8 @@
         name: name,
         email: email,
         role: role || (types.length > 0 ? types.join(', ') : 'Docente'),
-        types: types
+        types: types,
+        photo: photo
       });
 
       saveState();
@@ -2061,6 +2226,7 @@
       document.getElementById('docent-name').value = '';
       document.getElementById('docent-email').value = '';
       document.getElementById('docent-role').value = '';
+      clearProfPhoto('docent-admin');
       document.querySelectorAll('input[name="docent-type-admin"]').forEach(cb => cb.checked = false);
 
       if (supabaseClient) {
