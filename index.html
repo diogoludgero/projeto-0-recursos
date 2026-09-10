@@ -291,7 +291,7 @@
             <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Nome de Utilizador</label>
             <div class="relative">
               <i class="fa-solid fa-user absolute left-3.5 top-3.5 text-slate-400 text-xs"></i>
-              <input type="text" id="login-username" placeholder="Ex: admin ou aluno" required class="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-indigo-600 focus:bg-white transition">
+              <input type="text" id="login-username" placeholder="O teu nome de utilizador" required class="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-indigo-600 focus:bg-white transition">
             </div>
           </div>
 
@@ -301,6 +301,14 @@
               <i class="fa-solid fa-lock absolute left-3.5 top-3.5 text-slate-400 text-xs"></i>
               <input type="password" id="login-password" placeholder="••••••••" required class="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-indigo-600 focus:bg-white transition">
             </div>
+          </div>
+
+          <!-- Opção Manter Sessão Iniciada -->
+          <div class="flex items-center justify-between pt-0.5 select-none">
+            <label class="flex items-center gap-2 cursor-pointer text-xs text-slate-600 hover:text-slate-800 transition">
+              <input type="checkbox" id="login-remember" checked class="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 cursor-pointer">
+              <span class="font-medium">Manter sessão iniciada</span>
+            </label>
           </div>
 
           <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 active:scale-[0.99] text-white font-bold py-3 rounded-xl text-sm transition shadow-md flex items-center justify-center gap-2">
@@ -794,9 +802,25 @@
       }
     ];
 
+    // LER SESSÃO ATIVA (LOCALSTORAGE OU SESSIONSTORAGE)
+    let initialUser = null;
+    let initialRemember = false;
+    try {
+      const fromLocal = localStorage.getItem('study_current_user');
+      const fromSession = sessionStorage.getItem('study_current_user');
+      if (fromLocal) {
+        initialUser = JSON.parse(fromLocal);
+        initialRemember = true;
+      } else if (fromSession) {
+        initialUser = JSON.parse(fromSession);
+        initialRemember = false;
+      }
+    } catch(e) {}
+
     // ESTADO DA APLICAÇÃO
     let state = {
-      currentUser: JSON.parse(localStorage.getItem('study_current_user')) || null,
+      currentUser: initialUser,
+      rememberMe: initialRemember,
       users: JSON.parse(localStorage.getItem('study_users')) || INITIAL_USERS,
       subjects: JSON.parse(localStorage.getItem('study_subjects')) || [
         {
@@ -898,6 +922,7 @@
       if (state.currentUser && (state.currentUser.username === 'admin' || state.currentUser.username === 'aluno')) {
         state.currentUser = null;
         localStorage.removeItem('study_current_user');
+        sessionStorage.removeItem('study_current_user');
       }
 
       // Garantir cadeiras inscritas para diogoludgero
@@ -916,7 +941,18 @@
 
     function saveState() {
       localStorage.setItem('study_users', JSON.stringify(state.users));
-      localStorage.setItem('study_current_user', JSON.stringify(state.currentUser));
+      if (state.currentUser) {
+        if (state.rememberMe) {
+          localStorage.setItem('study_current_user', JSON.stringify(state.currentUser));
+          sessionStorage.removeItem('study_current_user');
+        } else {
+          sessionStorage.setItem('study_current_user', JSON.stringify(state.currentUser));
+          localStorage.removeItem('study_current_user');
+        }
+      } else {
+        localStorage.removeItem('study_current_user');
+        sessionStorage.removeItem('study_current_user');
+      }
       localStorage.setItem('study_subjects', JSON.stringify(state.subjects));
       localStorage.setItem('study_grades', JSON.stringify(state.grades));
       localStorage.setItem('study_enrolled_subjects', JSON.stringify(state.enrolledSubjects));
@@ -1159,6 +1195,8 @@
       if (e && e.preventDefault) e.preventDefault();
       const userVal = document.getElementById('login-username').value.trim();
       const passVal = document.getElementById('login-password').value.trim();
+      const rememberCheckbox = document.getElementById('login-remember');
+      const remember = rememberCheckbox ? rememberCheckbox.checked : false;
 
       const user = state.users.find(u => u.username.toLowerCase() === userVal.toLowerCase() && u.password === passVal);
 
@@ -1168,6 +1206,16 @@
       }
 
       state.currentUser = user;
+      state.rememberMe = remember;
+      
+      if (remember) {
+        localStorage.setItem('study_current_user', JSON.stringify(user));
+        sessionStorage.removeItem('study_current_user');
+      } else {
+        sessionStorage.setItem('study_current_user', JSON.stringify(user));
+        localStorage.removeItem('study_current_user');
+      }
+
       saveState();
       applyUserSession();
 
@@ -1209,6 +1257,10 @@
 
     function handleLogout() {
       state.currentUser = null;
+      state.rememberMe = false;
+      localStorage.removeItem('study_current_user');
+        sessionStorage.removeItem('study_current_user');
+      sessionStorage.removeItem('study_current_user');
       saveState();
       closeProfileModal();
       const menu = document.getElementById('profile-dropdown-menu');
@@ -3045,6 +3097,37 @@ ${480 + streamLen}
     }
 
     // ADMIN: CONSULTA DE ALUNOS E SUAS CADEIRAS
+        // ADMIN: REMOVER CONTA DE ESTUDANTE
+    function deleteStudentAccount(studentId) {
+      if (!state.currentUser || state.currentUser.role !== 'admin') {
+        showToast("Apenas o Administrador pode remover contas.", "error");
+        return;
+      }
+      const student = state.users.find(u => u.id === studentId);
+      if (!student) return;
+
+      if (student.role === 'admin' || student.id === state.currentUser.id) {
+        showToast("Não é possível remover a conta principal de Administrador.", "error");
+        return;
+      }
+
+      const displayName = student.name || student.username;
+      const confirmed = confirm(`Tens a certeza de que desejas eliminar permanentemente a conta de estudante "${displayName}" (@${student.username})?\n\nTodas as suas notas, faltas e inscrições em cadeiras serão eliminadas.`);
+      if (!confirmed) return;
+
+      // Remover utilizador
+      state.users = state.users.filter(u => u.id !== studentId);
+
+      // Limpar registos associados
+      delete state.grades[studentId];
+      delete state.absences[studentId];
+      delete state.enrolledSubjects[studentId];
+
+      saveState();
+      renderStudentsList();
+      showToast(`Conta de "${displayName}" eliminada com sucesso.`, "success");
+    }
+
     function renderStudentsList() {
       const container = document.getElementById('students-list-container');
       const pendingBox = document.getElementById('admin-pending-names-box');
@@ -3119,20 +3202,25 @@ ${480 + streamLen}
         }
 
         card.innerHTML = `
-          <div class="flex justify-between items-center">
+          <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-2">
             <div class="flex items-center gap-3">
-              <div class="w-9 h-9 rounded-full overflow-hidden bg-indigo-100 text-indigo-700 font-bold text-xs flex items-center justify-center border border-indigo-200">
+              <div class="w-9 h-9 rounded-full overflow-hidden bg-indigo-100 text-indigo-700 font-bold text-xs flex items-center justify-center border border-indigo-200 shrink-0">
                 ${std.avatar ? `<img src="${std.avatar}" class="w-full h-full object-cover">` : (std.name || std.username).charAt(0).toUpperCase()}
               </div>
-              <div>
-                <h4 class="font-bold text-slate-800 text-sm flex items-center gap-1.5">
+              <div class="min-w-0">
+                <h4 class="font-bold text-slate-800 text-sm flex items-center gap-1.5 flex-wrap">
                   ${std.name || std.username}
                   ${std.name && std.name !== std.username ? `<span class="text-slate-400 text-xs font-normal">(@${std.username})</span>` : ''}
                 </h4>
                 <p class="text-[11px] text-slate-400">Inscrito em ${enrolledSubs.length} cadeira(s)</p>
               </div>
             </div>
-            <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-indigo-100 text-indigo-700">Estudante</span>
+            <div class="flex items-center gap-2 self-end sm:self-auto shrink-0">
+              <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-indigo-100 text-indigo-700">Estudante</span>
+              <button type="button" onclick="deleteStudentAccount('${std.id}')" class="px-2.5 py-1 text-xs font-bold text-rose-600 hover:text-white hover:bg-rose-600 border border-rose-200 hover:border-rose-600 rounded-xl transition shadow-xs flex items-center gap-1 cursor-pointer" title="Remover conta do estudante">
+                <i class="fa-regular fa-trash-can text-[11px]"></i> Remover
+              </button>
+            </div>
           </div>
           <div class="bg-white p-3 rounded-lg border border-slate-200">
             <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Boletim do Aluno:</p>
