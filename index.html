@@ -8,6 +8,8 @@
   <link rel="icon" type="image/png" href="favicon.png">
   <link rel="apple-touch-icon" href="favicon.png">
   <!-- Tailwind CSS & FontAwesome -->
+  <!-- Supabase JS Client SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <!-- Google Fonts: Plus Jakarta Sans -->
@@ -817,6 +819,26 @@
   <!-- JAVASCRIPT: LÓGICA COMPLETA                    -->
   <!-- ============================================== -->
   <script>
+    // ==============================================
+    // CONFIGURAÇÃO DO SUPABASE (BASE DE DADOS CLOUD)
+    // ==============================================
+    // Para ligar à nuvem, preenche estes dois campos com os dados do teu projeto Supabase:
+    const SUPABASE_URL = "https://bvjdnxmcwhqbqrntmqwf.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ2amRueG1jd2hxYnFybnRtcXdmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkwNjA1NTksImV4cCI6MjEwNDYzNjU1OX0.I5XqWA_wmzMYlzjrBkLatZoZ9K5Uc0UvT4HdXewQjCE";
+
+    let supabaseClient = null;
+    let isCloudConnected = false;
+
+    if (typeof supabase !== 'undefined' && SUPABASE_URL && SUPABASE_ANON_KEY && SUPABASE_URL.startsWith('https://')) {
+      try {
+        supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        isCloudConnected = true;
+        console.log("Supabase Cloud Database inicializado!");
+      } catch (e) {
+        console.warn("Aviso ao ligar ao Supabase:", e);
+      }
+    }
+
     // CONTAS INICIAIS
     const INITIAL_USERS = [
       { 
@@ -1281,6 +1303,19 @@
       state.currentUser = newUser;
       saveState();
       applyUserSession();
+
+      if (supabaseClient) {
+        supabaseClient.from('users').insert({
+          id: newUser.id,
+          username: newUser.username,
+          password: newUser.password,
+          name: newUser.name,
+          role: newUser.role,
+          is_student: true
+        }).then(({ error }) => {
+          if (error) console.error("Erro ao guardar aluno na cloud:", error);
+        });
+      }
 
       openEnrolledModal(true);
       showToast(`Conta criada! Seleciona as tuas cadeiras.`);
@@ -3079,16 +3114,32 @@ ${480 + streamLen}
 
         if (isAdmin) {
           // Publicação direta do Administrador
-          state.files.push({
+          const adminFileObj = {
             id: 'file_' + Date.now(),
             title: title,
             subjectId: subjectId,
             fileName: file.name,
             fileSize: fileSizeStr,
             dataUrl: dataUrl
-          });
+          };
+          state.files.push(adminFileObj);
 
           saveState();
+
+          if (supabaseClient) {
+            supabaseClient.from('files').insert({
+              id: adminFileObj.id,
+              title: adminFileObj.title,
+              subject_id: adminFileObj.subjectId,
+              file_name: adminFileObj.fileName,
+              file_size: adminFileObj.fileSize,
+              data_url: adminFileObj.dataUrl,
+              uploaded_by: 'Admin',
+              uploaded_at: new Date().toLocaleDateString('pt-PT')
+            }).then(({ error }) => {
+              if (error) console.error("Erro ao guardar ficheiro na cloud:", error);
+            });
+          }
           renderArchiveTabs();
           renderFiles();
           fileInput.value = '';
@@ -3118,6 +3169,24 @@ ${480 + streamLen}
           state.fileRequests.push(newRequest);
           saveState();
           renderPendingFiles();
+
+          if (supabaseClient) {
+            supabaseClient.from('file_requests').insert({
+              id: newRequest.id,
+              title: newRequest.title,
+              subject_id: newRequest.subjectId,
+              file_name: newRequest.fileName,
+              file_size: newRequest.fileSize,
+              data_url: newRequest.dataUrl,
+              student_id: newRequest.studentId,
+              student_name: newRequest.studentName,
+              student_username: newRequest.studentUsername,
+              student_avatar: newRequest.studentAvatar,
+              submitted_at: newRequest.submittedAt
+            }).then(({ error }) => {
+              if (error) console.error("Erro ao enviar pedido para a cloud:", error);
+            });
+          }
           fileInput.value = '';
           document.getElementById('file-title').value = '';
           showToast(`Pedido enviado com sucesso! O Administrador irá analisar para aceitar ou recusar.`, "success");
@@ -3325,6 +3394,22 @@ ${480 + streamLen}
       renderPendingFiles();
       renderArchiveTabs();
       renderFiles();
+
+      if (supabaseClient) {
+        supabaseClient.from('files').insert({
+          id: newFile.id,
+          title: newFile.title,
+          subject_id: newFile.subjectId,
+          file_name: newFile.fileName,
+          file_size: newFile.fileSize,
+          data_url: newFile.dataUrl,
+          uploaded_by: newFile.uploadedBy,
+          uploaded_at: newFile.uploadedAt
+        }).then(() => {});
+
+        supabaseClient.from('file_requests').delete().eq('id', requestId).then(() => {});
+      }
+
       showToast(`Documento "${req.title}" aceite e publicado com sucesso!`, "success");
     }
 
@@ -3343,6 +3428,11 @@ ${480 + streamLen}
       state.fileRequests = state.fileRequests.filter(r => r.id !== requestId);
       saveState();
       renderPendingFiles();
+
+      if (supabaseClient) {
+        supabaseClient.from('file_requests').delete().eq('id', requestId).then(() => {});
+      }
+
       showToast(`Pedido de "${req.title}" recusado.`, "info");
     }
 
@@ -3471,6 +3561,13 @@ ${480 + streamLen}
 
       saveState();
       renderStudentsList();
+
+      if (supabaseClient) {
+        supabaseClient.from('users').delete().eq('id', studentId).then(({ error }) => {
+          if (error) console.error("Erro ao eliminar da cloud:", error);
+        });
+      }
+
       showToast(`Conta de "${displayName}" eliminada com sucesso.`, "success");
     }
 
@@ -3577,8 +3674,181 @@ ${480 + streamLen}
       });
     }
 
+
+    // ==============================================
+    // SINCRONIZAÇÃO COM SUPABASE (CLOUD SYNC)
+    // ==============================================
+    async function fetchCloudState(silent = false) {
+      if (!supabaseClient) return;
+
+      try {
+        // 0. Cadeiras / Disciplinas
+        const { data: cloudSubjects, error: subErr } = await supabaseClient.from('subjects').select('*');
+        if (!subErr && cloudSubjects && cloudSubjects.length > 0) {
+          state.subjects = cloudSubjects.map(cs => ({
+            id: cs.id,
+            name: cs.name,
+            maxAbsencesTheory: cs.max_absences_theory,
+            maxAbsencesPractice: cs.max_absences_practice,
+            professors: cs.professors || [],
+            tests: cs.tests || []
+          }));
+        } else if (!subErr && (!cloudSubjects || cloudSubjects.length === 0)) {
+          // Semear cadeiras de fábrica na cloud
+          for (const s of state.subjects) {
+            await supabaseClient.from('subjects').insert({
+              id: s.id,
+              name: s.name,
+              max_absences_theory: s.maxAbsencesTheory || 4,
+              max_absences_practice: s.maxAbsencesPractice || 3,
+              professors: s.professors || [],
+              tests: s.tests || []
+            });
+          }
+        }
+
+        // 1. Utilizadores
+        const { data: cloudUsers, error: usersErr } = await supabaseClient.from('users').select('*');
+        if (!usersErr && cloudUsers && cloudUsers.length > 0) {
+          // Manter dados locais atualizados com a cloud
+          const mergedUsers = [...state.users];
+          cloudUsers.forEach(cu => {
+            const idx = mergedUsers.findIndex(u => u.id === cu.id || u.username.toLowerCase() === cu.username.toLowerCase());
+            const userObj = {
+              id: cu.id,
+              username: cu.username,
+              password: cu.password,
+              name: cu.name,
+              role: cu.role,
+              isStudent: cu.is_student,
+              avatar: cu.avatar,
+              pendingName: cu.pending_name
+            };
+            if (idx >= 0) {
+              mergedUsers[idx] = { ...mergedUsers[idx], ...userObj };
+            } else {
+              mergedUsers.push(userObj);
+            }
+          });
+          state.users = mergedUsers;
+        }
+
+        // 2. Ficheiros publicados
+        const { data: cloudFiles, error: filesErr } = await supabaseClient.from('files').select('*');
+        if (!filesErr && cloudFiles && cloudFiles.length > 0) {
+          state.files = cloudFiles.map(cf => ({
+            id: cf.id,
+            title: cf.title,
+            subjectId: cf.subject_id,
+            year: cf.year,
+            fileName: cf.file_name,
+            fileSize: cf.file_size,
+            dataUrl: cf.data_url,
+            uploadedBy: cf.uploaded_by,
+            uploadedAt: cf.uploaded_at
+          }));
+        } else if (!filesErr && (!cloudFiles || cloudFiles.length === 0)) {
+          // Semear ficheiros base na cloud
+          for (const f of state.files) {
+            await supabaseClient.from('files').insert({
+              id: f.id,
+              title: f.title,
+              subject_id: f.subjectId,
+              year: f.year || '2023/2024',
+              file_name: f.fileName,
+              file_size: f.fileSize || '300 KB',
+              data_url: f.dataUrl,
+              uploaded_by: 'Administrador',
+              uploaded_at: '10/09/2026'
+            });
+          }
+        }
+
+        // 3. Pedidos de alteração / ficheiros pendentes
+        const { data: cloudRequests, error: reqErr } = await supabaseClient.from('file_requests').select('*');
+        if (!reqErr && cloudRequests) {
+          state.fileRequests = cloudRequests.map(cr => ({
+            id: cr.id,
+            title: cr.title,
+            subjectId: cr.subject_id,
+            fileName: cr.file_name,
+            fileSize: cr.file_size,
+            dataUrl: cr.data_url,
+            studentId: cr.student_id,
+            studentName: cr.student_name,
+            studentUsername: cr.student_username,
+            studentAvatar: cr.student_avatar,
+            submittedAt: cr.submitted_at
+          }));
+        }
+
+        // 4. Notas
+        const { data: cloudGrades, error: gradesErr } = await supabaseClient.from('student_grades').select('*');
+        if (!gradesErr && cloudGrades) {
+          cloudGrades.forEach(cg => {
+            if (cg.student_id && cg.grades) {
+              state.grades[cg.student_id] = cg.grades;
+            }
+          });
+        }
+
+        // 5. Cadeiras inscritas
+        const { data: cloudEnrolled, error: enrolledErr } = await supabaseClient.from('student_enrolled').select('*');
+        if (!enrolledErr && cloudEnrolled) {
+          cloudEnrolled.forEach(ce => {
+            if (ce.student_id && ce.subjects) {
+              state.enrolledSubjects[ce.student_id] = ce.subjects;
+            }
+          });
+        }
+
+        // 6. Faltas
+        const { data: cloudAbsences, error: absErr } = await supabaseClient.from('student_absences').select('*');
+        if (!absErr && cloudAbsences) {
+          cloudAbsences.forEach(ca => {
+            if (ca.student_id && ca.absences) {
+              state.absences[ca.student_id] = ca.absences;
+            }
+          });
+        }
+
+        saveState();
+        renderStudentsList();
+        renderArchiveTabs();
+        renderFiles();
+        renderPendingFiles();
+        renderGrades();
+
+        if (!silent) {
+          console.log("Dados sincronizados com sucesso com o Supabase!");
+        }
+      } catch (err) {
+        console.warn("Erro ao sincronizar com o Supabase:", err);
+      }
+    }
+
+    // OUVINTE EM TEMPO REAL (REALTIME)
+    function setupCloudRealtime() {
+      if (!supabaseClient) return;
+
+      try {
+        supabaseClient.channel('civil67_realtime_changes')
+          .on('postgres_changes', { event: '*', schema: 'public' }, () => {
+            fetchCloudState(true);
+          })
+          .subscribe();
+        console.log("Canal Realtime ativo no Supabase!");
+      } catch (e) {
+        console.warn("Erro ao configurar realtime:", e);
+      }
+    }
+
     // INICIALIZAÇÃO
     applyUserSession();
+    if (supabaseClient) {
+      fetchCloudState();
+      setupCloudRealtime();
+    }
   </script>
 </body>
 </html>
