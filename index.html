@@ -862,10 +862,10 @@
         diogo.isStudent = true;
       }
 
-      // Se o utilizador na sessão for uma conta antiga, iniciar sessão com diogoludgero
-      if (!state.currentUser || state.currentUser.username === 'admin' || state.currentUser.username === 'aluno') {
-        state.currentUser = diogo;
-        localStorage.setItem('study_current_user', JSON.stringify(diogo));
+      // Se a sessão guardada no browser for de uma conta antiga de teste, limpar a sessão
+      if (state.currentUser && (state.currentUser.username === 'admin' || state.currentUser.username === 'aluno')) {
+        state.currentUser = null;
+        localStorage.removeItem('study_current_user');
       }
 
       // Garantir cadeiras inscritas para diogoludgero
