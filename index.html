@@ -1,0 +1,3000 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Projeto 0 Recursos</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="apple-touch-icon" href="favicon.png">
+  <!-- Tailwind CSS & FontAwesome -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade { animation: fadeIn 0.25s ease-out forwards; }
+    
+    @media screen and (max-width: 768px) {
+      input, select, textarea {
+        font-size: 16px !important;
+      }
+    }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-800 font-sans min-h-screen flex flex-col antialiased pb-20 sm:pb-8">
+
+  <!-- TOAST NOTIFICAÇÃO FLUTUANTE -->
+  <div id="toast" class="fixed top-4 right-4 sm:top-auto sm:bottom-5 sm:right-5 z-[110] hidden items-center gap-3 px-4 py-3 rounded-2xl shadow-2xl text-sm font-semibold text-white transition-all transform animate-fade"></div>
+
+  <!-- ============================================== -->
+  <!-- MODAL: O MEU PERFIL (FOTO, NOME & LOGOUT)      -->
+  <!-- ============================================== -->
+  <div id="profile-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-4 animate-fade">
+    <div class="bg-white w-full max-w-lg rounded-2xl shadow-2xl border border-slate-100 overflow-hidden flex flex-col max-h-[90vh]">
+      
+      <!-- Cabeçalho do Perfil -->
+      <div class="bg-slate-900 text-white p-5 flex items-center justify-between border-b border-slate-800">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-indigo-600/30 border border-indigo-400/40 flex items-center justify-center text-indigo-300">
+            <i class="fa-solid fa-circle-user text-lg"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-bold">O Meu Perfil</h3>
+            <p class="text-xs text-slate-400">Personaliza a tua imagem e o teu nome</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeProfileModal()" class="text-slate-400 hover:text-white p-1 rounded-lg transition">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <!-- Corpo do Modal -->
+      <div class="p-5 sm:p-6 overflow-y-auto flex-1 space-y-5">
+        
+        <!-- Foto de Perfil -->
+        <div class="flex items-center gap-4 p-4 bg-slate-50 rounded-2xl border border-slate-200">
+          <div class="relative w-16 h-16 rounded-full overflow-hidden bg-indigo-100 border-2 border-indigo-600 flex items-center justify-center shadow-inner shrink-0">
+            <span id="profile-modal-letter" class="text-xl font-bold text-indigo-700">U</span>
+            <img id="profile-modal-img" class="w-full h-full object-cover hidden" alt="Foto">
+          </div>
+          <div class="flex-1 min-w-0">
+            <h4 class="font-bold text-slate-800 text-xs sm:text-sm">Fotografia de Perfil</h4>
+            <p class="text-[11px] text-slate-400 mb-2">PNG, JPG ou WebP</p>
+            <label class="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-slate-100 border border-slate-300 rounded-xl text-xs font-bold text-slate-700 shadow-sm transition">
+              <i class="fa-solid fa-camera text-indigo-600"></i> Escolher Foto
+              <input type="file" id="profile-avatar-input" accept="image/*" onchange="handleAvatarUpload(event)" class="hidden">
+            </label>
+          </div>
+        </div>
+
+        <!-- Campos de Utilizador e Nome -->
+        <div class="space-y-3.5">
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Nome de Utilizador</label>
+            <input type="text" id="profile-modal-username" readonly class="w-full px-3.5 py-2.5 bg-slate-100 border border-slate-200 rounded-xl text-xs sm:text-sm font-mono text-slate-600 cursor-not-allowed outline-none">
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Nome Atual</label>
+            <input type="text" id="profile-modal-current-name" readonly class="w-full px-3.5 py-2.5 bg-slate-100 border border-slate-200 rounded-xl text-xs sm:text-sm font-semibold text-slate-700 outline-none">
+          </div>
+
+          <!-- Alerta de Pedido de Nome Pendente -->
+          <div id="profile-pending-alert" class="hidden p-3.5 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-800 flex items-start gap-2.5">
+            <i class="fa-solid fa-clock text-amber-500 mt-0.5"></i>
+            <div>
+              <p class="font-bold">Alteração de Nome a aguardar aprovação:</p>
+              <p class="mt-0.5">Pediste para alterar o teu nome para "<strong id="profile-pending-name-text"></strong>". O Administrador irá rever o teu pedido.</p>
+            </div>
+          </div>
+
+          <!-- Formulário para pedir novo nome -->
+          <form onsubmit="handleRequestNameChange(event)" class="pt-1">
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5 flex items-center justify-between">
+              <span>Pedir Novo Nome</span>
+              <span class="text-[10px] text-indigo-600 normal-case font-semibold">Requer aprovação do Admin</span>
+            </label>
+            <div class="flex gap-2">
+              <input type="text" id="profile-new-name-input" placeholder="Ex: Diogo Silva" required class="flex-1 px-3.5 py-2.5 border rounded-xl text-sm outline-none focus:border-indigo-600 transition bg-white">
+              <button type="submit" class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow transition shrink-0">
+                Submeter
+              </button>
+            </div>
+          </form>
+        </div>
+
+      </div>
+
+      <!-- Rodapé do Perfil com Terminar Sessão Integrado -->
+      <div class="p-4 sm:p-5 bg-slate-50 border-t border-slate-200 flex items-center justify-between gap-3">
+        <button type="button" onclick="handleLogout()" class="px-4 py-2.5 bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm">
+          <i class="fa-solid fa-arrow-right-from-bracket"></i> Terminar Sessão
+        </button>
+        <button type="button" onclick="closeProfileModal()" class="px-5 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl text-xs font-bold transition">
+          Fechar
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL: SELECIONAR CADEIRAS FREQUENTADAS        -->
+  <!-- ============================================== -->
+  <div id="enrolled-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-4 animate-fade">
+    <div class="bg-white w-full max-w-lg rounded-2xl shadow-2xl border border-slate-100 overflow-hidden flex flex-col max-h-[90vh]">
+      
+      <div class="bg-slate-900 text-white p-5 sm:p-6 border-b border-slate-800">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-indigo-600/30 border border-indigo-400/40 flex items-center justify-center text-indigo-300">
+            <i class="fa-solid fa-list-check text-lg"></i>
+          </div>
+          <div>
+            <h3 class="text-lg font-bold">Quais cadeiras frequentas?</h3>
+            <p class="text-xs text-slate-400 mt-0.5">Seleciona as disciplinas que estás a frequentar para organizar o teu boletim.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="p-4 sm:p-6 overflow-y-auto flex-1 space-y-3" id="enrolled-modal-list">
+        <!-- Injetado dinamicamente com as cadeiras -->
+      </div>
+
+      <div class="p-4 sm:p-6 bg-slate-50 border-t border-slate-200 flex flex-col sm:flex-row justify-between items-center gap-3">
+        <button type="button" onclick="toggleAllSubjectsModal(true)" class="text-xs font-bold text-indigo-600 hover:text-indigo-800 py-1 px-2 rounded">
+          <i class="fa-solid fa-check-double mr-1"></i> Selecionar Todas
+        </button>
+        <div class="flex gap-2 w-full sm:w-auto">
+          <button type="button" id="btn-close-enrolled-modal" onclick="closeEnrolledModal()" class="flex-1 sm:flex-none px-4 py-2.5 rounded-xl border border-slate-300 text-slate-700 text-xs font-bold hover:bg-slate-100 transition">
+            Cancelar
+          </button>
+          <button type="button" onclick="saveEnrolledSubjectsModal()" class="flex-1 sm:flex-none px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-md transition flex items-center justify-center gap-1.5">
+            <i class="fa-solid fa-check"></i> Confirmar Seleção
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- ============================================== -->
+  <!-- MODAL: MAIS INFORMAÇÕES DA CADEIRA (DOCENTES)  -->
+  <!-- ============================================== -->
+  <div id="subject-info-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-4 animate-fade">
+    <div class="bg-white w-full max-w-xl rounded-2xl shadow-2xl border border-slate-100 overflow-hidden flex flex-col max-h-[90vh]">
+      
+      <!-- Cabeçalho do Modal -->
+      <div class="bg-slate-900 text-white p-5 flex items-center justify-between border-b border-slate-800">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-indigo-600/30 border border-indigo-400/40 flex items-center justify-center text-indigo-300">
+            <i class="fa-solid fa-graduation-cap text-lg"></i>
+          </div>
+          <div class="min-w-0">
+            <h3 id="subject-info-title" class="text-base font-bold truncate max-w-[240px] sm:max-w-md">Nome da Cadeira</h3>
+            <p class="text-xs text-slate-400">Docentes & Contactos Oficiais</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeSubjectInfoModal()" class="text-slate-400 hover:text-white p-1 rounded-lg transition cursor-pointer">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <!-- Conteúdo do Modal (Professores e secção admin) -->
+      <div class="p-5 sm:p-6 overflow-y-auto flex-1 space-y-5" id="subject-info-body">
+        <!-- Renderizado dinamicamente por renderSubjectInfoBody -->
+      </div>
+
+      <!-- Rodapé -->
+      <div class="p-4 sm:p-5 bg-slate-50 border-t border-slate-200 flex justify-end">
+        <button type="button" onclick="closeSubjectInfoModal()" class="px-5 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl text-xs font-bold transition cursor-pointer">
+          Fechar
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL: CONFIRMAR REMOÇÃO DE FALTA              -->
+  <!-- ============================================== -->
+  <div id="delete-absence-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-4 animate-fade">
+    <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl border border-slate-100 overflow-hidden flex flex-col animate-scale">
+      
+      <div class="p-6 text-center">
+        <!-- Ícone de Alerta -->
+        <div class="w-14 h-14 rounded-2xl bg-rose-100 border border-rose-200 text-rose-600 flex items-center justify-center text-2xl mx-auto mb-4 shadow-inner">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+        </div>
+
+        <h3 class="text-lg font-bold text-slate-900">Queres mesmo remover esta falta?</h3>
+        <p class="text-xs text-slate-500 mt-1">
+          Confirma se pretendes anular o registo desta falta.
+        </p>
+
+        <!-- Detalhes da Falta a Remover -->
+        <div class="mt-4 p-3.5 bg-slate-50 border border-slate-200 rounded-xl text-left space-y-2 text-xs">
+          <div class="flex justify-between items-center">
+            <span class="text-slate-500 font-medium">Cadeira:</span>
+            <strong id="modal-delete-absence-subject" class="text-slate-800 font-bold truncate max-w-[200px]">Cadeira</strong>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-slate-500 font-medium">Tipo de Aula:</span>
+            <span id="modal-delete-absence-type" class="font-bold px-2 py-0.5 rounded-md text-[10px] uppercase bg-indigo-100 text-indigo-700">Teórica</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-slate-500 font-medium">Data da Aula:</span>
+            <span id="modal-delete-absence-date" class="font-mono font-bold text-slate-700">2026-09-10</span>
+          </div>
+        </div>
+
+        <p class="text-[11px] text-slate-400 mt-3">
+          Ao removeres, o teu saldo de faltas disponíveis para esta cadeira será automaticamente atualizado.
+        </p>
+      </div>
+
+      <!-- Ações do Modal -->
+      <div class="p-4 bg-slate-50 border-t border-slate-200 flex gap-2.5">
+        <button type="button" onclick="closeDeleteAbsenceModal()" class="flex-1 px-4 py-2.5 bg-white hover:bg-slate-100 border border-slate-300 text-slate-700 rounded-xl text-xs font-bold transition shadow-sm cursor-pointer">
+          Cancelar
+        </button>
+        <button type="button" id="modal-delete-absence-confirm-btn" onclick="confirmDeleteAbsence()" class="flex-1 px-4 py-2.5 bg-rose-600 hover:bg-rose-700 active:scale-[0.99] text-white rounded-xl text-xs font-bold transition shadow-md flex items-center justify-center gap-1.5 cursor-pointer">
+          <i class="fa-solid fa-trash-can"></i> Sim, Remover
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- ============================================== -->
+  <!-- ECRÃ DE AUTENTICAÇÃO (LOGIN / REGISTO)         -->
+  <!-- ============================================== -->
+  <div id="auth-screen" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-4">
+    <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl border border-slate-100 overflow-hidden flex flex-col">
+      
+      <!-- Cabeçalho com Logo FEUP / U.Porto -->
+      <div class="bg-white p-5 text-center border-b border-slate-100 flex flex-col items-center justify-center">
+        <img src="logo.png" alt="U.Porto FEUP" class="h-14 sm:h-16 w-auto object-contain mb-3">
+        <h2 class="text-2xl font-bold text-slate-800 tracking-tight">Projeto 0 Recursos</h2>
+      </div>
+
+      <!-- Abas de Autenticação -->
+      <div class="grid grid-cols-2 bg-slate-50 border-b border-slate-200">
+        <button id="auth-tab-login" onclick="switchAuthTab('login')" class="py-3 text-xs sm:text-sm font-bold border-b-2 border-indigo-600 text-indigo-600 flex items-center justify-center gap-2 transition">
+          <i class="fa-solid fa-right-to-bracket"></i> Iniciar Sessão
+        </button>
+        <button id="auth-tab-register" onclick="switchAuthTab('register')" class="py-3 text-xs sm:text-sm font-medium border-b-2 border-transparent text-slate-500 hover:text-indigo-600 flex items-center justify-center gap-2 transition">
+          <i class="fa-solid fa-user-plus"></i> Novo Estudante
+        </button>
+      </div>
+
+      <!-- Formulário de Login -->
+      <div id="form-login-container" class="p-5 sm:p-6">
+        <div id="login-error-msg" class="hidden mb-4 p-3 bg-rose-50 border border-rose-200 text-rose-700 text-xs rounded-xl flex items-center gap-2">
+          <i class="fa-solid fa-circle-exclamation text-rose-500"></i>
+          <span id="login-error-text">Utilizador ou palavra-passe incorretos.</span>
+        </div>
+
+        <form onsubmit="handleLogin(event)" class="space-y-4">
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Nome de Utilizador</label>
+            <div class="relative">
+              <i class="fa-solid fa-user absolute left-3.5 top-3.5 text-slate-400 text-xs"></i>
+              <input type="text" id="login-username" placeholder="Ex: admin ou aluno" required class="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-indigo-600 focus:bg-white transition">
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Palavra-passe</label>
+            <div class="relative">
+              <i class="fa-solid fa-lock absolute left-3.5 top-3.5 text-slate-400 text-xs"></i>
+              <input type="password" id="login-password" placeholder="••••••••" required class="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-indigo-600 focus:bg-white transition">
+            </div>
+          </div>
+
+          <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 active:scale-[0.99] text-white font-bold py-3 rounded-xl text-sm transition shadow-md flex items-center justify-center gap-2">
+            <i class="fa-solid fa-arrow-right-to-bracket"></i> Entrar
+          </button>
+        </form>
+
+        <!-- Acesso Rápido de Teste (1-Clique) -->
+        <div class="mt-6 pt-4 border-t border-slate-100 bg-slate-50/80 -mx-5 -mb-5 sm:-mx-6 sm:-mb-6 p-4 sm:p-5 text-xs text-slate-500 rounded-b-2xl">
+          <p class="font-bold text-slate-700 mb-2 flex items-center gap-1.5">
+            <i class="fa-solid fa-bolt text-amber-500"></i> Contas Pré-definidas (Clique para entrar):
+          </p>
+          <div class="grid grid-cols-2 gap-2 text-[11px]">
+            <button type="button" onclick="quickLogin('admin', 'admin123')" class="p-2.5 bg-white hover:bg-indigo-50/50 rounded-xl border border-slate-200 hover:border-indigo-300 text-left transition shadow-sm group">
+              <div class="flex items-center justify-between">
+                <span class="font-bold text-indigo-700 flex items-center gap-1"><i class="fa-solid fa-shield-halved text-xs"></i> Admin</span>
+                <i class="fa-solid fa-chevron-right text-[10px] text-slate-400 group-hover:text-indigo-600 transition"></i>
+              </div>
+              <p class="text-slate-600 mt-1 font-mono text-[10px]">admin / admin123</p>
+            </button>
+            <button type="button" onclick="quickLogin('aluno', 'aluno123')" class="p-2.5 bg-white hover:bg-indigo-50/50 rounded-xl border border-slate-200 hover:border-indigo-300 text-left transition shadow-sm group">
+              <div class="flex items-center justify-between">
+                <span class="font-bold text-emerald-700 flex items-center gap-1"><i class="fa-solid fa-user-graduate text-xs"></i> Estudante</span>
+                <i class="fa-solid fa-chevron-right text-[10px] text-slate-400 group-hover:text-emerald-600 transition"></i>
+              </div>
+              <p class="text-slate-600 mt-1 font-mono text-[10px]">aluno / aluno123</p>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Formulário de Registo (Sem Nome Completo) -->
+      <div id="form-register-container" class="p-5 sm:p-6 hidden">
+        <div id="register-error-msg" class="hidden mb-4 p-3 bg-rose-50 border border-rose-200 text-rose-700 text-xs rounded-xl flex items-center gap-2">
+          <i class="fa-solid fa-circle-exclamation text-rose-500"></i>
+          <span id="register-error-text">Este nome de utilizador já se encontra registado.</span>
+        </div>
+
+        <form onsubmit="handleRegister(event)" class="space-y-4">
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Nome de Utilizador</label>
+            <div class="relative">
+              <i class="fa-solid fa-at absolute left-3.5 top-3.5 text-slate-400 text-xs"></i>
+              <input type="text" id="reg-username" placeholder="Ex: diogosantos" required class="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-indigo-600 focus:bg-white transition">
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Palavra-passe</label>
+            <div class="relative">
+              <i class="fa-solid fa-key absolute left-3.5 top-3.5 text-slate-400 text-xs"></i>
+              <input type="password" id="reg-password" placeholder="Mínimo 4 caracteres" required class="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-indigo-600 focus:bg-white transition">
+            </div>
+          </div>
+
+          <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] text-white font-bold py-3 rounded-xl text-sm transition shadow-md flex items-center justify-center gap-2">
+            <i class="fa-solid fa-user-check"></i> Criar Conta
+          </button>
+        </form>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- BARRA SUPERIOR (HEADER)                        -->
+  <!-- ============================================== -->
+  <header class="bg-white text-slate-800 shadow-sm border-b border-slate-200 sticky top-0 z-40">
+    <div class="max-w-6xl mx-auto px-3 sm:px-6 py-2.5 sm:py-3 flex justify-between items-center gap-3">
+      
+      <!-- Imagem do Site e Nome "Projeto 0 Recursos" -->
+      <div class="flex items-center gap-2.5 sm:gap-4 min-w-0">
+        <img src="logo.png" alt="U.Porto FEUP" class="h-8 sm:h-10 w-auto object-contain shrink-0">
+        <h1 class="text-base sm:text-xl font-bold tracking-tight text-slate-800 truncate">
+          Projeto 0 Recursos
+        </h1>
+      </div>
+
+      <!-- BOTÃO UNIFICADO DE PERFIL & SESSÃO NO CANTO SUPERIOR DIREITO -->
+      <div class="relative" id="user-profile-wrapper">
+        <button 
+          id="user-profile-button" 
+          onclick="toggleProfileDropdown(event)" 
+          class="flex items-center gap-2 sm:gap-2.5 bg-slate-50 hover:bg-slate-100/90 active:bg-slate-200/70 py-1.5 px-2.5 sm:px-3 rounded-2xl border border-slate-200 transition shadow-sm cursor-pointer select-none"
+          title="Opções de Perfil e Sessão"
+        >
+          <!-- Foto / Avatar -->
+          <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-full overflow-hidden bg-indigo-100 text-indigo-700 font-bold text-xs flex items-center justify-center shrink-0 border border-slate-300 shadow-inner" id="profile-avatar-container">
+            <span id="profile-avatar-letter">U</span>
+            <img id="profile-avatar-img" class="w-full h-full object-cover hidden" alt="Avatar">
+          </div>
+          
+          <div class="text-left hidden sm:block">
+            <p id="profile-name" class="text-xs font-bold text-slate-800 truncate max-w-[130px]">Utilizador</p>
+            <span id="profile-role" class="text-[9px] font-bold uppercase px-1.5 py-0.2 rounded bg-indigo-100 text-indigo-700">Papel</span>
+          </div>
+
+          <i class="fa-solid fa-chevron-down text-[10px] text-slate-400 ml-0.5"></i>
+        </button>
+
+        <!-- MENU DROPDOWN DE PERFIL E SESSÃO -->
+        <div id="profile-dropdown-menu" class="absolute right-0 top-full mt-2 w-64 bg-white rounded-2xl shadow-xl border border-slate-200 py-2 z-50 hidden animate-fade">
+          
+          <!-- Identificação -->
+          <div class="px-4 py-3 border-b border-slate-100 flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full overflow-hidden bg-indigo-100 text-indigo-700 font-bold text-sm flex items-center justify-center shrink-0 border border-slate-300" id="dropdown-avatar-container">
+              <span id="dropdown-avatar-letter">U</span>
+              <img id="dropdown-avatar-img" class="w-full h-full object-cover hidden" alt="Avatar">
+            </div>
+            <div class="min-w-0 flex-1">
+              <p id="dropdown-profile-name" class="text-xs font-bold text-slate-800 truncate">Utilizador</p>
+              <p id="dropdown-profile-username" class="text-[11px] text-slate-400 font-mono truncate">@user</p>
+              <span id="dropdown-profile-role" class="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded bg-indigo-100 text-indigo-700 mt-1 inline-block">Papel</span>
+            </div>
+          </div>
+
+          <!-- Ações de Perfil -->
+          <div class="p-1.5 space-y-1">
+            <button onclick="openProfileModal(); toggleProfileDropdown();" class="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 rounded-xl transition text-left">
+              <i class="fa-solid fa-circle-user text-indigo-600 text-sm"></i>
+              <span>O Meu Perfil (Foto & Nome)</span>
+            </button>
+            <button id="dropdown-enrolled-btn" onclick="openEnrolledModal(); toggleProfileDropdown();" class="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 rounded-xl transition text-left">
+              <i class="fa-solid fa-graduation-cap text-indigo-600 text-sm"></i>
+              <span>As Minhas Cadeiras</span>
+            </button>
+          </div>
+
+          <!-- Encerramento de Sessão -->
+          <div class="p-1.5 border-t border-slate-100 mt-1">
+            <button onclick="handleLogout()" class="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-bold text-rose-600 hover:bg-rose-50 rounded-xl transition text-left">
+              <i class="fa-solid fa-arrow-right-from-bracket text-rose-500 text-sm"></i>
+              <span>Terminar Sessão</span>
+            </button>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- ============================================== -->
+  <!-- NAVEGAÇÃO SUPERIOR (TABLET / DESKTOP)          -->
+  <!-- ============================================== -->
+  <div class="bg-white border-b border-slate-200 hidden sm:block">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 flex gap-2">
+      <button onclick="switchTab('grades')" id="tab-btn-grades" class="py-3 px-5 border-b-2 border-indigo-600 font-bold text-indigo-600 flex items-center gap-2 text-sm transition">
+        <i class="fa-solid fa-graduation-cap"></i> Cadeiras
+      </button>
+      <button onclick="switchTab('files')" id="tab-btn-files" class="py-3 px-5 border-b-2 border-transparent font-medium text-slate-500 hover:text-indigo-600 flex items-center gap-2 text-sm transition">
+        <i class="fa-solid fa-folder-open"></i> Arquivo
+      </button>
+      <button onclick="switchTab('absences')" id="tab-btn-absences" class="py-3 px-5 border-b-2 border-transparent font-medium text-slate-500 hover:text-indigo-600 flex items-center gap-2 text-sm transition">
+        <i class="fa-solid fa-clipboard-user"></i> Faltas
+      </button>
+      <button onclick="switchTab('students')" id="tab-btn-students" class="hidden py-3 px-5 border-b-2 border-transparent font-medium text-slate-500 hover:text-indigo-600 flex items-center gap-2 text-sm transition">
+        <i class="fa-solid fa-users"></i> Alunos (Admin)
+      </button>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- CONTEÚDO PRINCIPAL                             -->
+  <!-- ============================================== -->
+  <main class="max-w-6xl mx-auto px-3 sm:px-6 py-4 sm:py-6 flex-1 w-full">
+
+    <!-- ============================================== -->
+    <!-- ABA 1: CADEIRAS                                -->
+    <!-- ============================================== -->
+    <section id="tab-grades" class="animate-fade">
+
+      <!-- Painel Admin: Criar Cadeira & Testes -->
+      <div id="admin-grades-panel" class="hidden mb-6 sm:mb-8 bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-slate-200">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-sm sm:text-base font-bold text-slate-800 flex items-center gap-2">
+            <i class="fa-solid fa-shield-halved text-indigo-600"></i> Gestão de Cadeiras e Avaliações (Admin)
+          </h2>
+          <span class="text-[10px] bg-indigo-50 text-indigo-700 font-bold px-2 py-0.5 rounded-full border border-indigo-200">
+            Administrador
+          </span>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+          
+          <!-- Formulário Criar Cadeira -->
+          <form onsubmit="addSubject(event)" class="bg-slate-50 p-4 rounded-xl border border-slate-200 flex flex-col justify-between">
+            <div>
+              <h3 class="font-bold text-xs uppercase tracking-wider text-slate-600 mb-2.5 flex items-center gap-1.5">
+                <i class="fa-solid fa-book-bookmark text-indigo-600"></i> Nova Cadeira
+              </h3>
+              <div>
+                <input type="text" id="new-subject-name" placeholder="Ex: Análise Matemática I" required class="w-full px-3.5 py-2.5 border rounded-xl text-sm outline-none focus:border-indigo-600 bg-white transition">
+              </div>
+            </div>
+            <div class="mt-4 flex justify-end">
+              <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow transition flex items-center justify-center gap-1.5">
+                <i class="fa-solid fa-plus"></i> Criar Cadeira
+              </button>
+            </div>
+          </form>
+
+          <!-- Formulário Associar Docente à Cadeira (Admin) -->
+          <form onsubmit="addProfessorFromAdmin(event)" class="bg-slate-50 p-4 rounded-xl border border-slate-200 flex flex-col justify-between">
+            <div>
+              <h3 class="font-bold text-xs uppercase tracking-wider text-slate-600 mb-2.5 flex items-center gap-1.5">
+                <i class="fa-solid fa-chalkboard-user text-indigo-600"></i> Registar Docente
+              </h3>
+              <div class="space-y-2">
+                <select id="docent-subject-select" required class="w-full px-3 py-2 border rounded-xl text-xs bg-white outline-none focus:border-indigo-600 transition">
+                  <option value="">Seleciona a cadeira...</option>
+                </select>
+                <input type="text" id="docent-name" placeholder="Nome (Ex: Prof. João Silva)" required class="w-full px-3 py-2 border rounded-xl text-xs outline-none focus:border-indigo-600 bg-white transition">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <input type="email" id="docent-email" placeholder="Email institucional" required class="w-full px-3 py-2 border rounded-xl text-xs outline-none focus:border-indigo-600 bg-white transition">
+                  <input type="text" id="docent-role" placeholder="Cargo (Ex: Regente)" class="w-full px-3 py-2 border rounded-xl text-xs outline-none focus:border-indigo-600 bg-white transition">
+                </div>
+              </div>
+            </div>
+            <div class="mt-4 flex justify-end">
+              <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow transition flex items-center justify-center gap-1.5">
+                <i class="fa-solid fa-user-plus"></i> Adicionar Docente
+              </button>
+            </div>
+          </form>
+
+          <!-- Formulário Criar Teste com Data de Lançamento de Notas -->
+          <form onsubmit="addTest(event)" class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+            <h3 class="font-bold text-xs uppercase tracking-wider text-slate-600 mb-2.5 flex items-center gap-1.5">
+              <i class="fa-solid fa-file-pen text-indigo-600"></i> Nova Avaliação
+            </h3>
+            <div class="space-y-2.5">
+              <select id="test-subject-select" required class="w-full px-3.5 py-2.5 border rounded-xl text-sm bg-white outline-none focus:border-indigo-600 transition">
+                <option value="">Seleciona a cadeira...</option>
+              </select>
+              
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                <input type="text" id="new-test-name" placeholder="Ex: 1º Teste Teórico" required class="sm:col-span-2 px-3.5 py-2.5 border rounded-xl text-sm outline-none focus:border-indigo-600 bg-white transition">
+                <input type="number" id="new-test-weight" placeholder="Peso %" min="1" max="100" class="px-3.5 py-2.5 border rounded-xl text-sm outline-none focus:border-indigo-600 bg-white transition">
+              </div>
+
+              <!-- Data em que é possível colocar as notas -->
+              <div class="bg-white p-2.5 rounded-xl border border-slate-200">
+                <label class="block text-[11px] font-bold text-slate-600 mb-1 flex items-center gap-1">
+                  <i class="fa-regular fa-calendar-check text-indigo-600"></i> Data em que os alunos podem colocar a nota:
+                </label>
+                <div class="flex flex-col sm:flex-row gap-2 items-center">
+                  <input type="date" id="new-test-opendate" class="w-full sm:flex-1 px-3 py-1.5 border rounded-lg text-xs bg-slate-50 outline-none focus:border-indigo-600">
+                  <span class="text-[10px] text-slate-400 sm:w-48 text-center sm:text-left">Se deixares vazio, abre imediatamente.</span>
+                </div>
+              </div>
+
+              <div class="flex justify-end pt-1">
+                <button type="submit" class="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-5 py-2.5 rounded-xl shadow transition">
+                  Criar Avaliação
+                </button>
+              </div>
+            </div>
+          </form>
+
+        </div>
+      </div>
+
+      <!-- Barra do Estudante: Gerir as Cadeiras Frequentas -->
+      <div id="student-actions-bar" class="hidden mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
+        <div class="flex items-center gap-2 text-xs text-slate-600 font-medium">
+          <i class="fa-solid fa-graduation-cap text-indigo-600 text-sm"></i>
+          <span>A frequentar: <strong id="student-enrolled-count" class="text-indigo-600 font-bold">0</strong> cadeiras</span>
+        </div>
+        <button onclick="openEnrolledModal()" class="w-full sm:w-auto px-4 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 text-xs font-bold rounded-xl transition flex items-center justify-center gap-1.5">
+          <i class="fa-solid fa-sliders"></i> Alterar as Minhas Cadeiras
+        </button>
+      </div>
+
+      <!-- Contentor de Cadeiras -->
+      <div id="subjects-container" class="space-y-5 sm:space-y-6"></div>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- ABA 2: ARQUIVO (ORGANIZADO COM ABAS EM CIMA)   -->
+    <!-- ============================================== -->
+    <section id="tab-files" class="hidden animate-fade">
+
+      <!-- Painel Admin: Upload de Ficheiro -->
+      <div id="admin-files-panel" class="hidden mb-6 sm:mb-8 bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-slate-200">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-sm sm:text-base font-bold text-slate-800 flex items-center gap-2">
+            <i class="fa-solid fa-cloud-arrow-up text-indigo-600"></i> Publicar no Arquivo (Admin)
+          </h2>
+          <span class="text-[10px] bg-indigo-50 text-indigo-700 font-bold px-2 py-0.5 rounded-full border border-indigo-200">
+            Administrador
+          </span>
+        </div>
+
+        <form onsubmit="uploadFile(event)" class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 items-end bg-slate-50 p-4 rounded-xl border border-slate-200">
+          <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1">Cadeira</label>
+            <select id="file-subject-select" required class="w-full px-3 py-2.5 border rounded-xl text-sm bg-white outline-none focus:border-indigo-600">
+              <option value="">Seleciona...</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1">Título</label>
+            <input type="text" id="file-title" placeholder="Ex: Exame Época Normal" required class="w-full px-3 py-2.5 border rounded-xl text-sm bg-white outline-none focus:border-indigo-600">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1">Ficheiro</label>
+            <input type="file" id="file-input" accept=".pdf,application/pdf,image/*" required class="w-full text-xs text-slate-500 file:mr-2 file:py-2 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-indigo-100 file:text-indigo-800 hover:file:bg-indigo-200 cursor-pointer">
+          </div>
+          <div class="sm:col-span-3 flex justify-end pt-2">
+            <button type="submit" class="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-6 py-2.5 rounded-xl shadow transition flex items-center justify-center gap-1.5">
+              <i class="fa-solid fa-cloud-arrow-up"></i> Publicar Documento
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- ABAS DE CADEIRAS NO ARQUIVO (ORGANIZADO POR CADEIRAS EM CIMA) -->
+      <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 mb-6">
+        <div class="flex items-center justify-between mb-3 pb-2 border-b border-slate-100">
+          <span class="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+            <i class="fa-solid fa-book-open text-indigo-600"></i> Cadeiras no Arquivo
+          </span>
+        </div>
+
+        <!-- Barra de Abas / Pills das Cadeiras com scroll suave -->
+        <div id="file-subject-tabs" class="flex gap-2 overflow-x-auto pb-1 scrollbar-thin">
+          <!-- Injetado via JS -->
+        </div>
+      </div>
+
+      <!-- Contentor de Ficheiros -->
+      <div id="files-container" class="space-y-4 sm:space-y-6"></div>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- ABA 3: FALTAS (GESTÃO DE PRESENÇAS E LIMITES)  -->
+    <!-- ============================================== -->
+    <section id="tab-absences" class="hidden animate-fade space-y-6">
+
+      <!-- PAINEL ADMIN: CONFIGURAR LIMITES DE FALTAS POR CADEIRA -->
+      <div id="admin-absences-panel" class="hidden bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-slate-200">
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <h2 class="text-sm sm:text-base font-bold text-slate-800 flex items-center gap-2">
+              <i class="fa-solid fa-shield-halved text-indigo-600"></i> Configurar Limites de Faltas por Cadeira (Admin)
+            </h2>
+            <p class="text-xs text-slate-400 mt-0.5">Define o número máximo de faltas que os alunos podem dar a aulas Teóricas e Práticas.</p>
+          </div>
+          <span class="text-[10px] bg-indigo-50 text-indigo-700 font-bold px-2 py-0.5 rounded-full border border-indigo-200">
+            Administrador
+          </span>
+        </div>
+
+        <form onsubmit="saveSubjectAbsenceLimits(event)" class="bg-slate-50 p-4 rounded-xl border border-slate-200 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 items-end">
+          <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1">Cadeira</label>
+            <select id="absence-admin-subject-select" onchange="onAdminSelectAbsenceSubject()" required class="w-full px-3 py-2.5 border rounded-xl text-xs sm:text-sm bg-white outline-none focus:border-indigo-600 transition">
+              <option value="">Seleciona a cadeira...</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1 flex items-center gap-1">
+              <i class="fa-solid fa-book text-indigo-600"></i> Máx. Faltas Teóricas
+            </label>
+            <input type="number" id="absence-admin-max-theory" min="0" max="50" placeholder="Ex: 4" required class="w-full px-3 py-2.5 border rounded-xl text-xs sm:text-sm bg-white outline-none focus:border-indigo-600 transition">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1 flex items-center gap-1">
+              <i class="fa-solid fa-flask text-emerald-600"></i> Máx. Faltas Práticas
+            </label>
+            <input type="number" id="absence-admin-max-practice" min="0" max="50" placeholder="Ex: 3" required class="w-full px-3 py-2.5 border rounded-xl text-xs sm:text-sm bg-white outline-none focus:border-indigo-600 transition">
+          </div>
+          <div>
+            <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 active:scale-[0.99] text-white font-bold py-2.5 px-4 rounded-xl text-xs sm:text-sm transition shadow-sm flex items-center justify-center gap-1.5">
+              <i class="fa-solid fa-floppy-disk"></i> Guardar Limites
+            </button>
+          </div>
+        </form>
+      </div>
+
+
+      <!-- CONTROLO DE PRESENÇAS E QUANTAS FALTAS PODE DAR -->
+      <div class="space-y-4">
+        <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-1 pb-1">
+          <div>
+            <h3 class="font-bold text-slate-800 text-sm sm:text-base flex items-center gap-2">
+              <i class="fa-solid fa-clipboard-check text-indigo-600"></i> Faltas Dadas e Faltas Disponíveis
+            </h3>
+          </div>
+        </div>
+
+        <div id="absences-cards-container" class="space-y-4">
+          <!-- Injetado dinamicamente -->
+        </div>
+      </div>
+
+      <!-- HISTÓRICO DE FALTAS REGISTADAS -->
+      <div class="bg-white rounded-2xl p-4 sm:p-6 shadow-sm border border-slate-200">
+        <div class="flex items-center justify-between mb-4 pb-2 border-b border-slate-100">
+          <h3 class="font-bold text-slate-800 text-sm sm:text-base flex items-center gap-2">
+            <i class="fa-solid fa-clock-rotate-left text-slate-500"></i> Histórico de Faltas Registadas
+          </h3>
+          <span id="absence-total-counter-badge" class="text-xs font-bold text-slate-600 bg-slate-100 px-2.5 py-0.5 rounded-full">
+            0 faltas
+          </span>
+        </div>
+
+        <div id="absences-history-list" class="space-y-2.5">
+          <!-- Injetado dinamicamente -->
+        </div>
+      </div>
+
+    </section>
+
+
+    <!-- ============================================== -->
+    <!-- ABA 3: ALUNOS REGISTADOS (ADMIN)               -->
+    <!-- ============================================== -->
+    <section id="tab-students" class="hidden animate-fade">
+      
+      <!-- Pedidos de Alteração de Nome Pendentes -->
+      <div id="admin-pending-names-box" class="mb-6 bg-amber-50 border border-amber-200 rounded-2xl p-5 shadow-sm hidden">
+        <h3 class="text-sm font-bold text-amber-900 mb-1 flex items-center gap-2">
+          <i class="fa-solid fa-bell text-amber-600"></i> Pedidos de Alteração de Nome Pendentes
+        </h3>
+        <p class="text-xs text-amber-700 mb-4">Estudantes que solicitaram alteração de nome no respetivo perfil:</p>
+        <div id="admin-pending-names-list" class="space-y-2"></div>
+      </div>
+
+      <div class="bg-white rounded-2xl p-4 sm:p-6 shadow-sm border border-slate-200">
+        <h2 class="text-base font-bold text-slate-800 mb-1 flex items-center gap-2">
+          <i class="fa-solid fa-users text-indigo-600"></i> Alunos Registados
+        </h2>
+        <p class="text-xs text-slate-500 mb-6">Consulta as cadeiras frequentadas e o boletim de cada estudante.</p>
+        
+        <div id="students-list-container" class="space-y-4"></div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ============================================== -->
+  <!-- BARRA DE NAVEGAÇÃO INFERIOR (MOBILE)           -->
+  <!-- ============================================== -->
+  <nav class="sm:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-slate-200 flex justify-around items-center py-2 px-1 shadow-lg">
+    <button onclick="switchTab('grades')" id="mob-btn-grades" class="flex flex-col items-center gap-1 text-indigo-600 px-2.5 py-1 text-[11px] font-bold">
+      <i class="fa-solid fa-graduation-cap text-lg"></i>
+      <span>Cadeiras</span>
+    </button>
+    <button onclick="switchTab('files')" id="mob-btn-files" class="flex flex-col items-center gap-1 text-slate-400 px-2.5 py-1 text-[11px] font-medium">
+      <i class="fa-solid fa-folder-open text-lg"></i>
+      <span>Arquivo</span>
+    </button>
+    <button onclick="switchTab('absences')" id="mob-btn-absences" class="flex flex-col items-center gap-1 text-slate-400 px-2.5 py-1 text-[11px] font-medium">
+      <i class="fa-solid fa-clipboard-user text-lg"></i>
+      <span>Faltas</span>
+    </button>
+    <button onclick="switchTab('students')" id="mob-btn-students" class="hidden flex flex-col items-center gap-1 text-slate-400 px-2.5 py-1 text-[11px] font-medium">
+      <i class="fa-solid fa-users text-lg"></i>
+      <span>Alunos</span>
+    </button>
+  </nav>
+
+  <!-- ============================================== -->
+  <!-- JAVASCRIPT: LÓGICA COMPLETA                    -->
+  <!-- ============================================== -->
+  <script>
+    // CONTAS INICIAIS
+    const INITIAL_USERS = [
+      { id: 'usr_admin', username: 'admin', password: 'admin123', name: 'Administrador', role: 'admin', avatar: null, pendingName: null },
+      { id: 'usr_student_1', username: 'aluno', password: 'aluno123', name: 'Diogo Estudante', role: 'student', avatar: null, pendingName: null }
+    ];
+
+    // ESTADO DA APLICAÇÃO
+    let state = {
+      currentUser: JSON.parse(localStorage.getItem('study_current_user')) || null,
+      users: JSON.parse(localStorage.getItem('study_users')) || INITIAL_USERS,
+      subjects: JSON.parse(localStorage.getItem('study_subjects')) || [
+        {
+          id: 'sub_1',
+          name: 'Programação Orientada a Objetos',
+          maxAbsencesTheory: 4,
+          maxAbsencesPractice: 3,
+          professors: [
+            { id: 'prof_1', name: 'Prof. Doutor Ademar Aguiar', email: 'ademar@fe.up.pt', role: 'Regente' },
+            { id: 'prof_2', name: 'Prof. Hugo Sereno Ferreira', email: 'hsereno@fe.up.pt', role: 'Docente Teórico-Prático' }
+          ],
+          tests: [
+            { id: 'test_1', name: '1º Teste Teórico', weight: 40, openDate: '' },
+            { id: 'test_2', name: 'Projeto Prático', weight: 60, openDate: '' }
+          ]
+        },
+        {
+          id: 'sub_2',
+          name: 'Álgebra Linear',
+          maxAbsencesTheory: 4,
+          maxAbsencesPractice: 3,
+          professors: [
+            { id: 'prof_3', name: 'Prof.ª Doutora Maria João Rodrigues', email: 'mjr@fe.up.pt', role: 'Regente' }
+          ],
+          tests: [
+            { id: 'test_3', name: 'Frequência 1', weight: 50, openDate: '' },
+            { id: 'test_4', name: 'Frequência 2', weight: 50, openDate: '' }
+          ]
+        },
+        {
+          id: 'sub_3',
+          name: 'Física I',
+          maxAbsencesTheory: 4,
+          maxAbsencesPractice: 3,
+          professors: [
+            { id: 'prof_4', name: 'Prof. Doutor Jaime Villate', email: 'villate@fe.up.pt', role: 'Regente' }
+          ],
+          tests: [
+            { id: 'test_5', name: 'Mini-Teste 1', weight: 30, openDate: '' },
+            { id: 'test_6', name: 'Exame Final', weight: 70, openDate: '' }
+          ]
+        }
+      ],
+      absences: JSON.parse(localStorage.getItem('study_absences')) || {
+        'usr_student_1': [
+          {
+            id: 'abs_demo_1',
+            subjectId: 'sub_1',
+            type: 'theory',
+            date: '2026-09-08'
+          }
+        ]
+      },
+      grades: JSON.parse(localStorage.getItem('study_grades')) || {
+        'usr_student_1': { 'test_1': 8.0 }
+      },
+      enrolledSubjects: JSON.parse(localStorage.getItem('study_enrolled_subjects')) || {
+        'usr_student_1': ['sub_1', 'sub_2', 'sub_3']
+      },
+      files: JSON.parse(localStorage.getItem('study_files')) || [
+        {
+          id: 'file_demo_1',
+          title: 'Exame Época Normal 2023',
+          year: '2023/2024',
+          subjectId: 'sub_1',
+          fileName: 'POO_Exame_Normal_2023.pdf',
+          dataUrl: 'data:application/pdf;base64,JVBERi0xLjQKMSAwIG9iaiA8PC9UeXBlIC9DYXRhbG9nIC9QYWdlcyAyIDAgUj4+IGVuZG9iagoyIDAgb2JqIDw8L1R5cGUgL1BhZ2VzIC9LaWRzIFszIDAgUl0gL0NvdW50IDE+PiBlbmRvYmoKMyAwIG9iaiA8PC9UeXBlIC9QYWdlIC9QYXJlbnQgMiAwIFIgL01lZGlhQm94IFswIDAgNjEyIDc5Ml0gL1Jlc291cmNlcyA8PC9Gb250IDw8L0YxIDQgMCBSPj4+PiAvQ29udGVudHMgNSAwIFI+PiBlbmRvYmoKNCAwIG9iaiA8PC9UeXBlIC9Gb250IC9TdWJ0eXBlIC9UeXBlMSAvQmFzZUZvbnQgL0hlbHZldGljYS1Cb2xkPj4gZW5kb2JqCjUgMCBvYmogPDwvTGVuZ3RoIDM3MD4+IHN0cmVhbQpCVAovRjEgMTggVGYKNTAgNzIwIFRkCihQcm9ncmFtYWNhbyBPcmllbnRhZGEgYSBPYmpldG9zKSBUagovRjEgMTQgVGYKMCAtMzAgVGQKKEV4YW1lIEVwb2NhIE5vcm1hbCAyMDIzIC0gQW5vOiAyMDIzLzIwMjQpIFRqCi9GMSAxMSBUZgowIC0zNSBUZAooUHJvamV0byAyMCB2YWxvcmVzIC0gUGxhdGFmb3JtYSBkZSBFc3R1ZG8gRkVVUCkgVGoKMCAtMjIgVGQKKERvY3VtZW50byBQREYgYWJlcnRvIGVtIG5vdmEgYWJhIGRvIENocm9tZSBhIHBhcnRpciBkbyBBcnF1aXZvLikgVGoKMCAtMjAgVGQKKFV0aWxpemUgYXMgZmVycmFtZW50YXMgZG8gQ2hyb21lIG5vIHRvcG8gcGFyYSBhbXBsaWFyLCBkZXNjYXJyZWdhciBvdSBpbXByaW1pci4pIFRqCkVUCmVuZHN0cmVhbQplbmRvYmoKeHJlZgowIDYKMDAwMDAwMDAwMCA2NTUzNSBmIAowMDAwMDAwMDEwIDAwMDAwIG4gCjAwMDAwMDAwNjAgMDAwMDAgbiAKMDAwMDAwMDExNyAwMDAwMCBuIAowMDAwMDAwMjMyIDAwMDAwIG4gCjAwMDAwMDAzMDggMDAwMDAgbiAKdHJhaWxlciA8PC9TaXplIDYgL1Jvb3QgMSAwIFI+PgpzdGFydHhyZWYKNzkwCiUlRU9G'
+        },
+        {
+          id: 'file_demo_2',
+          title: 'Ficha de Exercícios de Matrizes',
+          year: '2023/2024',
+          subjectId: 'sub_2',
+          fileName: 'Algebra_Ficha_Matrizes.pdf',
+          dataUrl: 'data:application/pdf;base64,JVBERi0xLjQKMSAwIG9iaiA8PC9UeXBlIC9DYXRhbG9nIC9QYWdlcyAyIDAgUj4+IGVuZG9iagoyIDAgb2JqIDw8L1R5cGUgL1BhZ2VzIC9LaWRzIFszIDAgUl0gL0NvdW50IDE+PiBlbmRvYmoKMyAwIG9iaiA8PC9UeXBlIC9QYWdlIC9QYXJlbnQgMiAwIFIgL01lZGlhQm94IFswIDAgNjEyIDc5Ml0gL1Jlc291cmNlcyA8PC9Gb250IDw8L0YxIDQgMCBSPj4+PiAvQ29udGVudHMgNSAwIFI+PiBlbmRvYmoKNCAwIG9iaiA8PC9UeXBlIC9Gb250IC9TdWJ0eXBlIC9UeXBlMSAvQmFzZUZvbnQgL0hlbHZldGljYS1Cb2xkPj4gZW5kb2JqCjUgMCBvYmogPDwvTGVuZ3RoIDM2MT4+IHN0cmVhbQpCVAovRjEgMTggVGYKNTAgNzIwIFRkCihBbGdlYnJhIExpbmVhcikgVGoKL0YxIDE0IFRmCjAgLTMwIFRkCihGaWNoYSBkZSBFeGVyY2ljaW9zIGRlIE1hdHJpemVzIC0gQW5vOiAyMDIzLzIwMjQpIFRqCi9GMSAxMSBUZgowIC0zNSBUZAooUHJvamV0byAyMCB2YWxvcmVzIC0gUGxhdGFmb3JtYSBkZSBFc3R1ZG8gRkVVUCkgVGoKMCAtMjIgVGQKKERvY3VtZW50byBQREYgYWJlcnRvIGVtIG5vdmEgYWJhIGRvIENocm9tZSBhIHBhcnRpciBkbyBBcnF1aXZvLikgVGoKMCAtMjAgVGQKKFV0aWxpemUgYXMgZmVycmFtZW50YXMgZG8gQ2hyb21lIG5vIHRvcG8gcGFyYSBhbXBsaWFyLCBkZXNjYXJyZWdhciBvdSBpbXByaW1pci4pIFRqCkVUCmVuZHN0cmVhbQplbmRvYmoKeHJlZgowIDYKMDAwMDAwMDAwMCA2NTUzNSBmIAowMDAwMDAwMDEwIDAwMDAwIG4gCjAwMDAwMDAwNjAgMDAwMDAgbiAKMDAwMDAwMDExNyAwMDAwMCBuIAowMDAwMDAwMjMyIDAwMDAwIG4gCjAwMDAwMDAzMDggMDAwMDAgbiAKdHJhaWxlciA8PC9TaXplIDYgL1Jvb3QgMSAwIFI+PgpzdGFydHhyZWYKNzgxCiUlRU9G'
+        }
+      ],
+      selectedArchiveSubject: 'ALL'
+    };
+
+    function saveState() {
+      localStorage.setItem('study_users', JSON.stringify(state.users));
+      localStorage.setItem('study_current_user', JSON.stringify(state.currentUser));
+      localStorage.setItem('study_subjects', JSON.stringify(state.subjects));
+      localStorage.setItem('study_grades', JSON.stringify(state.grades));
+      localStorage.setItem('study_enrolled_subjects', JSON.stringify(state.enrolledSubjects));
+      localStorage.setItem('study_files', JSON.stringify(state.files));
+      localStorage.setItem('study_absences', JSON.stringify(state.absences));
+    }
+    // Salvaguarda e Migração para utilizadores existentes
+    const DEMO_PDF_POO = "data:application/pdf;base64,JVBERi0xLjQKMSAwIG9iaiA8PC9UeXBlIC9DYXRhbG9nIC9QYWdlcyAyIDAgUj4+IGVuZG9iagoyIDAgb2JqIDw8L1R5cGUgL1BhZ2VzIC9LaWRzIFszIDAgUl0gL0NvdW50IDE+PiBlbmRvYmoKMyAwIG9iaiA8PC9UeXBlIC9QYWdlIC9QYXJlbnQgMiAwIFIgL01lZGlhQm94IFswIDAgNjEyIDc5Ml0gL1Jlc291cmNlcyA8PC9Gb250IDw8L0YxIDQgMCBSPj4+PiAvQ29udGVudHMgNSAwIFI+PiBlbmRvYmoKNCAwIG9iaiA8PC9UeXBlIC9Gb250IC9TdWJ0eXBlIC9UeXBlMSAvQmFzZUZvbnQgL0hlbHZldGljYS1Cb2xkPj4gZW5kb2JqCjUgMCBvYmogPDwvTGVuZ3RoIDM3MD4+IHN0cmVhbQpCVAovRjEgMTggVGYKNTAgNzIwIFRkCihQcm9ncmFtYWNhbyBPcmllbnRhZGEgYSBPYmpldG9zKSBUagovRjEgMTQgVGYKMCAtMzAgVGQKKEV4YW1lIEVwb2NhIE5vcm1hbCAyMDIzIC0gQW5vOiAyMDIzLzIwMjQpIFRqCi9GMSAxMSBUZgowIC0zNSBUZAooUHJvamV0byAyMCB2YWxvcmVzIC0gUGxhdGFmb3JtYSBkZSBFc3R1ZG8gRkVVUCkgVGoKMCAtMjIgVGQKKERvY3VtZW50byBQREYgYWJlcnRvIGVtIG5vdmEgYWJhIGRvIENocm9tZSBhIHBhcnRpciBkbyBBcnF1aXZvLikgVGoKMCAtMjAgVGQKKFV0aWxpemUgYXMgZmVycmFtZW50YXMgZG8gQ2hyb21lIG5vIHRvcG8gcGFyYSBhbXBsaWFyLCBkZXNjYXJyZWdhciBvdSBpbXByaW1pci4pIFRqCkVUCmVuZHN0cmVhbQplbmRvYmoKeHJlZgowIDYKMDAwMDAwMDAwMCA2NTUzNSBmIAowMDAwMDAwMDEwIDAwMDAwIG4gCjAwMDAwMDAwNjAgMDAwMDAgbiAKMDAwMDAwMDExNyAwMDAwMCBuIAowMDAwMDAwMjMyIDAwMDAwIG4gCjAwMDAwMDAzMDggMDAwMDAgbiAKdHJhaWxlciA8PC9TaXplIDYgL1Jvb3QgMSAwIFI+PgpzdGFydHhyZWYKNzkwCiUlRU9G";
+    const DEMO_PDF_ALGEBRA = "data:application/pdf;base64,JVBERi0xLjQKMSAwIG9iaiA8PC9UeXBlIC9DYXRhbG9nIC9QYWdlcyAyIDAgUj4+IGVuZG9iagoyIDAgb2JqIDw8L1R5cGUgL1BhZ2VzIC9LaWRzIFszIDAgUl0gL0NvdW50IDE+PiBlbmRvYmoKMyAwIG9iaiA8PC9UeXBlIC9QYWdlIC9QYXJlbnQgMiAwIFIgL01lZGlhQm94IFswIDAgNjEyIDc5Ml0gL1Jlc291cmNlcyA8PC9Gb250IDw8L0YxIDQgMCBSPj4+PiAvQ29udGVudHMgNSAwIFI+PiBlbmRvYmoKNCAwIG9iaiA8PC9UeXBlIC9Gb250IC9TdWJ0eXBlIC9UeXBlMSAvQmFzZUZvbnQgL0hlbHZldGljYS1Cb2xkPj4gZW5kb2JqCjUgMCBvYmogPDwvTGVuZ3RoIDM2MT4+IHN0cmVhbQpCVAovRjEgMTggVGYKNTAgNzIwIFRkCihBbGdlYnJhIExpbmVhcikgVGoKL0YxIDE0IFRmCjAgLTMwIFRkCihGaWNoYSBkZSBFeGVyY2ljaW9zIGRlIE1hdHJpemVzIC0gQW5vOiAyMDIzLzIwMjQpIFRqCi9GMSAxMSBUZgowIC0zNSBUZAooUHJvamV0byAyMCB2YWxvcmVzIC0gUGxhdGFmb3JtYSBkZSBFc3R1ZG8gRkVVUCkgVGoKMCAtMjIgVGQKKERvY3VtZW50byBQREYgYWJlcnRvIGVtIG5vdmEgYWJhIGRvIENocm9tZSBhIHBhcnRpciBkbyBBcnF1aXZvLikgVGoKMCAtMjAgVGQKKFV0aWxpemUgYXMgZmVycmFtZW50YXMgZG8gQ2hyb21lIG5vIHRvcG8gcGFyYSBhbXBsaWFyLCBkZXNjYXJyZWdhciBvdSBpbXByaW1pci4pIFRqCkVUCmVuZHN0cmVhbQplbmRvYmoKeHJlZgowIDYKMDAwMDAwMDAwMCA2NTUzNSBmIAowMDAwMDAwMDEwIDAwMDAwIG4gCjAwMDAwMDAwNjAgMDAwMDAgbiAKMDAwMDAwMDExNyAwMDAwMCBuIAowMDAwMDAwMjMyIDAwMDAwIG4gCjAwMDAwMDAzMDggMDAwMDAgbiAKdHJhaWxlciA8PC9TaXplIDYgL1Jvb3QgMSAwIFI+PgpzdGFydHhyZWYKNzgxCiUlRU9G";
+
+    state.subjects.forEach(sub => {
+      if (!Array.isArray(sub.professors)) {
+        sub.professors = [];
+      }
+      if (typeof sub.maxAbsencesTheory === 'undefined') sub.maxAbsencesTheory = 4;
+      if (typeof sub.maxAbsencesPractice === 'undefined') sub.maxAbsencesPractice = 3;
+    });
+
+    if (!state.absences) {
+      state.absences = {
+        'usr_student_1': [
+          { id: 'abs_demo_1', subjectId: 'sub_1', type: 'theory', date: '2026-09-08' }
+        ]
+      };
+      saveState();
+    }
+
+    // Se nenhuma cadeira tiver professores (ex: carregado de sessão anterior em localStorage)
+    const totalExistingProfs = state.subjects.reduce((acc, s) => acc + (s.professors ? s.professors.length : 0), 0);
+    if (totalExistingProfs === 0) {
+      state.subjects.forEach(sub => {
+        if (sub.id === 'sub_1') {
+          sub.professors = [
+            { id: 'prof_1', name: 'Prof. Doutor Ademar Aguiar', email: 'ademar@fe.up.pt', role: 'Regente' },
+            { id: 'prof_2', name: 'Prof. Hugo Sereno Ferreira', email: 'hsereno@fe.up.pt', role: 'Docente Teórico-Prático' }
+          ];
+        } else if (sub.id === 'sub_2') {
+          sub.professors = [
+            { id: 'prof_3', name: 'Prof.ª Doutora Maria João Rodrigues', email: 'mjr@fe.up.pt', role: 'Regente' }
+          ];
+        } else if (sub.id === 'sub_3') {
+          sub.professors = [
+            { id: 'prof_4', name: 'Prof. Doutor Jaime Villate', email: 'villate@fe.up.pt', role: 'Regente' }
+          ];
+        }
+      });
+      saveState();
+    }
+
+    // Atualizar demo files se ainda tiverem '#'
+    state.files.forEach(f => {
+      if (f.id === 'file_demo_1' && (!f.dataUrl || f.dataUrl === '#')) {
+        f.dataUrl = DEMO_PDF_POO;
+      }
+      if (f.id === 'file_demo_2' && (!f.dataUrl || f.dataUrl === '#')) {
+        f.dataUrl = DEMO_PDF_ALGEBRA;
+      }
+    });
+    saveState();
+
+
+    // SISTEMA TOAST
+    function showToast(message, type = 'success') {
+      const toast = document.getElementById('toast');
+      toast.className = `fixed top-4 right-4 sm:top-auto sm:bottom-5 sm:right-5 z-[110] flex items-center gap-3 px-4 py-3 rounded-2xl shadow-2xl text-sm font-bold text-white transition-all transform animate-fade ${
+        type === 'success' ? 'bg-emerald-600' : 'bg-rose-600'
+      }`;
+      toast.innerHTML = `
+        <i class="fa-solid ${type === 'success' ? 'fa-circle-check' : 'fa-triangle-exclamation'}"></i>
+        <span>${message}</span>
+      `;
+      toast.classList.remove('hidden');
+      setTimeout(() => {
+        toast.classList.add('hidden');
+      }, 3000);
+    }
+
+    // GESTÃO DO DROPDOWN NO CANTO SUPERIOR DIREITO
+    function toggleProfileDropdown(event) {
+      if (event) event.stopPropagation();
+      const menu = document.getElementById('profile-dropdown-menu');
+      menu.classList.toggle('hidden');
+    }
+
+    // Fechar dropdown ao clicar fora
+    document.addEventListener('click', (e) => {
+      const menu = document.getElementById('profile-dropdown-menu');
+      const btn = document.getElementById('user-profile-button');
+      if (menu && !menu.classList.contains('hidden')) {
+        if (!menu.contains(e.target) && !btn.contains(e.target)) {
+          menu.classList.add('hidden');
+        }
+      }
+    });
+
+    // MODAL DE PERFIL
+    function openProfileModal() {
+      if (!state.currentUser) return;
+      const user = state.currentUser;
+
+      document.getElementById('profile-modal-username').value = user.username;
+      document.getElementById('profile-modal-current-name').value = user.name || user.username;
+
+      const letter = document.getElementById('profile-modal-letter');
+      const img = document.getElementById('profile-modal-img');
+      if (user.avatar) {
+        img.src = user.avatar;
+        img.classList.remove('hidden');
+        letter.classList.add('hidden');
+      } else {
+        letter.textContent = (user.name || user.username).charAt(0).toUpperCase();
+        letter.classList.remove('hidden');
+        img.classList.add('hidden');
+      }
+
+      const pendingAlert = document.getElementById('profile-pending-alert');
+      const pendingText = document.getElementById('profile-pending-name-text');
+      if (user.pendingName) {
+        pendingText.textContent = user.pendingName;
+        pendingAlert.classList.remove('hidden');
+      } else {
+        pendingAlert.classList.add('hidden');
+      }
+
+      document.getElementById('profile-modal').classList.remove('hidden');
+    }
+
+    function closeProfileModal() {
+      document.getElementById('profile-modal').classList.add('hidden');
+    }
+
+    function handleAvatarUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        state.currentUser.avatar = e.target.result;
+        const u = state.users.find(x => x.id === state.currentUser.id);
+        if (u) u.avatar = e.target.result;
+
+        saveState();
+        applyUserSession();
+        openProfileModal(); // Atualiza modal
+        showToast("Fotografia de perfil atualizada!");
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function handleRequestNameChange(e) {
+      e.preventDefault();
+      const newName = document.getElementById('profile-new-name-input').value.trim();
+      if (!newName) return;
+
+      if (state.currentUser.role === 'admin') {
+        state.currentUser.name = newName;
+        const u = state.users.find(x => x.id === state.currentUser.id);
+        if (u) u.name = newName;
+        saveState();
+        applyUserSession();
+        openProfileModal();
+        showToast("Nome atualizado com sucesso!");
+        document.getElementById('profile-new-name-input').value = '';
+        return;
+      }
+
+      state.currentUser.pendingName = newName;
+      const u = state.users.find(x => x.id === state.currentUser.id);
+      if (u) u.pendingName = newName;
+
+      saveState();
+      openProfileModal();
+      document.getElementById('profile-new-name-input').value = '';
+      showToast("Pedido enviado para aprovação do Administrador.");
+    }
+
+    // ADMIN: APROVAR OU REJEITAR PEDIDO DE NOME
+    function approveNameChange(userId) {
+      const u = state.users.find(x => x.id === userId);
+      if (u && u.pendingName) {
+        const approvedName = u.pendingName;
+        u.name = approvedName;
+        u.pendingName = null;
+
+        if (state.currentUser && state.currentUser.id === userId) {
+          state.currentUser.name = approvedName;
+          state.currentUser.pendingName = null;
+        }
+
+        saveState();
+        renderStudentsList();
+        applyUserSession();
+        showToast(`Nome de ${u.username} aprovado como "${approvedName}"!`);
+      }
+    }
+
+    function rejectNameChange(userId) {
+      const u = state.users.find(x => x.id === userId);
+      if (u) {
+        u.pendingName = null;
+        if (state.currentUser && state.currentUser.id === userId) {
+          state.currentUser.pendingName = null;
+        }
+        saveState();
+        renderStudentsList();
+        showToast("Pedido de alteração de nome rejeitado.");
+      }
+    }
+
+    // GESTÃO DE AUTENTICAÇÃO
+    function switchAuthTab(tab) {
+      const loginTab = document.getElementById('auth-tab-login');
+      const regTab = document.getElementById('auth-tab-register');
+      const loginForm = document.getElementById('form-login-container');
+      const regForm = document.getElementById('form-register-container');
+      
+      document.getElementById('login-error-msg').classList.add('hidden');
+      document.getElementById('register-error-msg').classList.add('hidden');
+
+      if (tab === 'login') {
+        loginTab.className = "py-3 text-xs sm:text-sm font-bold border-b-2 border-indigo-600 text-indigo-600 flex items-center justify-center gap-2 transition";
+        regTab.className = "py-3 text-xs sm:text-sm font-medium border-b-2 border-transparent text-slate-500 hover:text-indigo-600 flex items-center justify-center gap-2 transition";
+        loginForm.classList.remove('hidden');
+        regForm.classList.add('hidden');
+      } else {
+        regTab.className = "py-3 text-xs sm:text-sm font-bold border-b-2 border-indigo-600 text-indigo-600 flex items-center justify-center gap-2 transition";
+        loginTab.className = "py-3 text-xs sm:text-sm font-medium border-b-2 border-transparent text-slate-500 hover:text-indigo-600 flex items-center justify-center gap-2 transition";
+        regForm.classList.remove('hidden');
+        loginForm.classList.add('hidden');
+      }
+    }
+
+    function quickLogin(username, password) {
+      document.getElementById('login-username').value = username;
+      document.getElementById('login-password').value = password;
+      handleLogin(new Event('submit'));
+    }
+
+    function handleLogin(e) {
+      if (e && e.preventDefault) e.preventDefault();
+      const userVal = document.getElementById('login-username').value.trim();
+      const passVal = document.getElementById('login-password').value.trim();
+
+      const user = state.users.find(u => u.username.toLowerCase() === userVal.toLowerCase() && u.password === passVal);
+
+      if (!user) {
+        document.getElementById('login-error-msg').classList.remove('hidden');
+        return;
+      }
+
+      state.currentUser = user;
+      saveState();
+      applyUserSession();
+
+      if (user.role === 'student' && (!state.enrolledSubjects[user.id] || state.enrolledSubjects[user.id].length === 0)) {
+        openEnrolledModal(true);
+      } else {
+        showToast(`Bem-vindo, ${user.name || user.username}!`);
+      }
+    }
+
+    function handleRegister(e) {
+      e.preventDefault();
+      const username = document.getElementById('reg-username').value.trim();
+      const password = document.getElementById('reg-password').value.trim();
+
+      if (state.users.some(u => u.username.toLowerCase() === username.toLowerCase())) {
+        document.getElementById('register-error-msg').classList.remove('hidden');
+        return;
+      }
+
+      const newUser = {
+        id: 'usr_' + Date.now(),
+        username: username,
+        password: password,
+        name: username,
+        role: 'student',
+        avatar: null,
+        pendingName: null
+      };
+
+      state.users.push(newUser);
+      state.currentUser = newUser;
+      saveState();
+      applyUserSession();
+
+      openEnrolledModal(true);
+      showToast(`Conta criada! Seleciona as tuas cadeiras.`);
+    }
+
+    function handleLogout() {
+      state.currentUser = null;
+      saveState();
+      closeProfileModal();
+      const menu = document.getElementById('profile-dropdown-menu');
+      if (menu) menu.classList.add('hidden');
+      document.getElementById('auth-screen').classList.remove('hidden');
+      showToast("Sessão terminada.", "success");
+    }
+
+    function applyUserSession() {
+      const authScreen = document.getElementById('auth-screen');
+      if (!state.currentUser) {
+        authScreen.classList.remove('hidden');
+        return;
+      }
+
+      authScreen.classList.add('hidden');
+
+      // Atualizar badge do perfil no canto superior direito
+      const displayName = state.currentUser.name || state.currentUser.username;
+      document.getElementById('profile-name').textContent = displayName;
+      document.getElementById('dropdown-profile-name').textContent = displayName;
+      document.getElementById('dropdown-profile-username').textContent = '@' + state.currentUser.username;
+
+      // Avatar no Header e no Dropdown
+      const avatarLetter = document.getElementById('profile-avatar-letter');
+      const avatarImg = document.getElementById('profile-avatar-img');
+      const dropAvatarLetter = document.getElementById('dropdown-avatar-letter');
+      const dropAvatarImg = document.getElementById('dropdown-avatar-img');
+
+      if (state.currentUser.avatar) {
+        avatarImg.src = state.currentUser.avatar;
+        avatarImg.classList.remove('hidden');
+        avatarLetter.classList.add('hidden');
+
+        dropAvatarImg.src = state.currentUser.avatar;
+        dropAvatarImg.classList.remove('hidden');
+        dropAvatarLetter.classList.add('hidden');
+      } else {
+        const initial = displayName.charAt(0).toUpperCase();
+        avatarLetter.textContent = initial;
+        avatarLetter.classList.remove('hidden');
+        avatarImg.classList.add('hidden');
+
+        dropAvatarLetter.textContent = initial;
+        dropAvatarLetter.classList.remove('hidden');
+        dropAvatarImg.classList.add('hidden');
+      }
+
+      const roleBadge = document.getElementById('profile-role');
+      const dropRoleBadge = document.getElementById('dropdown-profile-role');
+      const btnStudentsTab = document.getElementById('tab-btn-students');
+      const mobBtnStudents = document.getElementById('mob-btn-students');
+      const adminGradesPanel = document.getElementById('admin-grades-panel');
+      const adminFilesPanel = document.getElementById('admin-files-panel');
+      const adminAbsencesPanel = document.getElementById('admin-absences-panel');
+      const studentActionsBar = document.getElementById('student-actions-bar');
+      const dropEnrolledBtn = document.getElementById('dropdown-enrolled-btn');
+
+      if (state.currentUser.role === 'admin') {
+        roleBadge.textContent = "Admin";
+        roleBadge.className = "text-[9px] font-bold uppercase px-1.5 py-0.2 rounded bg-amber-100 text-amber-800 border border-amber-300";
+        dropRoleBadge.textContent = "Administrador";
+        dropRoleBadge.className = "text-[9px] font-bold uppercase px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 border border-amber-300 mt-1 inline-block";
+        adminGradesPanel.classList.remove('hidden');
+        adminFilesPanel.classList.remove('hidden');
+        if (adminAbsencesPanel) adminAbsencesPanel.classList.remove('hidden');
+        btnStudentsTab.classList.remove('hidden');
+        mobBtnStudents.classList.remove('hidden');
+        studentActionsBar.classList.add('hidden');
+        if (dropEnrolledBtn) dropEnrolledBtn.classList.add('hidden');
+      } else {
+        roleBadge.textContent = "Estudante";
+        roleBadge.className = "text-[9px] font-bold uppercase px-1.5 py-0.2 rounded bg-indigo-100 text-indigo-800 border border-indigo-200";
+        dropRoleBadge.textContent = "Estudante";
+        dropRoleBadge.className = "text-[9px] font-bold uppercase px-1.5 py-0.5 rounded bg-indigo-100 text-indigo-800 border border-indigo-200 mt-1 inline-block";
+        adminGradesPanel.classList.add('hidden');
+        adminFilesPanel.classList.add('hidden');
+        if (adminAbsencesPanel) adminAbsencesPanel.classList.add('hidden');
+        btnStudentsTab.classList.add('hidden');
+        mobBtnStudents.classList.add('hidden');
+        studentActionsBar.classList.remove('hidden');
+        if (dropEnrolledBtn) dropEnrolledBtn.classList.remove('hidden');
+      }
+
+      updateSubjectSelects();
+      renderGrades();
+      renderArchiveTabs();
+      renderFiles();
+      renderStudentsList();
+    }
+
+    // MODAL DE CADEIRAS FREQUENTADAS
+    function openEnrolledModal(mandatory = false) {
+      const modal = document.getElementById('enrolled-modal');
+      const list = document.getElementById('enrolled-modal-list');
+      const closeBtn = document.getElementById('btn-close-enrolled-modal');
+      
+      if (mandatory) {
+        closeBtn.classList.add('hidden');
+      } else {
+        closeBtn.classList.remove('hidden');
+      }
+
+      const userId = state.currentUser ? state.currentUser.id : null;
+      const enrolled = (userId && state.enrolledSubjects[userId]) ? state.enrolledSubjects[userId] : [];
+
+      if (state.subjects.length === 0) {
+        list.innerHTML = `
+          <div class="text-center p-6 text-slate-400">
+            <i class="fa-solid fa-info-circle text-2xl mb-2"></i>
+            <p class="text-sm">Ainda não existem cadeiras criadas pelo Administrador.</p>
+          </div>
+        `;
+      } else {
+        list.innerHTML = state.subjects.map(sub => {
+          const isChecked = enrolled.includes(sub.id);
+          return `
+            <label class="flex items-center justify-between p-3.5 bg-slate-50 hover:bg-indigo-50/50 rounded-xl border border-slate-200 hover:border-indigo-300 cursor-pointer transition">
+              <div class="flex items-center gap-3">
+                <input type="checkbox" value="${sub.id}" class="subject-enrolled-checkbox w-4 h-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500" ${isChecked ? 'checked' : ''}>
+                <span class="text-sm font-bold text-slate-800">${sub.name}</span>
+              </div>
+              <span class="text-xs text-slate-400 font-medium">${sub.tests.length} avaliação(ões)</span>
+            </label>
+          `;
+        }).join('');
+      }
+
+      modal.classList.remove('hidden');
+    }
+
+    function closeEnrolledModal() {
+      document.getElementById('enrolled-modal').classList.add('hidden');
+    }
+
+    function toggleAllSubjectsModal(select) {
+      const checkboxes = document.querySelectorAll('.subject-enrolled-checkbox');
+      checkboxes.forEach(cb => cb.checked = select);
+    }
+
+    function saveEnrolledSubjectsModal() {
+      if (!state.currentUser) return;
+      const userId = state.currentUser.id;
+      const checkboxes = document.querySelectorAll('.subject-enrolled-checkbox:checked');
+      const selectedIds = Array.from(checkboxes).map(cb => cb.value);
+
+      state.enrolledSubjects[userId] = selectedIds;
+      saveState();
+      closeEnrolledModal();
+      renderGrades();
+      showToast("Cadeiras atualizadas com sucesso!");
+    }
+
+    // NAVEGAÇÃO DE ABAS
+    function switchTab(tab) {
+      const tabs = ['grades', 'files', 'absences', 'students'];
+      tabs.forEach(t => {
+        const el = document.getElementById('tab-' + t);
+        if (el) el.classList.add('hidden');
+        
+        const btnDesktop = document.getElementById('tab-btn-' + t);
+        if (btnDesktop) {
+          btnDesktop.className = "py-3 px-5 border-b-2 border-transparent font-medium text-slate-500 hover:text-indigo-600 flex items-center gap-2 text-sm transition";
+        }
+        
+        const btnMobile = document.getElementById('mob-btn-' + t);
+        if (btnMobile) {
+          btnMobile.className = "flex flex-col items-center gap-1 text-slate-400 px-2.5 py-1 text-[11px] font-medium";
+        }
+      });
+
+      const activeSection = document.getElementById('tab-' + tab);
+      if (activeSection) activeSection.classList.remove('hidden');
+
+      const activeBtn = document.getElementById('tab-btn-' + tab);
+      if (activeBtn) {
+        activeBtn.className = "py-3 px-5 border-b-2 border-indigo-600 font-bold text-indigo-600 flex items-center gap-2 text-sm transition";
+      }
+
+      const activeMob = document.getElementById('mob-btn-' + tab);
+      if (activeMob) {
+        activeMob.className = "flex flex-col items-center gap-1 text-indigo-600 px-2.5 py-1 text-[11px] font-bold";
+      }
+
+      if (tab === 'students') renderStudentsList();
+      if (tab === 'files') renderArchiveTabs();
+      if (tab === 'absences') renderAbsences();
+    }
+
+
+    // ==============================================
+    // GESTÃO DE DOCENTES E MAIS INFORMAÇÕES (MODAL)
+    // ==============================================
+    let currentEditingProfId = null;
+
+    function openSubjectInfoModal(subjectId) {
+      const subject = state.subjects.find(s => s.id === subjectId);
+      if (!subject) return;
+
+      currentEditingProfId = null;
+      document.getElementById('subject-info-title').textContent = subject.name;
+      renderSubjectInfoBody(subjectId);
+      document.getElementById('subject-info-modal').classList.remove('hidden');
+    }
+
+    function closeSubjectInfoModal() {
+      document.getElementById('subject-info-modal').classList.add('hidden');
+      currentEditingProfId = null;
+    }
+
+    function renderSubjectInfoBody(subjectId) {
+      const subject = state.subjects.find(s => s.id === subjectId);
+      if (!subject) return;
+
+      const isAdmin = state.currentUser && state.currentUser.role === 'admin';
+      const professors = subject.professors || [];
+      const body = document.getElementById('subject-info-body');
+
+      let profListHtml = '';
+      if (professors.length === 0) {
+        profListHtml = `
+          <div class="p-6 text-center text-slate-400 bg-slate-50 rounded-2xl border border-slate-200">
+            <i class="fa-solid fa-chalkboard-user text-3xl mb-2 text-slate-300"></i>
+            <p class="font-bold text-slate-600 text-sm">Ainda não existem docentes registados nesta cadeira.</p>
+            <p class="text-xs text-slate-400 mt-1">${isAdmin ? 'Podes adicionar o corpo docente utilizando o formulário abaixo.' : 'O administrador irá adicionar os contactos em breve.'}</p>
+          </div>
+        `;
+      } else {
+        profListHtml = `
+          <div class="space-y-3">
+            ${professors.map(prof => `
+              <div class="p-4 bg-slate-50 hover:bg-slate-100/70 border border-slate-200 rounded-2xl flex flex-col sm:flex-row justify-between sm:items-center gap-3 transition shadow-sm">
+                <div class="flex items-center gap-3 min-w-0">
+                  <div class="w-10 h-10 rounded-full bg-indigo-100 text-indigo-700 font-bold flex items-center justify-center text-sm shrink-0 border border-indigo-200 shadow-inner">
+                    <i class="fa-solid fa-user-tie"></i>
+                  </div>
+                  <div class="min-w-0">
+                    <div class="flex items-center gap-2 flex-wrap">
+                      <h4 class="font-bold text-slate-800 text-sm truncate">${prof.name}</h4>
+                      <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-md bg-indigo-100/80 text-indigo-700 border border-indigo-200/50">
+                        ${prof.role || 'Docente'}
+                      </span>
+                    </div>
+                    <div class="flex items-center gap-1.5 text-xs text-slate-600 mt-1">
+                      <i class="fa-regular fa-envelope text-slate-400"></i>
+                      <a href="mailto:${prof.email}" class="text-indigo-600 hover:text-indigo-800 hover:underline font-mono truncate" title="Clique para enviar email">
+                        ${prof.email}
+                      </a>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="flex items-center gap-2 self-end sm:self-center shrink-0">
+                  <button type="button" onclick="copyToClipboard('${prof.email}', 'Email')" class="px-2.5 py-1.5 bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition shadow-sm cursor-pointer" title="Copiar email">
+                    <i class="fa-regular fa-copy text-slate-500"></i> Copiar
+                  </button>
+                  <a href="mailto:${prof.email}" class="px-2.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 transition shadow-sm" title="Enviar email institucional">
+                    <i class="fa-solid fa-paper-plane"></i> Contactar
+                  </a>
+                  ${isAdmin ? `
+                    <button type="button" onclick="startEditProfessor('${subject.id}', '${prof.id}')" class="p-1.5 text-indigo-600 hover:bg-indigo-50 rounded-lg transition" title="Editar docente">
+                      <i class="fa-regular fa-pen-to-square"></i>
+                    </button>
+                    <button type="button" onclick="deleteProfessorFromSubject('${subject.id}', '${prof.id}')" class="p-1.5 text-rose-600 hover:bg-rose-50 rounded-lg transition" title="Remover docente">
+                      <i class="fa-regular fa-trash-can"></i>
+                    </button>
+                  ` : ''}
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        `;
+      }
+
+      // Painel de Gestão do Administrador no Modal
+      let adminSectionHtml = '';
+      if (isAdmin) {
+        const editingProf = currentEditingProfId ? professors.find(p => p.id === currentEditingProfId) : null;
+        if (editingProf) {
+          adminSectionHtml = `
+            <div class="mt-5 p-4 sm:p-5 bg-amber-50/70 border border-amber-200 rounded-2xl">
+              <div class="flex items-center justify-between mb-3">
+                <h4 class="font-bold text-xs uppercase tracking-wider text-amber-900 flex items-center gap-2">
+                  <i class="fa-solid fa-user-pen text-amber-600"></i> Editar Docente
+                </h4>
+                <button type="button" onclick="cancelEditProfessor('${subject.id}')" class="text-xs text-amber-700 hover:underline">
+                  Cancelar
+                </button>
+              </div>
+              <form onsubmit="handleSaveEditedProfessor(event, '${subject.id}', '${editingProf.id}')" class="space-y-3">
+                <div>
+                  <label class="block text-[11px] font-bold text-slate-600 mb-1">Nome Completo do Docente</label>
+                  <input type="text" id="modal-edit-prof-name" value="${editingProf.name}" required class="w-full px-3 py-2 border rounded-xl text-xs bg-white outline-none focus:border-indigo-600 transition">
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  <div>
+                    <label class="block text-[11px] font-bold text-slate-600 mb-1">Email Institucional</label>
+                    <input type="email" id="modal-edit-prof-email" value="${editingProf.email}" required class="w-full px-3 py-2 border rounded-xl text-xs bg-white outline-none focus:border-indigo-600 transition">
+                  </div>
+                  <div>
+                    <label class="block text-[11px] font-bold text-slate-600 mb-1">Cargo / Função (Ex: Regente)</label>
+                    <input type="text" id="modal-edit-prof-role" value="${editingProf.role || ''}" placeholder="Ex: Regente" class="w-full px-3 py-2 border rounded-xl text-xs bg-white outline-none focus:border-indigo-600 transition">
+                  </div>
+                </div>
+                <div class="flex justify-end gap-2 pt-1">
+                  <button type="button" onclick="cancelEditProfessor('${subject.id}')" class="px-3.5 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-bold rounded-xl transition">
+                    Cancelar
+                  </button>
+                  <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow transition">
+                    Guardar Alterações
+                  </button>
+                </div>
+              </form>
+            </div>
+          `;
+        } else {
+          adminSectionHtml = `
+            <div class="mt-5 p-4 sm:p-5 bg-slate-50 border border-slate-200 rounded-2xl">
+              <h4 class="font-bold text-xs uppercase tracking-wider text-slate-600 mb-3 flex items-center gap-2">
+                <i class="fa-solid fa-user-plus text-indigo-600"></i> Adicionar Docente a esta Cadeira (Admin)
+              </h4>
+              <form onsubmit="handleAddProfessorModal(event, '${subject.id}')" class="space-y-3">
+                <div>
+                  <label class="block text-[11px] font-bold text-slate-600 mb-1">Nome Completo do Docente</label>
+                  <input type="text" id="modal-new-prof-name" placeholder="Ex: Prof. Doutor Carlos Silva" required class="w-full px-3 py-2 border rounded-xl text-xs bg-white outline-none focus:border-indigo-600 transition">
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  <div>
+                    <label class="block text-[11px] font-bold text-slate-600 mb-1">Email Institucional</label>
+                    <input type="email" id="modal-new-prof-email" placeholder="Ex: csilva@fe.up.pt" required class="w-full px-3 py-2 border rounded-xl text-xs bg-white outline-none focus:border-indigo-600 transition">
+                  </div>
+                  <div>
+                    <label class="block text-[11px] font-bold text-slate-600 mb-1">Cargo / Função (Opcional)</label>
+                    <input type="text" id="modal-new-prof-role" placeholder="Ex: Regente ou Práticas" class="w-full px-3 py-2 border rounded-xl text-xs bg-white outline-none focus:border-indigo-600 transition">
+                  </div>
+                </div>
+                <div class="flex justify-end pt-1">
+                  <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-plus"></i> Adicionar Docente
+                  </button>
+                </div>
+              </form>
+            </div>
+          `;
+        }
+      }
+
+      body.innerHTML = `
+        <div>
+          <div class="flex items-center justify-between mb-3 pb-2 border-b border-slate-100">
+            <h4 class="font-bold text-xs uppercase tracking-wider text-slate-600 flex items-center gap-2">
+              <i class="fa-solid fa-users-gear text-indigo-600"></i> Corpo Docente (${professors.length})
+            </h4>
+            <span class="text-xs text-slate-400">Contactos Oficiais</span>
+          </div>
+          ${profListHtml}
+        </div>
+        ${adminSectionHtml}
+      `;
+    }
+
+    function startEditProfessor(subjectId, profId) {
+      currentEditingProfId = profId;
+      renderSubjectInfoBody(subjectId);
+    }
+
+    function cancelEditProfessor(subjectId) {
+      currentEditingProfId = null;
+      renderSubjectInfoBody(subjectId);
+    }
+
+    function handleAddProfessorModal(event, subjectId) {
+      event.preventDefault();
+      const subject = state.subjects.find(s => s.id === subjectId);
+      if (!subject) return;
+
+      const name = document.getElementById('modal-new-prof-name').value.trim();
+      const email = document.getElementById('modal-new-prof-email').value.trim();
+      const role = document.getElementById('modal-new-prof-role').value.trim() || 'Docente';
+
+      if (!Array.isArray(subject.professors)) subject.professors = [];
+      subject.professors.push({
+        id: 'prof_' + Date.now(),
+        name: name,
+        email: email,
+        role: role
+      });
+
+      saveState();
+      renderSubjectInfoBody(subjectId);
+      renderGrades();
+      showToast(`Docente ${name} associado a ${subject.name}!`);
+    }
+
+    function handleSaveEditedProfessor(event, subjectId, profId) {
+      event.preventDefault();
+      const subject = state.subjects.find(s => s.id === subjectId);
+      if (!subject || !subject.professors) return;
+
+      const prof = subject.professors.find(p => p.id === profId);
+      if (!prof) return;
+
+      prof.name = document.getElementById('modal-edit-prof-name').value.trim();
+      prof.email = document.getElementById('modal-edit-prof-email').value.trim();
+      prof.role = document.getElementById('modal-edit-prof-role').value.trim() || 'Docente';
+
+      currentEditingProfId = null;
+      saveState();
+      renderSubjectInfoBody(subjectId);
+      renderGrades();
+      showToast("Dados do docente atualizados!");
+    }
+
+    function deleteProfessorFromSubject(subjectId, profId) {
+      const subject = state.subjects.find(s => s.id === subjectId);
+      if (!subject || !subject.professors) return;
+
+      if (confirm("Tens a certeza que desejas remover este docente da cadeira?")) {
+        subject.professors = subject.professors.filter(p => p.id !== profId);
+        saveState();
+        renderSubjectInfoBody(subjectId);
+        renderGrades();
+        showToast("Docente removido com sucesso.");
+      }
+    }
+
+    function addProfessorFromAdmin(e) {
+      e.preventDefault();
+      const subjectId = document.getElementById('docent-subject-select').value;
+      const name = document.getElementById('docent-name').value.trim();
+      const email = document.getElementById('docent-email').value.trim();
+      const role = document.getElementById('docent-role').value.trim() || 'Docente';
+
+      const subject = state.subjects.find(s => s.id === subjectId);
+      if (!subject) {
+        alert("Por favor seleciona uma cadeira.");
+        return;
+      }
+
+      if (!Array.isArray(subject.professors)) subject.professors = [];
+      subject.professors.push({
+        id: 'prof_' + Date.now(),
+        name: name,
+        email: email,
+        role: role
+      });
+
+      saveState();
+      renderGrades();
+      document.getElementById('docent-name').value = '';
+      document.getElementById('docent-email').value = '';
+      document.getElementById('docent-role').value = '';
+      showToast(`Docente ${name} registado em ${subject.name}!`);
+    }
+
+    function copyToClipboard(text, label) {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(() => {
+          showToast(`${label || 'Texto'} copiado para a área de transferência!`);
+        }).catch(() => {
+          fallbackCopyText(text, label);
+        });
+      } else {
+        fallbackCopyText(text, label);
+      }
+    }
+
+    function fallbackCopyText(text, label) {
+      const textArea = document.createElement("textarea");
+      textArea.value = text;
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      try {
+        document.execCommand('copy');
+        showToast(`${label || 'Texto'} copiado!`);
+      } catch (err) {
+        prompt("Copia manualmente:", text);
+      }
+      document.body.removeChild(textArea);
+    }
+
+
+    // ==============================================
+    // GESTÃO DE FALTAS E CONTROLO DE LIMITES (T / P)
+    // ==============================================
+    function renderAbsences() {
+      const dateInput = document.getElementById('absence-input-date');
+      if (dateInput && !dateInput.value) {
+        dateInput.value = new Date().toISOString().split('T')[0];
+      }
+
+      updateSubjectSelects();
+      renderAbsenceCards();
+      renderAbsenceHistory();
+
+      const adminSelect = document.getElementById('absence-admin-subject-select');
+      if (adminSelect && adminSelect.value) {
+        onAdminSelectAbsenceSubject();
+      } else if (adminSelect && state.subjects.length > 0) {
+        adminSelect.value = state.subjects[0].id;
+        onAdminSelectAbsenceSubject();
+      }
+    }
+
+    function onAdminSelectAbsenceSubject() {
+      const select = document.getElementById('absence-admin-subject-select');
+      if (!select) return;
+      const subject = state.subjects.find(s => s.id === select.value);
+      if (!subject) return;
+
+      document.getElementById('absence-admin-max-theory').value = subject.maxAbsencesTheory !== undefined ? subject.maxAbsencesTheory : 4;
+      document.getElementById('absence-admin-max-practice').value = subject.maxAbsencesPractice !== undefined ? subject.maxAbsencesPractice : 3;
+    }
+
+    function saveSubjectAbsenceLimits(e) {
+      e.preventDefault();
+      const subjectId = document.getElementById('absence-admin-subject-select').value;
+      const maxTheory = parseInt(document.getElementById('absence-admin-max-theory').value);
+      const maxPractice = parseInt(document.getElementById('absence-admin-max-practice').value);
+
+      const subject = state.subjects.find(s => s.id === subjectId);
+      if (!subject) return;
+
+      subject.maxAbsencesTheory = Math.max(0, isNaN(maxTheory) ? 4 : maxTheory);
+      subject.maxAbsencesPractice = Math.max(0, isNaN(maxPractice) ? 3 : maxPractice);
+
+      saveState();
+      renderAbsenceCards();
+      showToast(`Limites de faltas guardados para ${subject.name}!`);
+    }
+
+    // Variável para guardar o id da falta a ser confirmada para remoção
+    let pendingDeleteAbsenceId = null;
+
+    function handleRegisterAbsence(e) {
+      e.preventDefault();
+      if (!state.currentUser) return;
+      const userId = state.currentUser.id;
+      const subjectId = document.getElementById('absence-input-subject').value;
+      const type = document.getElementById('absence-input-type').value; // 'theory' ou 'practice'
+      const date = document.getElementById('absence-input-date').value;
+
+      if (!subjectId) {
+        alert("Por favor seleciona uma cadeira.");
+        return;
+      }
+
+      if (!date) {
+        alert("Por favor indica a data da falta.");
+        return;
+      }
+
+      if (!state.absences[userId]) {
+        state.absences[userId] = [];
+      }
+
+      const subject = state.subjects.find(s => s.id === subjectId);
+      const subName = subject ? subject.name : 'esta cadeira';
+      const typeLabel = type === 'theory' ? 'Teórica' : 'Prática';
+
+      // REGRA: Apenas se pode colocar uma falta prática e uma teórica em cada dia por cadeira
+      const alreadyRegistered = state.absences[userId].find(a => 
+        a.subjectId === subjectId && 
+        a.type === type && 
+        a.date === date
+      );
+
+      if (alreadyRegistered) {
+        showToast(`Já registaste uma falta ${typeLabel} a ${subName} no dia ${date}. Apenas é permitida 1 falta teórica e 1 prática por dia!`, 'error');
+        return;
+      }
+
+      const newAbsence = {
+        id: 'abs_' + Date.now(),
+        subjectId: subjectId,
+        type: type,
+        date: date,
+        createdAt: Date.now()
+      };
+
+      state.absences[userId].push(newAbsence);
+      saveState();
+      renderAbsences();
+
+      showToast(`Falta registada à aula ${typeLabel} de ${subName}!`);
+    }
+
+    function quickAddAbsence(subjectId, type) {
+      if (!state.currentUser) return;
+      const userId = state.currentUser.id;
+      const today = new Date().toISOString().split('T')[0];
+
+      if (!state.absences[userId]) {
+        state.absences[userId] = [];
+      }
+
+      const subject = state.subjects.find(s => s.id === subjectId);
+      const subName = subject ? subject.name : 'esta cadeira';
+      const typeLabel = type === 'theory' ? 'Teórica' : 'Prática';
+
+      // REGRA: Apenas se pode colocar uma falta prática e uma teórica em cada dia por cadeira
+      const alreadyRegistered = state.absences[userId].find(a => 
+        a.subjectId === subjectId && 
+        a.type === type && 
+        a.date === today
+      );
+
+      if (alreadyRegistered) {
+        showToast(`Já registaste hoje uma falta ${typeLabel} a ${subName}. Apenas é permitida 1 falta teórica e 1 prática por dia!`, 'error');
+        return;
+      }
+
+      const newAbsence = {
+        id: 'abs_' + Date.now(),
+        subjectId: subjectId,
+        type: type,
+        date: today,
+        createdAt: Date.now()
+      };
+
+      state.absences[userId].push(newAbsence);
+      saveState();
+      renderAbsences();
+
+      showToast(`Falta registada: ${typeLabel} (${subName})`);
+    }
+
+    // PEDIDO DE REMOÇÃO DE FALTA COM MODAL DE CONFIRMAÇÃO
+    function requestDeleteAbsence(absenceId) {
+      if (!state.currentUser) return;
+      const userId = state.currentUser.id;
+      const userAbsences = state.absences[userId] || [];
+      const abs = userAbsences.find(a => a.id === absenceId);
+      if (!abs) return;
+
+      pendingDeleteAbsenceId = absenceId;
+
+      const subject = state.subjects.find(s => s.id === abs.subjectId);
+      const subName = subject ? subject.name : 'Disciplina';
+      const isTheory = abs.type === 'theory';
+
+      const subjectEl = document.getElementById('modal-delete-absence-subject');
+      const typeEl = document.getElementById('modal-delete-absence-type');
+      const dateEl = document.getElementById('modal-delete-absence-date');
+      const modalEl = document.getElementById('delete-absence-modal');
+
+      if (subjectEl) subjectEl.textContent = subName;
+      if (typeEl) {
+        typeEl.textContent = isTheory ? 'Aula Teórica' : 'Aula Prática';
+        typeEl.className = isTheory 
+          ? "font-bold px-2 py-0.5 rounded-md text-[10px] uppercase bg-indigo-100 text-indigo-700 border border-indigo-200"
+          : "font-bold px-2 py-0.5 rounded-md text-[10px] uppercase bg-emerald-100 text-emerald-700 border border-emerald-200";
+      }
+      if (dateEl) dateEl.textContent = abs.date;
+
+      if (modalEl) {
+        modalEl.classList.remove('hidden');
+      } else {
+        // Fallback caso o modal não esteja no DOM
+        if (confirm(`Queres mesmo remover a falta ${isTheory ? 'Teórica' : 'Prática'} de ${subName} do dia ${abs.date}?`)) {
+          confirmDeleteAbsence();
+        }
+      }
+    }
+
+    function closeDeleteAbsenceModal() {
+      const modalEl = document.getElementById('delete-absence-modal');
+      if (modalEl) modalEl.classList.add('hidden');
+      pendingDeleteAbsenceId = null;
+    }
+
+    function confirmDeleteAbsence() {
+      if (!pendingDeleteAbsenceId || !state.currentUser) return;
+      const userId = state.currentUser.id;
+      if (!state.absences[userId]) return;
+
+      const absId = pendingDeleteAbsenceId;
+      const abs = state.absences[userId].find(a => a.id === absId);
+      const subject = abs ? state.subjects.find(s => s.id === abs.subjectId) : null;
+      const subName = subject ? subject.name : 'Cadeira';
+      const typeLabel = (abs && abs.type === 'theory') ? 'Teórica' : 'Prática';
+
+      state.absences[userId] = state.absences[userId].filter(a => a.id !== absId);
+      saveState();
+      closeDeleteAbsenceModal();
+      renderAbsences();
+      showToast(`Falta ${typeLabel} de ${subName} removida.`);
+    }
+
+    // Compatibilidade com chamadas diretas
+    function deleteAbsence(absenceId) {
+      requestDeleteAbsence(absenceId);
+    }
+
+    function getAbsenceStatusBadge(remaining, maxAllowed, typeLabel) {
+      if (maxAllowed <= 0) {
+        return {
+          badgeClass: "bg-slate-50 text-slate-700 border-slate-200",
+          progressClass: "bg-slate-400",
+          icon: "fa-circle-info text-slate-400",
+          text: `Sem limite de faltas ${typeLabel} configurado.`
+        };
+      }
+
+      if (remaining > 1) {
+        return {
+          badgeClass: "bg-emerald-50/90 text-emerald-800 border-emerald-200",
+          progressClass: "bg-emerald-500",
+          icon: "fa-circle-check text-emerald-600",
+          text: `Podes faltar a mais <strong>${remaining}</strong> aula(s) ${typeLabel}.`
+        };
+      } else if (remaining === 1) {
+        return {
+          badgeClass: "bg-amber-50/90 text-amber-900 border-amber-300",
+          progressClass: "bg-amber-500",
+          icon: "fa-triangle-exclamation text-amber-600",
+          text: `Atenção: Só podes faltar a mais <strong>1</strong> aula ${typeLabel}!`
+        };
+      } else if (remaining === 0) {
+        return {
+          badgeClass: "bg-rose-50 text-rose-800 border-rose-300",
+          progressClass: "bg-rose-600",
+          icon: "fa-ban text-rose-600",
+          text: `<strong>Limite atingido!</strong> Não podes faltar a mais nenhuma aula ${typeLabel}.`
+        };
+      } else {
+        const exceeded = Math.abs(remaining);
+        return {
+          badgeClass: "bg-rose-100 text-rose-900 border-rose-400 animate-pulse",
+          progressClass: "bg-rose-700",
+          icon: "fa-circle-exclamation text-rose-700",
+          text: `<strong>Limite Ultrapassado!</strong> Excedeste em <strong>${exceeded}</strong> falta(s) o limite permitido.`
+        };
+      }
+    }
+
+    function renderAbsenceCards() {
+      const container = document.getElementById('absences-cards-container');
+      if (!container) return;
+      container.innerHTML = '';
+
+      const userId = state.currentUser ? state.currentUser.id : null;
+      const isAdmin = state.currentUser && state.currentUser.role === 'admin';
+      const userAbsences = (userId && state.absences[userId]) ? state.absences[userId] : [];
+
+      let displaySubjects = state.subjects;
+      if (!isAdmin && userId) {
+        const enrolled = state.enrolledSubjects[userId] || [];
+        if (enrolled.length > 0) {
+          displaySubjects = state.subjects.filter(s => enrolled.includes(s.id));
+        }
+      }
+
+      if (displaySubjects.length === 0) {
+        container.innerHTML = `
+          <div class="p-8 text-center text-slate-400 bg-white rounded-2xl border border-slate-200">
+            <i class="fa-solid fa-graduation-cap text-3xl mb-2 text-slate-300"></i>
+            <p class="font-bold text-slate-600">Nenhuma cadeira selecionada para monitorizar faltas.</p>
+            <p class="text-xs mt-1">Vai a Cadeiras para selecionares as tuas disciplinas.</p>
+          </div>
+        `;
+        return;
+      }
+
+      displaySubjects.forEach(subject => {
+        const maxTheory = subject.maxAbsencesTheory !== undefined ? subject.maxAbsencesTheory : 4;
+        const maxPractice = subject.maxAbsencesPractice !== undefined ? subject.maxAbsencesPractice : 3;
+
+        const givenTheory = userAbsences.filter(a => a.subjectId === subject.id && a.type === 'theory').length;
+        const givenPractice = userAbsences.filter(a => a.subjectId === subject.id && a.type === 'practice').length;
+
+        const remainingTheory = maxTheory - givenTheory;
+        const remainingPractice = maxPractice - givenPractice;
+
+        const theoryStatus = getAbsenceStatusBadge(remainingTheory, maxTheory, 'teórica');
+        const practiceStatus = getAbsenceStatusBadge(remainingPractice, maxPractice, 'prática');
+
+        const theoryPercent = maxTheory > 0 ? Math.min(100, Math.round((givenTheory / maxTheory) * 100)) : 0;
+        const practicePercent = maxPractice > 0 ? Math.min(100, Math.round((givenPractice / maxPractice) * 100)) : 0;
+
+        const card = document.createElement('div');
+        card.className = "bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-slate-200 transition hover:shadow-md";
+        card.innerHTML = `
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 mb-4 border-b border-slate-100">
+            <div class="min-w-0">
+              <h4 class="font-bold text-slate-800 text-sm sm:text-base truncate flex items-center gap-2">
+                <i class="fa-solid fa-book text-indigo-500 text-xs"></i> ${subject.name}
+              </h4>
+              <p class="text-[11px] text-slate-400 mt-0.5">
+                Limite autorizado: <strong class="text-slate-600">${maxTheory}</strong> Teóricas · <strong class="text-slate-600">${maxPractice}</strong> Práticas
+              </p>
+            </div>
+            <span class="text-xs font-bold px-3 py-1 rounded-xl bg-slate-100 text-slate-700 shrink-0 self-start sm:self-auto">
+              Total Faltas: <strong class="text-indigo-600">${givenTheory + givenPractice}</strong>
+            </span>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            
+            <!-- BLOCO AULAS TEÓRICAS -->
+            <div class="p-4 rounded-2xl border ${theoryStatus.badgeClass} flex flex-col justify-between space-y-3.5 shadow-sm">
+              <div>
+                <div class="flex items-center justify-between mb-2">
+                  <span class="font-bold text-xs uppercase tracking-wider flex items-center gap-1.5">
+                    <i class="fa-solid fa-book-open text-xs"></i> Aulas Teóricas
+                  </span>
+                  <span class="font-extrabold text-xs px-2 py-0.5 rounded-lg bg-white/70 border border-slate-200">
+                    ${givenTheory} / ${maxTheory} faltas
+                  </span>
+                </div>
+                <!-- Barra de progresso -->
+                <div class="w-full bg-black/10 rounded-full h-2.5 overflow-hidden mb-2.5">
+                  <div class="${theoryStatus.progressClass} h-full rounded-full transition-all duration-300" style="width: ${theoryPercent}%"></div>
+                </div>
+                <p class="text-xs leading-relaxed flex items-start gap-1.5">
+                  <i class="fa-solid ${theoryStatus.icon} mt-0.5 shrink-0"></i>
+                  <span>${theoryStatus.text}</span>
+                </p>
+              </div>
+              <button type="button" onclick="quickAddAbsence('${subject.id}', 'theory')" class="w-full py-2 px-3 bg-white hover:bg-slate-50 border border-slate-300/90 rounded-xl text-xs font-bold text-slate-700 shadow-sm transition flex items-center justify-center gap-1.5 cursor-pointer active:scale-[0.99]">
+                <i class="fa-solid fa-plus text-indigo-600 text-[10px]"></i> + Falta Teórica
+              </button>
+            </div>
+
+            <!-- BLOCO AULAS PRÁTICAS -->
+            <div class="p-4 rounded-2xl border ${practiceStatus.badgeClass} flex flex-col justify-between space-y-3.5 shadow-sm">
+              <div>
+                <div class="flex items-center justify-between mb-2">
+                  <span class="font-bold text-xs uppercase tracking-wider flex items-center gap-1.5">
+                    <i class="fa-solid fa-flask text-xs"></i> Aulas Práticas
+                  </span>
+                  <span class="font-extrabold text-xs px-2 py-0.5 rounded-lg bg-white/70 border border-slate-200">
+                    ${givenPractice} / ${maxPractice} faltas
+                  </span>
+                </div>
+                <!-- Barra de progresso -->
+                <div class="w-full bg-black/10 rounded-full h-2.5 overflow-hidden mb-2.5">
+                  <div class="${practiceStatus.progressClass} h-full rounded-full transition-all duration-300" style="width: ${practicePercent}%"></div>
+                </div>
+                <p class="text-xs leading-relaxed flex items-start gap-1.5">
+                  <i class="fa-solid ${practiceStatus.icon} mt-0.5 shrink-0"></i>
+                  <span>${practiceStatus.text}</span>
+                </p>
+              </div>
+              <button type="button" onclick="quickAddAbsence('${subject.id}', 'practice')" class="w-full py-2 px-3 bg-white hover:bg-slate-50 border border-slate-300/90 rounded-xl text-xs font-bold text-slate-700 shadow-sm transition flex items-center justify-center gap-1.5 cursor-pointer active:scale-[0.99]">
+                <i class="fa-solid fa-plus text-emerald-600 text-[10px]"></i> + Falta Prática
+              </button>
+            </div>
+
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function renderAbsenceHistory() {
+      const listContainer = document.getElementById('absences-history-list');
+      const counterBadge = document.getElementById('absence-total-counter-badge');
+      if (!listContainer) return;
+      listContainer.innerHTML = '';
+
+      const userId = state.currentUser ? state.currentUser.id : null;
+      const rawAbsences = (userId && state.absences[userId]) ? state.absences[userId] : [];
+
+      if (counterBadge) {
+        counterBadge.textContent = `${rawAbsences.length} falta(s) dada(s)`;
+      }
+
+      if (rawAbsences.length === 0) {
+        listContainer.innerHTML = `
+          <div class="p-6 text-center text-slate-400 bg-slate-50 rounded-xl border border-slate-100">
+            <i class="fa-solid fa-circle-check text-2xl mb-1 text-emerald-500"></i>
+            <p class="font-bold text-slate-600 text-xs">Ainda não tens faltas registadas.</p>
+            <p class="text-[11px] text-slate-400 mt-0.5">Excelente assiduidade!</p>
+          </div>
+        `;
+        return;
+      }
+
+      // As últimas faltas registadas devem aparecer em cima (mais recentes no topo)
+      const userAbsences = rawAbsences.map((item, idx) => ({ ...item, _idx: idx }));
+      userAbsences.sort((a, b) => {
+        const timeA = a.createdAt || parseInt((a.id || '').replace(/\D/g, '')) || (a._idx + 1);
+        const timeB = b.createdAt || parseInt((b.id || '').replace(/\D/g, '')) || (b._idx + 1);
+        if (timeA !== timeB) return timeB - timeA;
+        return b._idx - a._idx;
+      });
+
+      userAbsences.forEach(abs => {
+        const subject = state.subjects.find(s => s.id === abs.subjectId);
+        const subName = subject ? subject.name : 'Disciplina Desconhecida';
+        const isTheory = abs.type === 'theory';
+
+        const row = document.createElement('div');
+        row.className = "p-3 sm:p-3.5 bg-slate-50 hover:bg-slate-100/80 border border-slate-200 rounded-xl flex items-center justify-between gap-3 transition";
+        row.innerHTML = `
+          <div class="flex items-center gap-3 min-w-0">
+            <div class="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold shrink-0 ${isTheory ? 'bg-indigo-100 text-indigo-700' : 'bg-emerald-100 text-emerald-700'}">
+              <i class="fa-solid ${isTheory ? 'fa-book-open' : 'fa-flask'}"></i>
+            </div>
+            <div class="min-w-0">
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="font-bold text-xs text-slate-800 truncate">${subName}</span>
+                <span class="text-[10px] font-bold uppercase px-1.5 py-0.5 rounded ${isTheory ? 'bg-indigo-100 text-indigo-700' : 'bg-emerald-100 text-emerald-700'}">
+                  ${isTheory ? 'Teórica' : 'Prática'}
+                </span>
+              </div>
+              <p class="text-[11px] text-slate-400 flex items-center gap-1.5 mt-0.5">
+                <i class="fa-regular fa-calendar text-[10px]"></i> Data: <span class="font-mono text-slate-600 font-semibold">${abs.date}</span>
+              </p>
+            </div>
+          </div>
+
+          <button type="button" onclick="requestDeleteAbsence('${abs.id}')" class="text-rose-500 hover:text-rose-700 hover:bg-rose-50 p-1.5 rounded-lg text-xs transition cursor-pointer shrink-0" title="Remover esta falta (com confirmação)">
+            <i class="fa-regular fa-trash-can"></i>
+          </button>
+        `;
+        listContainer.appendChild(row);
+      });
+    }
+
+    // SELECTS DE CADEIRAS
+    function updateSubjectSelects() {
+      const testSelect = document.getElementById('test-subject-select');
+      const fileSelect = document.getElementById('file-subject-select');
+      const docentSelect = document.getElementById('docent-subject-select');
+      const absenceAdminSelect = document.getElementById('absence-admin-subject-select');
+      const absenceInputSelect = document.getElementById('absence-input-subject');
+
+      const options = state.subjects.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+      if (testSelect) testSelect.innerHTML = '<option value="">Seleciona a cadeira...</option>' + options;
+      if (fileSelect) fileSelect.innerHTML = '<option value="">Seleciona a cadeira...</option>' + options;
+      if (docentSelect) docentSelect.innerHTML = '<option value="">Seleciona a cadeira...</option>' + options;
+      
+      if (absenceAdminSelect) {
+        const currentVal = absenceAdminSelect.value;
+        absenceAdminSelect.innerHTML = '<option value="">Seleciona a cadeira...</option>' + options;
+        if (currentVal) absenceAdminSelect.value = currentVal;
+      }
+
+      if (absenceInputSelect) {
+        const userId = state.currentUser ? state.currentUser.id : null;
+        const isAdmin = state.currentUser && state.currentUser.role === 'admin';
+        let allowedSubjects = state.subjects;
+        if (!isAdmin && userId) {
+          const enrolled = state.enrolledSubjects[userId] || [];
+          if (enrolled.length > 0) {
+            allowedSubjects = state.subjects.filter(s => enrolled.includes(s.id));
+          }
+        }
+        const studentOptions = allowedSubjects.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+        absenceInputSelect.innerHTML = '<option value="">Seleciona a cadeira...</option>' + studentOptions;
+      }
+    }
+
+    // ADMIN: CRIAR / APAGAR CADEIRAS
+    function addSubject(e) {
+      e.preventDefault();
+      const input = document.getElementById('new-subject-name');
+      const name = input.value.trim();
+      if (!name) return;
+
+      const newSub = {
+        id: 'sub_' + Date.now(),
+        name: name,
+        maxAbsencesTheory: 4,
+        maxAbsencesPractice: 3,
+        professors: [],
+        tests: []
+      };
+
+      state.subjects.push(newSub);
+      saveState();
+      input.value = '';
+      updateSubjectSelects();
+      renderGrades();
+      renderArchiveTabs();
+      showToast(`Cadeira "${name}" criada!`);
+    }
+
+    function deleteSubject(subjectId) {
+      const subject = state.subjects.find(s => s.id === subjectId);
+      const name = subject ? subject.name : 'a cadeira';
+      if (confirm(`Tens a certeza de que pretendes eliminar "${name}"?`)) {
+        state.subjects = state.subjects.filter(s => s.id !== subjectId);
+        saveState();
+        updateSubjectSelects();
+        renderGrades();
+        renderArchiveTabs();
+        renderFiles();
+        showToast("Cadeira eliminada.");
+      }
+    }
+
+    // ADMIN: CRIAR / APAGAR TESTES (COM DATA DE ABERTURA)
+    function addTest(e) {
+      e.preventDefault();
+      const subjectId = document.getElementById('test-subject-select').value;
+      const testName = document.getElementById('new-test-name').value.trim();
+      const testWeight = parseFloat(document.getElementById('new-test-weight').value) || 0;
+      const openDate = document.getElementById('new-test-opendate').value || '';
+
+      const subject = state.subjects.find(s => s.id === subjectId);
+      if (subject) {
+        subject.tests.push({
+          id: 'test_' + Date.now(),
+          name: testName,
+          weight: testWeight,
+          openDate: openDate
+        });
+        saveState();
+        document.getElementById('new-test-name').value = '';
+        document.getElementById('new-test-weight').value = '';
+        document.getElementById('new-test-opendate').value = '';
+        renderGrades();
+        showToast(`Avaliação "${testName}" adicionada!`);
+      }
+    }
+
+    function deleteTest(subjectId, testId) {
+      if (confirm("Eliminar esta avaliação?")) {
+        const subject = state.subjects.find(s => s.id === subjectId);
+        if (subject) {
+          subject.tests = subject.tests.filter(t => t.id !== testId);
+          saveState();
+          renderGrades();
+          showToast("Avaliação eliminada.");
+        }
+      }
+    }
+
+    // ESTUDANTE: GUARDAR NOTA
+    function saveGrade(testId, val) {
+      if (!state.currentUser) return;
+      const userId = state.currentUser.id;
+      if (!state.grades[userId]) state.grades[userId] = {};
+
+      const num = parseFloat(val);
+      if (isNaN(num)) {
+        delete state.grades[userId][testId];
+      } else {
+        state.grades[userId][testId] = Math.min(20, Math.max(0, num));
+      }
+      saveState();
+      renderGrades();
+    }
+
+    function isGradeInputAllowed(test) {
+      if (state.currentUser && state.currentUser.role === 'admin') return true;
+      if (!test.openDate) return true;
+      const today = new Date().toISOString().split('T')[0];
+      return today >= test.openDate;
+    }
+
+    // CÁLCULO DE METAS P/ APROVAÇÃO (>= 9.5)
+    function calculateNeededGrades(subject, userGrades) {
+      if (!subject.tests || subject.tests.length === 0) return null;
+
+      let totalWeight = 0;
+      let gradedWeight = 0;
+      let accumulatedScore = 0;
+      const pendingTests = [];
+
+      subject.tests.forEach(test => {
+        const w = test.weight > 0 ? test.weight : 1;
+        totalWeight += w;
+        const g = userGrades[test.id];
+        if (g !== undefined && g !== null) {
+          gradedWeight += w;
+          accumulatedScore += g * w;
+        } else {
+          pendingTests.push({ test, weight: w });
+        }
+      });
+
+      if (pendingTests.length === 0) return null;
+
+      const targetScore = 9.5 * totalWeight;
+      const neededScore = targetScore - accumulatedScore;
+      const pendingWeight = totalWeight - gradedWeight;
+
+      if (neededScore <= 0) {
+        return {
+          status: 'guaranteed',
+          message: 'Aprovação já garantida!',
+          details: 'A tua pontuação acumulada já assegura uma média superior a 9.5, mesmo que obtenhas 0 nos testes seguintes.'
+        };
+      }
+
+      if (neededScore > 20 * pendingWeight) {
+        const maxAverage = ((accumulatedScore + 20 * pendingWeight) / totalWeight).toFixed(1);
+        return {
+          status: 'impossible',
+          message: 'Aprovação contínua inacessível',
+          details: `Mesmo tirando 20 em todos os testes restantes, a média máxima possível será de ${maxAverage}. Será necessário exame de recurso.`
+        };
+      }
+
+      if (pendingTests.length === 1) {
+        const nextTest = pendingTests[0];
+        const gradeNeeded = Math.max(0, (neededScore / nextTest.weight)).toFixed(1);
+        return {
+          status: 'single',
+          nextTestName: nextTest.test.name,
+          gradeNeeded: gradeNeeded,
+          scenarios: []
+        };
+      }
+
+      const nextTest = pendingTests[0];
+      const remainingAfterNextWeight = pendingWeight - nextTest.weight;
+      const avgNeeded = (neededScore / pendingWeight).toFixed(1);
+      const scenarios = [];
+
+      scenarios.push({
+        title: 'Cenário Equilibrado',
+        desc: `Tirar pelo menos <strong>${avgNeeded}</strong> em cada um dos ${pendingTests.length} testes restantes.`
+      });
+
+      if (nextTest.weight > 0 && remainingAfterNextWeight > 0) {
+        const scoreIf95 = neededScore - (9.5 * nextTest.weight);
+        const nextNeeded = Math.max(0, scoreIf95 / remainingAfterNextWeight).toFixed(1);
+        if (parseFloat(nextNeeded) <= 20) {
+          scenarios.push({
+            title: 'Se tirares 9.5 no próximo teste',
+            desc: `Ficarás a precisar de média de <strong>${nextNeeded}</strong> nos testes seguintes.`
+          });
+        }
+      }
+
+      if (nextTest.weight > 0 && remainingAfterNextWeight > 0) {
+        const scoreIf14 = neededScore - (14.0 * nextTest.weight);
+        const nextNeeded = Math.max(0, scoreIf14 / remainingAfterNextWeight).toFixed(1);
+        scenarios.push({
+          title: 'Se tirares 14.0 no próximo teste',
+          desc: `Precisarás de apenas <strong>${nextNeeded}</strong> de média nos testes seguintes.`
+        });
+      }
+
+      return {
+        status: 'multiple',
+        nextTestName: nextTest.test.name,
+        avgNeeded: avgNeeded,
+        scenarios: scenarios
+      };
+    }
+
+    // RENDERIZAÇÃO DAS CADEIRAS & NOTAS
+    function renderGrades() {
+      const container = document.getElementById('subjects-container');
+      container.innerHTML = '';
+
+      const userId = state.currentUser ? state.currentUser.id : null;
+      const isAdmin = state.currentUser && state.currentUser.role === 'admin';
+      const userGrades = (userId && state.grades[userId]) ? state.grades[userId] : {};
+      
+      let displaySubjects = state.subjects;
+      if (!isAdmin && userId) {
+        const enrolled = state.enrolledSubjects[userId] || [];
+        document.getElementById('student-enrolled-count').textContent = enrolled.length;
+        displaySubjects = state.subjects.filter(s => enrolled.includes(s.id));
+      }
+
+      if (state.subjects.length === 0) {
+        container.innerHTML = `
+          <div class="p-8 sm:p-12 text-center text-slate-400 bg-white rounded-2xl border border-slate-200">
+            <i class="fa-solid fa-graduation-cap text-3xl mb-2 text-slate-300"></i>
+            <p class="font-bold text-slate-600">Ainda não existem cadeiras registadas.</p>
+            <p class="text-xs mt-1">O Administrador pode adicionar novas disciplinas no painel acima.</p>
+          </div>
+        `;
+        return;
+      }
+
+      if (!isAdmin && displaySubjects.length === 0) {
+        container.innerHTML = `
+          <div class="p-8 sm:p-12 text-center text-slate-500 bg-white rounded-2xl border border-slate-200 space-y-3">
+            <i class="fa-solid fa-list-check text-4xl text-indigo-400"></i>
+            <h3 class="font-bold text-slate-800 text-base">Ainda não selecionaste as cadeiras que frequentas</h3>
+            <p class="text-xs text-slate-400 max-w-sm mx-auto">Clica no botão abaixo para escolheres as tuas disciplinas.</p>
+            <button onclick="openEnrolledModal()" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow transition inline-flex items-center gap-2">
+              <i class="fa-solid fa-plus"></i> Escolher as Minhas Cadeiras
+            </button>
+          </div>
+        `;
+        return;
+      }
+
+      displaySubjects.forEach(subject => {
+        let totalScore = 0;
+        let totalWeight = 0;
+
+        subject.tests.forEach(test => {
+          const grade = userGrades[test.id];
+          if (grade !== undefined && grade !== null) {
+            const weight = test.weight > 0 ? test.weight : 1;
+            totalScore += grade * weight;
+            totalWeight += weight;
+          }
+        });
+
+        const average = totalWeight > 0 ? (totalScore / totalWeight).toFixed(1) : null;
+        let statusBadge = '';
+        if (average !== null) {
+          statusBadge = average >= 9.5
+            ? `<span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-3 py-1 rounded-full border border-emerald-200 inline-flex items-center gap-1.5"><i class="fa-solid fa-circle-check text-emerald-600"></i> Média: ${average} (Aprovado)</span>`
+            : `<span class="bg-rose-100 text-rose-800 text-xs font-bold px-3 py-1 rounded-full border border-rose-200 inline-flex items-center gap-1.5"><i class="fa-solid fa-circle-xmark text-rose-600"></i> Média: ${average}</span>`;
+        }
+
+        let simulationCardHtml = '';
+        if (!isAdmin) {
+          const sim = calculateNeededGrades(subject, userGrades);
+          if (sim) {
+            if (sim.status === 'guaranteed') {
+              simulationCardHtml = `
+                <div class="mt-4 p-3.5 bg-emerald-50 border border-emerald-200 rounded-xl text-xs text-emerald-900 flex items-start gap-2.5">
+                  <i class="fa-solid fa-trophy text-emerald-600 text-base mt-0.5"></i>
+                  <div>
+                    <span class="font-bold text-emerald-800">${sim.message}</span>
+                    <p class="text-emerald-700 text-[11px] mt-0.5">${sim.details}</p>
+                  </div>
+                </div>
+              `;
+            } else if (sim.status === 'impossible') {
+              simulationCardHtml = `
+                <div class="mt-4 p-3.5 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-900 flex items-start gap-2.5">
+                  <i class="fa-solid fa-triangle-exclamation text-rose-600 text-base mt-0.5"></i>
+                  <div>
+                    <span class="font-bold text-rose-800">${sim.message}</span>
+                    <p class="text-rose-700 text-[11px] mt-0.5">${sim.details}</p>
+                  </div>
+                </div>
+              `;
+            } else if (sim.status === 'single') {
+              simulationCardHtml = `
+                <div class="mt-4 p-4 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-300/80 rounded-xl text-xs shadow-sm">
+                  <div class="flex items-center gap-2 mb-1.5">
+                    <span class="w-6 h-6 rounded-lg bg-amber-500 text-white flex items-center justify-center text-xs font-bold">
+                      <i class="fa-solid fa-bullseye"></i>
+                    </span>
+                    <h5 class="font-bold text-amber-950 text-xs">Meta para Aprovação (Média &ge; 9.5):</h5>
+                  </div>
+                  <p class="text-slate-700">
+                    No próximo teste (<strong>${sim.nextTestName}</strong>), precisas de tirar no mínimo:
+                    <span class="inline-block font-extrabold text-sm px-2.5 py-0.5 bg-amber-500 text-white rounded-lg ml-1 shadow-sm">
+                      ${sim.gradeNeeded} valores
+                    </span>
+                  </p>
+                </div>
+              `;
+            } else if (sim.status === 'multiple') {
+              const scenariosList = sim.scenarios.map(sc => `
+                <li class="flex items-start gap-2 text-[11px] text-slate-700">
+                  <i class="fa-solid fa-chevron-right text-indigo-500 text-[10px] mt-1 shrink-0"></i>
+                  <div><strong class="text-indigo-950">${sc.title}:</strong> ${sc.desc}</div>
+                </li>
+              `).join('');
+
+              simulationCardHtml = `
+                <div class="mt-4 p-4 bg-gradient-to-br from-indigo-50/80 via-amber-50/60 to-purple-50/60 border border-indigo-200 rounded-xl text-xs shadow-sm">
+                  <div class="flex items-center justify-between gap-2 mb-2 pb-2 border-b border-indigo-100">
+                    <div class="flex items-center gap-2">
+                      <span class="w-6 h-6 rounded-lg bg-indigo-600 text-white flex items-center justify-center text-xs font-bold">
+                        <i class="fa-solid fa-calculator"></i>
+                      </span>
+                      <h5 class="font-bold text-indigo-950 text-xs">Possibilidades para Aprovação (Média &ge; 9.5)</h5>
+                    </div>
+                    <span class="text-[10px] font-bold text-indigo-700 bg-white px-2 py-0.5 rounded-full border border-indigo-200">
+                      Média restante: ${sim.avgNeeded}
+                    </span>
+                  </div>
+                  <ul class="space-y-1.5 mt-2">
+                    ${scenariosList}
+                  </ul>
+                </div>
+              `;
+            }
+          }
+        }
+
+        const card = document.createElement('div');
+        card.className = "bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden transition";
+        card.innerHTML = `
+          <!-- Cabeçalho da Cadeira -->
+          <div class="px-4 sm:px-6 py-3.5 sm:py-4 bg-slate-50/90 border-b border-slate-200 flex flex-col sm:flex-row justify-between sm:items-center gap-2.5">
+            <div>
+              <div class="flex items-center gap-2 flex-wrap">
+                <h3 class="font-bold text-slate-800 text-sm sm:text-base flex items-center gap-2">
+                  <i class="fa-solid fa-book text-indigo-500 text-xs sm:text-sm"></i> ${subject.name}
+                </h3>
+                ${(subject.professors && subject.professors.length > 0) ? `
+                  <span class="text-[10px] text-slate-600 bg-white border border-slate-200 px-2 py-0.5 rounded-full font-medium flex items-center gap-1 shadow-sm">
+                    <i class="fa-solid fa-chalkboard-user text-indigo-500 text-[10px]"></i> ${subject.professors.length} docente(s)
+                  </span>
+                ` : ''}
+              </div>
+              ${isAdmin ? `
+                <p class="text-[11px] text-slate-400 mt-0.5">${subject.tests.length} avaliação(ões) configurada(s)</p>
+              ` : ''}
+            </div>
+            <div class="flex items-center flex-wrap justify-between sm:justify-end gap-2">
+              <!-- BOTÃO MAIS INFORMAÇÕES -->
+              <button onclick="openSubjectInfoModal('${subject.id}')" class="px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm cursor-pointer" title="Ver professores e contactos desta cadeira">
+                <i class="fa-solid fa-circle-info text-indigo-600"></i> Mais informações
+              </button>
+              ${!isAdmin ? statusBadge : ''}
+              ${isAdmin ? `
+                <button onclick="deleteSubject('${subject.id}')" class="text-rose-600 hover:text-rose-700 text-xs font-bold px-2.5 py-1.5 rounded-lg hover:bg-rose-50 transition" title="Eliminar Cadeira">
+                  <i class="fa-regular fa-trash-can mr-1"></i> Eliminar
+                </button>
+              ` : ''}
+            </div>
+          </div>
+
+          <!-- Corpo de Avaliações -->
+          <div class="p-3 sm:p-6">
+            ${subject.tests.length === 0 ? `
+              <p class="text-xs text-slate-400 italic py-2">Sem avaliações registadas para esta cadeira.</p>
+            ` : `
+              <!-- Desktop / Tablet Table -->
+              <div class="hidden sm:block overflow-x-auto">
+                <table class="w-full text-left text-sm">
+                  <thead>
+                    <tr class="text-slate-400 border-b text-xs uppercase tracking-wider">
+                      <th class="pb-3 font-bold">Avaliação</th>
+                      <th class="pb-3 font-bold">Peso</th>
+                      <th class="pb-3 font-bold">Disponibilidade</th>
+                      <th class="pb-3 font-bold">${isAdmin ? 'Ação' : 'Classificação (0-20)'}</th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-slate-100">
+                    ${subject.tests.map(test => {
+                      const grade = userGrades[test.id] !== undefined ? userGrades[test.id] : '';
+                      const isAllowed = isGradeInputAllowed(test);
+                      return `
+                        <tr class="hover:bg-slate-50/50 transition">
+                          <td class="py-3 font-semibold text-slate-700">${test.name}</td>
+                          <td class="py-3 text-slate-500 text-xs">
+                            <span class="bg-slate-100 px-2 py-0.5 rounded font-mono font-medium">${test.weight ? test.weight + '%' : 'Uniforme'}</span>
+                          </td>
+                          <td class="py-3 text-xs">
+                            ${isAllowed 
+                              ? `<span class="text-emerald-700 font-semibold flex items-center gap-1"><i class="fa-solid fa-lock-open text-[10px]"></i> Disponível</span>` 
+                              : `<span class="text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-lg font-semibold inline-flex items-center gap-1"><i class="fa-solid fa-lock text-[10px]"></i> Abre: ${test.openDate}</span>`}
+                          </td>
+                          <td class="py-3">
+                            ${isAdmin ? `
+                              <button onclick="deleteTest('${subject.id}', '${test.id}')" class="text-rose-600 hover:text-rose-800 text-xs font-semibold hover:bg-rose-50 px-2 py-1 rounded transition">
+                                <i class="fa-regular fa-trash-can mr-1"></i> Apagar
+                              </button>
+                            ` : (isAllowed ? `
+                              <div class="flex items-center gap-2">
+                                <input
+                                  type="number"
+                                  min="0"
+                                  max="20"
+                                  step="0.1"
+                                  value="${grade}"
+                                  placeholder="--"
+                                  onchange="saveGrade('${test.id}', this.value)"
+                                  class="w-24 px-3 py-1.5 border rounded-xl text-sm text-center font-bold outline-none focus:border-indigo-600 transition ${
+                                    grade !== ''
+                                      ? (grade >= 9.5
+                                          ? 'text-emerald-700 bg-emerald-50 border-emerald-300'
+                                          : 'text-rose-700 bg-rose-50 border-rose-300')
+                                      : 'text-slate-700 bg-white'
+                                  }"
+                                />
+                                <span class="text-xs text-slate-400 font-medium">/ 20</span>
+                              </div>
+                            ` : `
+                              <span class="text-xs text-slate-400 italic">Bloqueado até à data definida</span>
+                            `)}
+                          </td>
+                        </tr>
+                      `;
+                    }).join('')}
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- Mobile Cards -->
+              <div class="sm:hidden space-y-3">
+                ${subject.tests.map(test => {
+                  const grade = userGrades[test.id] !== undefined ? userGrades[test.id] : '';
+                  const isAllowed = isGradeInputAllowed(test);
+                  return `
+                    <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-between gap-3">
+                      <div class="min-w-0 flex-1">
+                        <p class="font-bold text-slate-800 text-xs truncate">${test.name}</p>
+                        <div class="flex items-center gap-2 text-[10px] text-slate-400 mt-0.5">
+                          <span>Peso: ${test.weight ? test.weight + '%' : 'Uniforme'}</span>
+                          <span>•</span>
+                          ${isAllowed 
+                            ? `<span class="text-emerald-600 font-semibold">Disponível</span>` 
+                            : `<span class="text-amber-600 font-semibold">Abre: ${test.openDate}</span>`}
+                        </div>
+                      </div>
+                      <div class="shrink-0">
+                        ${isAdmin ? `
+                          <button onclick="deleteTest('${subject.id}', '${test.id}')" class="text-rose-600 text-xs font-bold p-1.5">
+                            <i class="fa-regular fa-trash-can"></i>
+                          </button>
+                        ` : (isAllowed ? `
+                          <input
+                            type="number"
+                            min="0"
+                            max="20"
+                            step="0.1"
+                            value="${grade}"
+                            placeholder="--"
+                            onchange="saveGrade('${test.id}', this.value)"
+                            class="w-16 px-2 py-1.5 border rounded-xl text-sm text-center font-bold outline-none focus:border-indigo-600 ${
+                              grade !== ''
+                                ? (grade >= 9.5
+                                    ? 'text-emerald-700 bg-emerald-50 border-emerald-300'
+                                    : 'text-rose-700 bg-rose-50 border-rose-300')
+                                : 'text-slate-700 bg-white'
+                            }"
+                          />
+                        ` : `
+                          <span class="w-8 h-8 rounded-lg bg-slate-200/80 text-slate-400 flex items-center justify-center text-xs" title="Ainda não disponível">
+                            <i class="fa-solid fa-lock"></i>
+                          </span>
+                        `)}
+                      </div>
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+            `}
+
+            <!-- Cartão com as metas e possibilidades -->
+            ${simulationCardHtml}
+
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    // ARQUIVO: RENDERIZAR ABAS DE CADEIRAS NO TOPO
+    function renderArchiveTabs() {
+      const tabsContainer = document.getElementById('file-subject-tabs');
+      if (!tabsContainer) return;
+      tabsContainer.innerHTML = '';
+
+      const isAllSelected = state.selectedArchiveSubject === 'ALL';
+      const allBtn = document.createElement('button');
+      allBtn.type = 'button';
+      allBtn.className = `px-3.5 py-1.5 rounded-xl text-xs font-bold shrink-0 transition ${
+        isAllSelected 
+          ? 'bg-indigo-600 text-white shadow-sm' 
+          : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+      }`;
+      allBtn.innerHTML = `<i class="fa-solid fa-border-all mr-1"></i> Todas (${state.files.length})`;
+      allBtn.onclick = () => {
+        state.selectedArchiveSubject = 'ALL';
+        renderArchiveTabs();
+        renderFiles();
+      };
+      tabsContainer.appendChild(allBtn);
+
+      state.subjects.forEach(sub => {
+        const count = state.files.filter(f => f.subjectId === sub.id).length;
+        const isSelected = state.selectedArchiveSubject === sub.id;
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = `px-3.5 py-1.5 rounded-xl text-xs font-bold shrink-0 transition ${
+          isSelected 
+            ? 'bg-indigo-600 text-white shadow-sm' 
+            : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+        }`;
+        btn.innerHTML = `${sub.name} <span class="text-[10px] ml-1 opacity-75">(${count})</span>`;
+        btn.onclick = () => {
+          state.selectedArchiveSubject = sub.id;
+          renderArchiveTabs();
+          renderFiles();
+        };
+        tabsContainer.appendChild(btn);
+      });
+
+      if (state.selectedArchiveSubject !== 'ALL') {
+        const infoBtn = document.createElement('button');
+        infoBtn.type = 'button';
+        infoBtn.className = "px-3 py-1.5 rounded-xl text-xs font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 shrink-0 transition flex items-center gap-1.5 ml-auto cursor-pointer";
+        infoBtn.innerHTML = '<i class="fa-solid fa-circle-info text-indigo-600"></i> Docentes da Cadeira';
+        infoBtn.onclick = () => openSubjectInfoModal(state.selectedArchiveSubject);
+        tabsContainer.appendChild(infoBtn);
+      }
+    }
+
+
+    // ==============================================
+    // ABERTURA DE PDFS EM NOVA ABA DO CHROME
+    // ==============================================
+    function generateSamplePdfBlob(title, fileName, subjectName, year) {
+      const cleanTitle = (title || "Documento de Estudo").replace(/[^\x20-\x7E]/g, '');
+      const cleanSub = (subjectName || "Projeto 0 Recursos").replace(/[^\x20-\x7E]/g, '');
+      const cleanFile = (fileName || "documento.pdf").replace(/[^\x20-\x7E]/g, '');
+      const cleanYear = (year || "2023/2024").replace(/[^\x20-\x7E]/g, '');
+
+      const textStream = `BT
+/F1 18 Tf
+50 720 Td
+(${cleanSub}) Tj
+/F1 14 Tf
+0 -30 Td
+(${cleanTitle} - Ano: ${cleanYear}) Tj
+/F1 10 Tf
+0 -25 Td
+(Ficheiro: ${cleanFile}) Tj
+/F2 11 Tf
+0 -35 Td
+(Projeto 0 Recursos - Plataforma de Estudo e Arquivo FEUP) Tj
+0 -20 Td
+(Este documento foi aberto diretamente numa nova aba do Chrome a partir do Arquivo.) Tj
+0 -20 Td
+(Pode utilizar os controlos nativos do Chrome no topo para ampliar, imprimir ou guardar.) Tj
+ET`;
+
+      const streamLen = textStream.length;
+      const pdfSource = `%PDF-1.4
+1 0 obj <</Type /Catalog /Pages 2 0 R>> endobj
+2 0 obj <</Type /Pages /Kids [3 0 R] /Count 1>> endobj
+3 0 obj <</Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources <</Font <</F1 4 0 R /F2 5 0 R>>>> /Contents 6 0 R>> endobj
+4 0 obj <</Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold>> endobj
+5 0 obj <</Type /Font /Subtype /Type1 /BaseFont /Helvetica>> endobj
+6 0 obj <</Length ${streamLen}>> stream
+${textStream}
+endstream
+endobj
+xref
+0 7
+0000000000 65535 f 
+0000000010 00000 n 
+0000000060 00000 n 
+0000000117 00000 n 
+0000000245 00000 n 
+0000000321 00000 n 
+0000000392 00000 n 
+trailer <</Size 7 /Root 1 0 R>>
+startxref
+${480 + streamLen}
+%%EOF`;
+
+      return new Blob([pdfSource], { type: 'application/pdf' });
+    }
+
+    function openPdfFile(fileId) {
+      const file = state.files.find(f => f.id === fileId);
+      if (!file) return;
+
+      // 1. Se for um dataUrl Base64 (PDF carregado ou ficheiro demonstrativo)
+      if (file.dataUrl && file.dataUrl.startsWith('data:application/pdf;base64,')) {
+        try {
+          const base64Data = file.dataUrl.split(',')[1];
+          const binaryString = window.atob(base64Data);
+          const len = binaryString.length;
+          const bytes = new Uint8Array(len);
+          for (let i = 0; i < len; i++) {
+            bytes[i] = binaryString.charCodeAt(i);
+          }
+          const blob = new Blob([bytes], { type: 'application/pdf' });
+          const blobUrl = URL.createObjectURL(blob);
+          window.open(blobUrl, '_blank');
+          return;
+        } catch (err) {
+          console.error("Erro ao converter base64 em blob:", err);
+        }
+      }
+
+      // 2. Se for outro tipo de dataUrl (imagens ou documentos genéricos)
+      if (file.dataUrl && file.dataUrl.startsWith('data:')) {
+        try {
+          const parts = file.dataUrl.split(',');
+          const mime = (parts[0].match(/:(.*?);/) || [])[1] || 'application/pdf';
+          const binaryString = window.atob(parts[1]);
+          const bytes = new Uint8Array(binaryString.length);
+          for (let i = 0; i < binaryString.length; i++) {
+            bytes[i] = binaryString.charCodeAt(i);
+          }
+          const blob = new Blob([bytes], { type: mime });
+          const blobUrl = URL.createObjectURL(blob);
+          window.open(blobUrl, '_blank');
+          return;
+        } catch (err) {
+          console.error(err);
+        }
+      }
+
+      // 3. Ficheiro de demonstração ou URL
+      if (!file.dataUrl || file.dataUrl === '#' || !file.dataUrl.startsWith('data:')) {
+        const subject = state.subjects.find(s => s.id === file.subjectId);
+        const subName = subject ? subject.name : 'Disciplina FEUP';
+        const blob = generateSamplePdfBlob(file.title, file.fileName, subName, file.year);
+        const blobUrl = URL.createObjectURL(blob);
+        window.open(blobUrl, '_blank');
+        return;
+      }
+
+      window.open(file.dataUrl, '_blank');
+    }
+
+    function downloadPdfFile(fileId) {
+      const file = state.files.find(f => f.id === fileId);
+      if (!file) return;
+
+      if (file.dataUrl && file.dataUrl.startsWith('data:')) {
+        const a = document.createElement('a');
+        a.href = file.dataUrl;
+        a.download = file.fileName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        showToast("A descarregar " + file.fileName + "...");
+      } else {
+        const subject = state.subjects.find(s => s.id === file.subjectId);
+        const subName = subject ? subject.name : 'Disciplina FEUP';
+        const blob = generateSamplePdfBlob(file.title, file.fileName, subName, file.year);
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = file.fileName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+        showToast("A descarregar " + file.fileName + "...");
+      }
+    }
+
+    // GESTÃO DE FICHEIROS NO ARQUIVO
+    function uploadFile(e) {
+      e.preventDefault();
+      const subjectId = document.getElementById('file-subject-select').value;
+      const title = document.getElementById('file-title').value.trim();
+      const fileInput = document.getElementById('file-input');
+
+      if (!fileInput.files.length) return;
+      const file = fileInput.files[0];
+
+      const reader = new FileReader();
+      reader.onload = function(event) {
+        state.files.push({
+          id: 'file_' + Date.now(),
+          title: title,
+          subjectId: subjectId,
+          fileName: file.name,
+          dataUrl: event.target.result
+        });
+
+        saveState();
+        renderArchiveTabs();
+        renderFiles();
+        fileInput.value = '';
+        document.getElementById('file-title').value = '';
+        showToast(`Documento "${title}" publicado!`);
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function deleteFile(fileId) {
+      if (confirm("Eliminar este documento do arquivo?")) {
+        state.files = state.files.filter(f => f.id !== fileId);
+        saveState();
+        renderArchiveTabs();
+        renderFiles();
+        showToast("Documento removido.");
+      }
+    }
+
+    function renderFiles() {
+      const container = document.getElementById('files-container');
+      container.innerHTML = '';
+
+      let filteredFiles = state.files;
+      if (state.selectedArchiveSubject && state.selectedArchiveSubject !== 'ALL') {
+        filteredFiles = filteredFiles.filter(f => f.subjectId === state.selectedArchiveSubject);
+      }
+
+      if (filteredFiles.length === 0) {
+        container.innerHTML = `
+          <div class="p-8 sm:p-12 text-center text-slate-400 bg-white rounded-2xl border border-slate-200">
+            <i class="fa-solid fa-folder-open text-3xl mb-2 text-slate-300"></i>
+            <p class="font-bold text-slate-600">Nenhum ficheiro encontrado nesta seleção.</p>
+            <p class="text-xs mt-1">Escolhe outra cadeira ou carrega um documento.</p>
+          </div>
+        `;
+        return;
+      }
+
+      const isAdmin = state.currentUser && state.currentUser.role === 'admin';
+      const section = document.createElement('div');
+      section.className = "bg-white rounded-2xl p-4 sm:p-6 shadow-sm border border-slate-200";
+      section.innerHTML = `
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+          ${filteredFiles.map(f => {
+            const subject = state.subjects.find(s => s.id === f.subjectId);
+            const subjectName = subject ? subject.name : 'Geral';
+            return `
+              <div class="p-3.5 sm:p-4 bg-slate-50 border border-slate-200 rounded-xl flex flex-col justify-between hover:shadow-md hover:border-indigo-200 transition group">
+                <div>
+                  <div class="flex items-center justify-between gap-1 mb-1">
+                    <span class="text-[9px] uppercase font-bold text-indigo-700 bg-indigo-100 px-2 py-0.5 rounded">${subjectName}</span>
+                    <span class="text-[10px] text-rose-600 font-bold bg-rose-50 border border-rose-100 px-1.5 py-0.5 rounded flex items-center gap-1">
+                      <i class="fa-solid fa-file-pdf"></i> PDF
+                    </span>
+                  </div>
+                  <h4 onclick="openPdfFile('${f.id}')" class="font-bold text-slate-800 text-xs sm:text-sm mt-1.5 truncate cursor-pointer hover:text-indigo-600 transition" title="Clique para abrir ${f.title} no Chrome">
+                    ${f.title}
+                  </h4>
+                  <p class="text-[11px] text-slate-400 truncate mt-1 flex items-center gap-1">
+                    <i class="fa-regular fa-file-lines text-slate-400"></i> ${f.fileName}
+                  </p>
+                </div>
+                <div class="mt-3.5 pt-2.5 border-t border-slate-200 flex justify-between items-center gap-2">
+                  <!-- ABRIR NOUTRA ABA DO CHROME EM VEZ DE FAZER DOWNLOAD -->
+                  <button onclick="openPdfFile('${f.id}')" class="text-xs font-bold text-indigo-600 hover:text-indigo-800 flex items-center gap-1.5 transition py-1 px-1.5 rounded-lg hover:bg-indigo-50 cursor-pointer" title="Abrir documento numa nova aba do Chrome">
+                    <i class="fa-solid fa-arrow-up-right-from-square text-indigo-500"></i> Abrir no Chrome
+                  </button>
+                  <div class="flex items-center gap-1">
+                    <button onclick="downloadPdfFile('${f.id}')" class="text-slate-400 hover:text-slate-700 text-xs font-semibold p-1.5 hover:bg-slate-200/70 rounded-lg transition cursor-pointer" title="Descarregar cópia para o computador">
+                      <i class="fa-solid fa-download"></i>
+                    </button>
+                    ${isAdmin ? `
+                      <button onclick="deleteFile('${f.id}')" class="text-rose-600 hover:text-rose-800 text-xs font-semibold p-1.5 hover:bg-rose-50 rounded-lg transition" title="Eliminar documento">
+                        <i class="fa-regular fa-trash-can"></i>
+                      </button>
+                    ` : ''}
+                  </div>
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      `;
+      container.appendChild(section);
+    }
+
+    // ADMIN: CONSULTA DE ALUNOS E SUAS CADEIRAS
+    function renderStudentsList() {
+      const container = document.getElementById('students-list-container');
+      const pendingBox = document.getElementById('admin-pending-names-box');
+      const pendingList = document.getElementById('admin-pending-names-list');
+      if (!container) return;
+      container.innerHTML = '';
+
+      const pendingUsers = state.users.filter(u => u.pendingName);
+      if (pendingBox && pendingList) {
+        if (pendingUsers.length > 0) {
+          pendingBox.classList.remove('hidden');
+          pendingList.innerHTML = pendingUsers.map(u => `
+            <div class="p-3 bg-white rounded-xl border border-amber-300 flex flex-col sm:flex-row justify-between sm:items-center gap-2">
+              <div>
+                <span class="font-bold text-slate-800 text-xs">${u.username}</span>
+                <span class="text-slate-400 text-xs"> quer alterar de </span>
+                <strong class="text-slate-700 text-xs">"${u.name || u.username}"</strong>
+                <span class="text-slate-400 text-xs"> para </span>
+                <strong class="text-indigo-600 text-xs">"${u.pendingName}"</strong>
+              </div>
+              <div class="flex gap-2 shrink-0">
+                <button onclick="approveNameChange('${u.id}')" class="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg transition">
+                  <i class="fa-solid fa-check mr-1"></i> Aprovar
+                </button>
+                <button onclick="rejectNameChange('${u.id}')" class="px-3 py-1 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-lg transition">
+                  <i class="fa-solid fa-xmark mr-1"></i> Rejeitar
+                </button>
+              </div>
+            </div>
+          `).join('');
+        } else {
+          pendingBox.classList.add('hidden');
+        }
+      }
+
+      const students = state.users.filter(u => u.role === 'student');
+      if (students.length === 0) {
+        container.innerHTML = '<p class="text-xs text-slate-400">Ainda não existem estudantes registados.</p>';
+        return;
+      }
+
+      students.forEach(std => {
+        const studentGrades = state.grades[std.id] || {};
+        const enrolledIds = state.enrolledSubjects[std.id] || [];
+        const enrolledSubs = state.subjects.filter(s => enrolledIds.includes(s.id));
+
+        const card = document.createElement('div');
+        card.className = "p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col gap-3";
+        
+        let gradesSummaryHtml = '';
+        if (enrolledSubs.length === 0) {
+          gradesSummaryHtml = '<p class="text-xs text-slate-400 italic">O estudante ainda não selecionou nenhuma cadeira.</p>';
+        } else {
+          gradesSummaryHtml = enrolledSubs.map(sub => {
+            let total = 0, weight = 0;
+            sub.tests.forEach(t => {
+              const g = studentGrades[t.id];
+              if (g !== undefined) {
+                const w = t.weight > 0 ? t.weight : 1;
+                total += g * w;
+                weight += w;
+              }
+            });
+            const avg = weight > 0 ? (total / weight).toFixed(1) : 'Sem notas';
+            return `
+              <div class="text-xs flex items-center justify-between py-1 border-b border-slate-200/60 last:border-0">
+                <span class="font-medium text-slate-700 truncate mr-2">${sub.name}</span>
+                <span class="font-bold shrink-0 ${avg !== 'Sem notas' && parseFloat(avg) >= 9.5 ? 'text-emerald-600' : 'text-slate-500'}">${avg}</span>
+              </div>
+            `;
+          }).join('');
+        }
+
+        card.innerHTML = `
+          <div class="flex justify-between items-center">
+            <div class="flex items-center gap-3">
+              <div class="w-9 h-9 rounded-full overflow-hidden bg-indigo-100 text-indigo-700 font-bold text-xs flex items-center justify-center border border-indigo-200">
+                ${std.avatar ? `<img src="${std.avatar}" class="w-full h-full object-cover">` : (std.name || std.username).charAt(0).toUpperCase()}
+              </div>
+              <div>
+                <h4 class="font-bold text-slate-800 text-sm flex items-center gap-1.5">
+                  ${std.name || std.username}
+                  ${std.name && std.name !== std.username ? `<span class="text-slate-400 text-xs font-normal">(@${std.username})</span>` : ''}
+                </h4>
+                <p class="text-[11px] text-slate-400">Inscrito em ${enrolledSubs.length} cadeira(s)</p>
+              </div>
+            </div>
+            <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-indigo-100 text-indigo-700">Estudante</span>
+          </div>
+          <div class="bg-white p-3 rounded-lg border border-slate-200">
+            <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Boletim do Aluno:</p>
+            ${gradesSummaryHtml}
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    // INICIALIZAÇÃO
+    applyUserSession();
+  </script>
+</body>
+</html>
