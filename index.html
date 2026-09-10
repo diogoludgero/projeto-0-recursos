@@ -308,28 +308,7 @@
           </button>
         </form>
 
-        <!-- Acesso Rápido de Teste (1-Clique) -->
-        <div class="mt-6 pt-4 border-t border-slate-100 bg-slate-50/80 -mx-5 -mb-5 sm:-mx-6 sm:-mb-6 p-4 sm:p-5 text-xs text-slate-500 rounded-b-2xl">
-          <p class="font-bold text-slate-700 mb-2 flex items-center gap-1.5">
-            <i class="fa-solid fa-bolt text-amber-500"></i> Contas Pré-definidas (Clique para entrar):
-          </p>
-          <div class="grid grid-cols-2 gap-2 text-[11px]">
-            <button type="button" onclick="quickLogin('admin', 'admin123')" class="p-2.5 bg-white hover:bg-indigo-50/50 rounded-xl border border-slate-200 hover:border-indigo-300 text-left transition shadow-sm group">
-              <div class="flex items-center justify-between">
-                <span class="font-bold text-indigo-700 flex items-center gap-1"><i class="fa-solid fa-shield-halved text-xs"></i> Admin</span>
-                <i class="fa-solid fa-chevron-right text-[10px] text-slate-400 group-hover:text-indigo-600 transition"></i>
-              </div>
-              <p class="text-slate-600 mt-1 font-mono text-[10px]">admin / admin123</p>
-            </button>
-            <button type="button" onclick="quickLogin('aluno', 'aluno123')" class="p-2.5 bg-white hover:bg-indigo-50/50 rounded-xl border border-slate-200 hover:border-indigo-300 text-left transition shadow-sm group">
-              <div class="flex items-center justify-between">
-                <span class="font-bold text-emerald-700 flex items-center gap-1"><i class="fa-solid fa-user-graduate text-xs"></i> Estudante</span>
-                <i class="fa-solid fa-chevron-right text-[10px] text-slate-400 group-hover:text-emerald-600 transition"></i>
-              </div>
-              <p class="text-slate-600 mt-1 font-mono text-[10px]">aluno / aluno123</p>
-            </button>
-          </div>
-        </div>
+
       </div>
 
       <!-- Formulário de Registo (Sem Nome Completo) -->
@@ -771,8 +750,16 @@
   <script>
     // CONTAS INICIAIS
     const INITIAL_USERS = [
-      { id: 'usr_admin', username: 'admin', password: 'admin123', name: 'Administrador', role: 'admin', avatar: null, pendingName: null },
-      { id: 'usr_student_1', username: 'aluno', password: 'aluno123', name: 'Diogo Estudante', role: 'student', avatar: null, pendingName: null }
+      { 
+        id: 'usr_diogoludgero', 
+        username: 'diogoludgero', 
+        password: '255067801', 
+        name: 'Diogo Ludgero', 
+        role: 'admin', 
+        isStudent: true, 
+        avatar: null, 
+        pendingName: null 
+      }
     ];
 
     // ESTADO DA APLICAÇÃO
@@ -822,20 +809,13 @@
         }
       ],
       absences: JSON.parse(localStorage.getItem('study_absences')) || {
-        'usr_student_1': [
-          {
-            id: 'abs_demo_1',
-            subjectId: 'sub_1',
-            type: 'theory',
-            date: '2026-09-08'
-          }
-        ]
+        'usr_diogoludgero': []
       },
       grades: JSON.parse(localStorage.getItem('study_grades')) || {
-        'usr_student_1': { 'test_1': 8.0 }
+        'usr_diogoludgero': {}
       },
       enrolledSubjects: JSON.parse(localStorage.getItem('study_enrolled_subjects')) || {
-        'usr_student_1': ['sub_1', 'sub_2', 'sub_3']
+        'usr_diogoludgero': ['sub_1', 'sub_2', 'sub_3']
       },
       files: JSON.parse(localStorage.getItem('study_files')) || [
         {
@@ -857,6 +837,50 @@
       ],
       selectedArchiveSubject: 'ALL'
     };
+
+    // SINCRONIZAÇÃO AUTOMÁTICA DA CONTA DIOGOLUDGERO E PURGA DE DEMOS
+    (function syncDiogoAccount() {
+      // Remover contas de teste antigas
+      state.users = state.users.filter(u => u.username !== 'admin' && u.username !== 'aluno');
+      
+      let diogo = state.users.find(u => u.username === 'diogoludgero');
+      if (!diogo) {
+        diogo = {
+          id: 'usr_diogoludgero',
+          username: 'diogoludgero',
+          password: '255067801',
+          name: 'Diogo Ludgero',
+          role: 'admin',
+          isStudent: true,
+          avatar: null,
+          pendingName: null
+        };
+        state.users.unshift(diogo);
+      } else {
+        diogo.password = '255067801';
+        diogo.role = 'admin';
+        diogo.isStudent = true;
+      }
+
+      // Se o utilizador na sessão for uma conta antiga, iniciar sessão com diogoludgero
+      if (!state.currentUser || state.currentUser.username === 'admin' || state.currentUser.username === 'aluno') {
+        state.currentUser = diogo;
+        localStorage.setItem('study_current_user', JSON.stringify(diogo));
+      }
+
+      // Garantir cadeiras inscritas para diogoludgero
+      if (!state.enrolledSubjects[diogo.id] || state.enrolledSubjects[diogo.id].length === 0) {
+        state.enrolledSubjects[diogo.id] = state.subjects.map(s => s.id);
+      }
+      if (!state.grades[diogo.id]) {
+        state.grades[diogo.id] = {};
+      }
+      if (!state.absences[diogo.id]) {
+        state.absences[diogo.id] = [];
+      }
+
+      saveState();
+    })();
 
     function saveState() {
       localStorage.setItem('study_users', JSON.stringify(state.users));
@@ -1211,30 +1235,48 @@
       const studentActionsBar = document.getElementById('student-actions-bar');
       const dropEnrolledBtn = document.getElementById('dropdown-enrolled-btn');
 
-      if (state.currentUser.role === 'admin') {
+      const isAdmin = state.currentUser.role === 'admin';
+      const isStudent = state.currentUser.role === 'student' || !!state.currentUser.isStudent || isAdmin;
+
+      if (isAdmin && state.currentUser.isStudent) {
+        roleBadge.textContent = "Admin & Estudante";
+        roleBadge.className = "text-[9px] font-bold uppercase px-1.5 py-0.2 rounded bg-purple-100 text-purple-800 border border-purple-300";
+        dropRoleBadge.textContent = "Administrador & Estudante";
+        dropRoleBadge.className = "text-[9px] font-bold uppercase px-1.5 py-0.5 rounded bg-purple-100 text-purple-800 border border-purple-300 mt-1 inline-block";
+      } else if (isAdmin) {
         roleBadge.textContent = "Admin";
         roleBadge.className = "text-[9px] font-bold uppercase px-1.5 py-0.2 rounded bg-amber-100 text-amber-800 border border-amber-300";
         dropRoleBadge.textContent = "Administrador";
         dropRoleBadge.className = "text-[9px] font-bold uppercase px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 border border-amber-300 mt-1 inline-block";
-        adminGradesPanel.classList.remove('hidden');
-        adminFilesPanel.classList.remove('hidden');
-        if (adminAbsencesPanel) adminAbsencesPanel.classList.remove('hidden');
-        btnStudentsTab.classList.remove('hidden');
-        mobBtnStudents.classList.remove('hidden');
-        studentActionsBar.classList.add('hidden');
-        if (dropEnrolledBtn) dropEnrolledBtn.classList.add('hidden');
       } else {
         roleBadge.textContent = "Estudante";
         roleBadge.className = "text-[9px] font-bold uppercase px-1.5 py-0.2 rounded bg-indigo-100 text-indigo-800 border border-indigo-200";
         dropRoleBadge.textContent = "Estudante";
         dropRoleBadge.className = "text-[9px] font-bold uppercase px-1.5 py-0.5 rounded bg-indigo-100 text-indigo-800 border border-indigo-200 mt-1 inline-block";
+      }
+
+      // Painéis Admin visíveis para quem tem papel Admin
+      if (isAdmin) {
+        adminGradesPanel.classList.remove('hidden');
+        adminFilesPanel.classList.remove('hidden');
+        if (adminAbsencesPanel) adminAbsencesPanel.classList.remove('hidden');
+        btnStudentsTab.classList.remove('hidden');
+        mobBtnStudents.classList.remove('hidden');
+      } else {
         adminGradesPanel.classList.add('hidden');
         adminFilesPanel.classList.add('hidden');
         if (adminAbsencesPanel) adminAbsencesPanel.classList.add('hidden');
         btnStudentsTab.classList.add('hidden');
         mobBtnStudents.classList.add('hidden');
+      }
+
+      // Funcionalidades de Estudante visíveis para Estudante
+      if (isStudent) {
         studentActionsBar.classList.remove('hidden');
         if (dropEnrolledBtn) dropEnrolledBtn.classList.remove('hidden');
+      } else {
+        studentActionsBar.classList.add('hidden');
+        if (dropEnrolledBtn) dropEnrolledBtn.classList.add('hidden');
       }
 
       updateSubjectSelects();
@@ -2308,13 +2350,16 @@
 
       const userId = state.currentUser ? state.currentUser.id : null;
       const isAdmin = state.currentUser && state.currentUser.role === 'admin';
+      const isStudent = state.currentUser && (state.currentUser.role === 'student' || !!state.currentUser.isStudent);
       const userGrades = (userId && state.grades[userId]) ? state.grades[userId] : {};
       
       let displaySubjects = state.subjects;
-      if (!isAdmin && userId) {
+      if (isStudent && userId) {
         const enrolled = state.enrolledSubjects[userId] || [];
         document.getElementById('student-enrolled-count').textContent = enrolled.length;
-        displaySubjects = state.subjects.filter(s => enrolled.includes(s.id));
+        if (enrolled.length > 0) {
+          displaySubjects = state.subjects.filter(s => enrolled.includes(s.id));
+        }
       }
 
       if (state.subjects.length === 0) {
@@ -2364,7 +2409,7 @@
         }
 
         let simulationCardHtml = '';
-        if (!isAdmin) {
+        if (isStudent) {
           const sim = calculateNeededGrades(subject, userGrades);
           if (sim) {
             if (sim.status === 'guaranteed') {
@@ -2459,7 +2504,7 @@
               <button onclick="openSubjectInfoModal('${subject.id}')" class="px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm cursor-pointer" title="Ver professores e contactos desta cadeira">
                 <i class="fa-solid fa-circle-info text-indigo-600"></i> Mais informações
               </button>
-              ${!isAdmin ? statusBadge : ''}
+              ${isStudent ? statusBadge : ''}
               ${isAdmin ? `
                 <button onclick="deleteSubject('${subject.id}')" class="text-rose-600 hover:text-rose-700 text-xs font-bold px-2.5 py-1.5 rounded-lg hover:bg-rose-50 transition" title="Eliminar Cadeira">
                   <i class="fa-regular fa-trash-can mr-1"></i> Eliminar
@@ -2481,7 +2526,8 @@
                       <th class="pb-3 font-bold">Avaliação</th>
                       <th class="pb-3 font-bold">Peso</th>
                       <th class="pb-3 font-bold">Disponibilidade</th>
-                      <th class="pb-3 font-bold">${isAdmin ? 'Ação' : 'Classificação (0-20)'}</th>
+                      <th class="pb-3 font-bold">${isStudent ? 'Classificação (0-20)' : ''}</th>
+                      ${isAdmin ? '<th class="pb-3 font-bold text-right">Gestão (Admin)</th>' : ''}
                     </tr>
                   </thead>
                   <tbody class="divide-y divide-slate-100">
@@ -2499,35 +2545,40 @@
                               ? `<span class="text-emerald-700 font-semibold flex items-center gap-1"><i class="fa-solid fa-lock-open text-[10px]"></i> Disponível</span>` 
                               : `<span class="text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-lg font-semibold inline-flex items-center gap-1"><i class="fa-solid fa-lock text-[10px]"></i> Abre: ${test.openDate}</span>`}
                           </td>
-                          <td class="py-3">
-                            ${isAdmin ? `
-                              <button onclick="deleteTest('${subject.id}', '${test.id}')" class="text-rose-600 hover:text-rose-800 text-xs font-semibold hover:bg-rose-50 px-2 py-1 rounded transition">
+                          ${isStudent ? `
+                            <td class="py-3">
+                              ${isAllowed ? `
+                                <div class="flex items-center gap-2">
+                                  <input
+                                    type="number"
+                                    min="0"
+                                    max="20"
+                                    step="0.1"
+                                    value="${grade}"
+                                    placeholder="--"
+                                    onchange="saveGrade('${test.id}', this.value)"
+                                    class="w-24 px-3 py-1.5 border rounded-xl text-sm text-center font-bold outline-none focus:border-indigo-600 transition ${
+                                      grade !== ''
+                                        ? (grade >= 9.5
+                                            ? 'text-emerald-700 bg-emerald-50 border-emerald-300'
+                                            : 'text-rose-700 bg-rose-50 border-rose-300')
+                                        : 'text-slate-700 bg-white'
+                                    }"
+                                  />
+                                  <span class="text-xs text-slate-400 font-medium">/ 20</span>
+                                </div>
+                              ` : `
+                                <span class="text-xs text-slate-400 italic">Bloqueado até à data definida</span>
+                              `}
+                            </td>
+                          ` : ''}
+                          ${isAdmin ? `
+                            <td class="py-3 text-right">
+                              <button onclick="deleteTest('${subject.id}', '${test.id}')" class="text-rose-600 hover:text-rose-800 text-xs font-semibold hover:bg-rose-50 px-2 py-1 rounded transition" title="Apagar avaliação">
                                 <i class="fa-regular fa-trash-can mr-1"></i> Apagar
                               </button>
-                            ` : (isAllowed ? `
-                              <div class="flex items-center gap-2">
-                                <input
-                                  type="number"
-                                  min="0"
-                                  max="20"
-                                  step="0.1"
-                                  value="${grade}"
-                                  placeholder="--"
-                                  onchange="saveGrade('${test.id}', this.value)"
-                                  class="w-24 px-3 py-1.5 border rounded-xl text-sm text-center font-bold outline-none focus:border-indigo-600 transition ${
-                                    grade !== ''
-                                      ? (grade >= 9.5
-                                          ? 'text-emerald-700 bg-emerald-50 border-emerald-300'
-                                          : 'text-rose-700 bg-rose-50 border-rose-300')
-                                      : 'text-slate-700 bg-white'
-                                  }"
-                                />
-                                <span class="text-xs text-slate-400 font-medium">/ 20</span>
-                              </div>
-                            ` : `
-                              <span class="text-xs text-slate-400 italic">Bloqueado até à data definida</span>
-                            `)}
-                          </td>
+                            </td>
+                          ` : ''}
                         </tr>
                       `;
                     }).join('')}
@@ -2552,12 +2603,8 @@
                             : `<span class="text-amber-600 font-semibold">Abre: ${test.openDate}</span>`}
                         </div>
                       </div>
-                      <div class="shrink-0">
-                        ${isAdmin ? `
-                          <button onclick="deleteTest('${subject.id}', '${test.id}')" class="text-rose-600 text-xs font-bold p-1.5">
-                            <i class="fa-regular fa-trash-can"></i>
-                          </button>
-                        ` : (isAllowed ? `
+                      <div class="shrink-0 flex items-center gap-2">
+                        ${isStudent ? (isAllowed ? `
                           <input
                             type="number"
                             min="0"
@@ -2578,7 +2625,12 @@
                           <span class="w-8 h-8 rounded-lg bg-slate-200/80 text-slate-400 flex items-center justify-center text-xs" title="Ainda não disponível">
                             <i class="fa-solid fa-lock"></i>
                           </span>
-                        `)}
+                        `) : ''}
+                        ${isAdmin ? `
+                          <button onclick="deleteTest('${subject.id}', '${test.id}')" class="text-rose-600 text-xs font-bold p-1.5" title="Apagar avaliação">
+                            <i class="fa-regular fa-trash-can"></i>
+                          </button>
+                        ` : ''}
                       </div>
                     </div>
                   `;
