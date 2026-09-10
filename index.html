@@ -472,6 +472,7 @@
       </button>
       <button onclick="switchTab('files')" id="tab-btn-files" class="py-3 px-5 border-b-2 border-transparent font-medium text-slate-500 hover:text-indigo-600 flex items-center gap-2 text-sm transition">
         <i class="fa-solid fa-folder-open"></i> Arquivo
+        <span id="nav-files-pending-badge" class="hidden px-1.5 py-0.2 bg-amber-500 text-white text-[10px] font-bold rounded-full"></span>
       </button>
       <button onclick="switchTab('absences')" id="tab-btn-absences" class="py-3 px-5 border-b-2 border-transparent font-medium text-slate-500 hover:text-indigo-600 flex items-center gap-2 text-sm transition">
         <i class="fa-solid fa-clipboard-user"></i> Faltas
@@ -603,22 +604,48 @@
     <!-- ============================================== -->
     <section id="tab-files" class="hidden animate-fade">
 
-      <!-- Painel Admin: Upload de Ficheiro -->
+      <!-- Caixa de Pedidos Pendentes (Admin: Analisar, Aceitar ou Recusar) -->
+      <div id="admin-pending-files-box" class="hidden mb-6 sm:mb-8 bg-amber-50/80 border border-amber-300 p-4 sm:p-5 rounded-2xl shadow-xs animate-fade">
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="text-xs sm:text-sm font-bold text-amber-900 flex items-center gap-2">
+            <i class="fa-solid fa-clock-rotate-left text-amber-600"></i> Pedidos de Alteração / Documentos Pendentes
+            <span id="admin-pending-files-count" class="bg-amber-200 text-amber-900 text-[10px] px-2 py-0.5 rounded-full font-extrabold">0</span>
+          </h3>
+          <span class="text-[10px] sm:text-xs text-amber-800 font-semibold bg-amber-100/90 px-2.5 py-0.5 rounded-full border border-amber-300">Requer análise</span>
+        </div>
+        <p class="text-xs text-amber-800/90 mb-3.5">Estudantes submeteram estes documentos para serem adicionados ao arquivo. Analisa cada ficheiro e decide se aceitas para publicação ou se recusas:</p>
+        <div id="admin-pending-files-list" class="space-y-3"></div>
+      </div>
+
+      <!-- Caixa de Pedidos Submetidos (Estudante: Os Meus Pedidos em Análise) -->
+      <div id="student-pending-files-box" class="hidden mb-6 sm:mb-8 bg-indigo-50/70 border border-indigo-200 p-4 sm:p-5 rounded-2xl shadow-xs animate-fade">
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="text-xs sm:text-sm font-bold text-indigo-900 flex items-center gap-2">
+            <i class="fa-solid fa-hourglass-half text-indigo-600"></i> Os teus Pedidos de Documentos
+            <span id="student-pending-files-count" class="bg-indigo-200 text-indigo-900 text-[10px] px-2 py-0.5 rounded-full font-bold">0</span>
+          </h3>
+        </div>
+        <p class="text-xs text-indigo-800/80 mb-3">Documentos que submeteste e que estão atualmente a aguardar análise do Administrador:</p>
+        <div id="student-pending-files-list" class="space-y-2.5"></div>
+      </div>
+
+      <!-- Painel de Upload / Pedido de Alteração (Visível para Admin e Estudante) -->
       <div id="admin-files-panel" class="hidden mb-6 sm:mb-8 bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-slate-200">
-        <div class="flex items-center justify-between mb-4">
-          <h2 class="text-sm sm:text-base font-bold text-slate-800 flex items-center gap-2">
+        <div class="flex items-center justify-between mb-3">
+          <h2 id="files-panel-title" class="text-sm sm:text-base font-bold text-slate-800 flex items-center gap-2">
             <i class="fa-solid fa-cloud-arrow-up text-indigo-600"></i> Publicar no Arquivo (Admin)
           </h2>
-          <span class="text-[10px] bg-indigo-50 text-indigo-700 font-bold px-2 py-0.5 rounded-full border border-indigo-200">
+          <span id="files-panel-badge" class="text-[10px] bg-indigo-50 text-indigo-700 font-bold px-2.5 py-0.5 rounded-full border border-indigo-200">
             Administrador
           </span>
         </div>
+        <p id="files-panel-desc" class="text-xs text-slate-500 mb-4">Carrega ficheiros, testes e apontamentos para disponibilizar a toda a turma.</p>
 
         <form onsubmit="uploadFile(event)" class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 items-end bg-slate-50 p-4 rounded-xl border border-slate-200">
           <div>
             <label class="block text-xs font-bold text-slate-600 mb-1">Cadeira</label>
             <select id="file-subject-select" required class="w-full px-3 py-2.5 border rounded-xl text-sm bg-white outline-none focus:border-indigo-600">
-              <option value="">Seleciona...</option>
+              <option value="">Seleciona a cadeira...</option>
             </select>
           </div>
           <div>
@@ -630,8 +657,9 @@
             <input type="file" id="file-input" accept=".pdf,application/pdf,image/*" required class="w-full text-xs text-slate-500 file:mr-2 file:py-2 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-indigo-100 file:text-indigo-800 hover:file:bg-indigo-200 cursor-pointer">
           </div>
           <div class="sm:col-span-3 flex justify-end pt-2">
-            <button type="submit" class="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-6 py-2.5 rounded-xl shadow transition flex items-center justify-center gap-1.5">
-              <i class="fa-solid fa-cloud-arrow-up"></i> Publicar Documento
+            <button id="files-submit-btn" type="submit" class="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-6 py-2.5 rounded-xl shadow transition flex items-center justify-center gap-2 cursor-pointer">
+              <i id="files-submit-icon" class="fa-solid fa-cloud-arrow-up"></i>
+              <span id="files-submit-text">Publicar Documento</span>
             </button>
           </div>
         </form>
@@ -770,9 +798,10 @@
       <i class="fa-solid fa-graduation-cap text-lg"></i>
       <span>Cadeiras</span>
     </button>
-    <button onclick="switchTab('files')" id="mob-btn-files" class="flex flex-col items-center gap-1 text-slate-400 px-2.5 py-1 text-[11px] font-medium">
+    <button onclick="switchTab('files')" id="mob-btn-files" class="relative flex flex-col items-center gap-1 text-slate-400 px-2.5 py-1 text-[11px] font-medium">
       <i class="fa-solid fa-folder-open text-lg"></i>
       <span>Arquivo</span>
+      <span id="mob-files-pending-badge" class="hidden absolute top-1 right-3 w-2 h-2 bg-amber-500 rounded-full"></span>
     </button>
     <button onclick="switchTab('absences')" id="mob-btn-absences" class="flex flex-col items-center gap-1 text-slate-400 px-2.5 py-1 text-[11px] font-medium">
       <i class="fa-solid fa-clipboard-user text-lg"></i>
@@ -873,6 +902,7 @@
       enrolledSubjects: JSON.parse(localStorage.getItem('study_enrolled_subjects')) || {
         'usr_diogoludgero': ['sub_1', 'sub_2', 'sub_3']
       },
+      fileRequests: JSON.parse(localStorage.getItem('study_file_requests')) || [],
       files: JSON.parse(localStorage.getItem('study_files')) || [
         {
           id: 'file_demo_1',
@@ -957,6 +987,7 @@
       localStorage.setItem('study_grades', JSON.stringify(state.grades));
       localStorage.setItem('study_enrolled_subjects', JSON.stringify(state.enrolledSubjects));
       localStorage.setItem('study_files', JSON.stringify(state.files));
+      localStorage.setItem('study_file_requests', JSON.stringify(state.fileRequests || []));
       localStorage.setItem('study_absences', JSON.stringify(state.absences));
     }
     // Salvaguarda e Migração para utilizadores existentes
@@ -1408,7 +1439,6 @@
         dropRoleBadge.className = "text-[9px] font-bold uppercase px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 border border-amber-300 mt-1 inline-block";
         
         adminGradesPanel.classList.remove('hidden');
-        adminFilesPanel.classList.remove('hidden');
         if (adminAbsencesPanel) adminAbsencesPanel.classList.remove('hidden');
         btnStudentsTab.classList.remove('hidden');
         mobBtnStudents.classList.remove('hidden');
@@ -1419,10 +1449,39 @@
         dropRoleBadge.className = "text-[9px] font-bold uppercase px-1.5 py-0.5 rounded bg-indigo-100 text-indigo-800 border border-indigo-200 mt-1 inline-block";
 
         adminGradesPanel.classList.add('hidden');
-        adminFilesPanel.classList.add('hidden');
         if (adminAbsencesPanel) adminAbsencesPanel.classList.add('hidden');
         btnStudentsTab.classList.add('hidden');
         mobBtnStudents.classList.add('hidden');
+      }
+
+      // Configuração do Painel de Arquivo para Admin e Estudante
+      if (adminFilesPanel) {
+        adminFilesPanel.classList.remove('hidden');
+        const titleEl = document.getElementById('files-panel-title');
+        const badgeEl = document.getElementById('files-panel-badge');
+        const descEl = document.getElementById('files-panel-desc');
+        const submitIcon = document.getElementById('files-submit-icon');
+        const submitText = document.getElementById('files-submit-text');
+
+        if (isAdmin) {
+          if (titleEl) titleEl.innerHTML = '<i class="fa-solid fa-cloud-arrow-up text-indigo-600"></i> Publicar no Arquivo (Admin)';
+          if (badgeEl) {
+            badgeEl.textContent = "Administrador";
+            badgeEl.className = "text-[10px] bg-amber-50 text-amber-700 font-bold px-2.5 py-0.5 rounded-full border border-amber-200";
+          }
+          if (descEl) descEl.textContent = "Carrega ficheiros, testes e apontamentos para disponibilizar diretamente a toda a turma.";
+          if (submitIcon) submitIcon.className = "fa-solid fa-cloud-arrow-up";
+          if (submitText) submitText.textContent = "Publicar Documento";
+        } else {
+          if (titleEl) titleEl.innerHTML = '<i class="fa-solid fa-paper-plane text-indigo-600"></i> Sugerir Documento / Pedir Alteração';
+          if (badgeEl) {
+            badgeEl.textContent = "Estudante";
+            badgeEl.className = "text-[10px] bg-indigo-50 text-indigo-700 font-bold px-2.5 py-0.5 rounded-full border border-indigo-200";
+          }
+          if (descEl) descEl.textContent = "Podes submeter um exame, ficha ou apontamento. O Administrador irá analisar o documento antes de o aceitar ou recusar para o arquivo.";
+          if (submitIcon) submitIcon.className = "fa-solid fa-paper-plane";
+          if (submitText) submitText.textContent = "Pedir Alteração";
+        }
       }
 
       studentActionsBar.classList.remove('hidden');
@@ -1529,7 +1588,7 @@
       }
 
       if (tab === 'students') renderStudentsList();
-      if (tab === 'files') renderArchiveTabs();
+      if (tab === 'files') { renderArchiveTabs(); renderFiles(); }
       if (tab === 'absences') renderAbsences();
     }
 
@@ -2995,27 +3054,310 @@ ${480 + streamLen}
       const title = document.getElementById('file-title').value.trim();
       const fileInput = document.getElementById('file-input');
 
-      if (!fileInput.files.length) return;
+      if (!subjectId) {
+        showToast("Por favor seleciona a cadeira.", "error");
+        return;
+      }
+      if (!title) {
+        showToast("Por favor introduz um título para o documento.", "error");
+        return;
+      }
+      if (!fileInput.files.length) {
+        showToast("Por favor escolhe um ficheiro.", "error");
+        return;
+      }
       const file = fileInput.files[0];
+      const activeRole = getActiveRole();
+      const isAdmin = activeRole === 'admin';
 
       const reader = new FileReader();
       reader.onload = function(event) {
-        state.files.push({
-          id: 'file_' + Date.now(),
-          title: title,
-          subjectId: subjectId,
-          fileName: file.name,
-          dataUrl: event.target.result
-        });
+        const dataUrl = event.target.result;
+        const fileSizeStr = file.size > 1024 * 1024 
+          ? (file.size / (1024 * 1024)).toFixed(1) + ' MB' 
+          : (file.size / 1024).toFixed(1) + ' KB';
 
-        saveState();
-        renderArchiveTabs();
-        renderFiles();
-        fileInput.value = '';
-        document.getElementById('file-title').value = '';
-        showToast(`Documento "${title}" publicado!`);
+        if (isAdmin) {
+          // Publicação direta do Administrador
+          state.files.push({
+            id: 'file_' + Date.now(),
+            title: title,
+            subjectId: subjectId,
+            fileName: file.name,
+            fileSize: fileSizeStr,
+            dataUrl: dataUrl
+          });
+
+          saveState();
+          renderArchiveTabs();
+          renderFiles();
+          fileInput.value = '';
+          document.getElementById('file-title').value = '';
+          showToast(`Documento "${title}" publicado no arquivo!`, "success");
+        } else {
+          // Pedido de alteração / sugestão do Estudante para análise do Admin
+          if (!Array.isArray(state.fileRequests)) {
+            state.fileRequests = [];
+          }
+
+          const user = state.currentUser || {};
+          const newRequest = {
+            id: 'freq_' + Date.now(),
+            title: title,
+            subjectId: subjectId,
+            fileName: file.name,
+            fileSize: fileSizeStr,
+            dataUrl: dataUrl,
+            studentId: user.id || 'usr_unknown',
+            studentName: user.name || user.username || 'Estudante',
+            studentUsername: user.username || 'aluno',
+            studentAvatar: user.avatar || null,
+            submittedAt: new Date().toLocaleDateString('pt-PT', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })
+          };
+
+          state.fileRequests.push(newRequest);
+          saveState();
+          renderPendingFiles();
+          fileInput.value = '';
+          document.getElementById('file-title').value = '';
+          showToast(`Pedido enviado com sucesso! O Administrador irá analisar para aceitar ou recusar.`, "success");
+        }
       };
       reader.readAsDataURL(file);
+    }
+
+    // RENDERIZAR PEDIDOS PENDENTES DE DOCUMENTOS (ADMIN E ESTUDANTE)
+    function renderPendingFiles() {
+      const adminBox = document.getElementById('admin-pending-files-box');
+      const adminList = document.getElementById('admin-pending-files-list');
+      const adminCount = document.getElementById('admin-pending-files-count');
+
+      const studentBox = document.getElementById('student-pending-files-box');
+      const studentList = document.getElementById('student-pending-files-list');
+      const studentCount = document.getElementById('student-pending-files-count');
+
+      const navBadge = document.getElementById('nav-files-pending-badge');
+      const mobBadge = document.getElementById('mob-files-pending-badge');
+
+      const activeRole = getActiveRole();
+      const isAdmin = activeRole === 'admin';
+      const requests = Array.isArray(state.fileRequests) ? state.fileRequests : [];
+
+      // Notificação no menu
+      if (navBadge) {
+        if (isAdmin && requests.length > 0) {
+          navBadge.textContent = requests.length;
+          navBadge.classList.remove('hidden');
+        } else {
+          navBadge.classList.add('hidden');
+        }
+      }
+      if (mobBadge) {
+        if (isAdmin && requests.length > 0) {
+          mobBadge.classList.remove('hidden');
+        } else {
+          mobBadge.classList.add('hidden');
+        }
+      }
+
+      if (isAdmin) {
+        if (studentBox) studentBox.classList.add('hidden');
+        if (adminBox && adminList) {
+          if (requests.length > 0) {
+            adminBox.classList.remove('hidden');
+            if (adminCount) adminCount.textContent = requests.length;
+
+            adminList.innerHTML = requests.map(req => {
+              const subject = state.subjects.find(s => s.id === req.subjectId);
+              const subName = subject ? subject.name : 'Cadeira Desconhecida';
+              const avatarHtml = req.studentAvatar 
+                ? `<img src="${req.studentAvatar}" class="w-9 h-9 rounded-full object-cover border border-slate-200 shrink-0">`
+                : `<div class="w-9 h-9 rounded-full bg-indigo-100 text-indigo-700 font-bold text-xs flex items-center justify-center border border-indigo-200 shrink-0">${(req.studentName || req.studentUsername || 'E').charAt(0).toUpperCase()}</div>`;
+
+              return `
+                <div class="p-3.5 bg-white rounded-xl border border-amber-200 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-3">
+                  <div class="flex items-start gap-3 min-w-0">
+                    ${avatarHtml}
+                    <div class="min-w-0">
+                      <div class="flex items-center gap-2 flex-wrap">
+                        <span class="font-bold text-xs text-slate-800">${req.studentName || req.studentUsername}</span>
+                        <span class="text-[11px] text-slate-400">(@${req.studentUsername})</span>
+                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">${subName}</span>
+                        <span class="text-[10px] text-slate-400"><i class="fa-regular fa-clock mr-0.5"></i>${req.submittedAt}</span>
+                      </div>
+                      <h4 class="font-bold text-slate-800 text-sm mt-1">${req.title}</h4>
+                      <p class="text-[11px] text-slate-500 flex items-center gap-1 mt-0.5">
+                        <i class="fa-regular fa-file-lines text-slate-400"></i> ${req.fileName} 
+                        <span class="text-slate-400">(${req.fileSize || 'Ficheiro'})</span>
+                      </p>
+                    </div>
+                  </div>
+                  <div class="flex items-center gap-2 self-end md:self-center shrink-0">
+                    <button type="button" onclick="previewPendingFile('${req.id}')" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl border border-slate-200 transition flex items-center gap-1.5 cursor-pointer">
+                      <i class="fa-solid fa-eye text-indigo-600"></i> Analisar
+                    </button>
+                    <button type="button" onclick="approveFileRequest('${req.id}')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-xs transition flex items-center gap-1.5 cursor-pointer">
+                      <i class="fa-solid fa-check"></i> Aceitar
+                    </button>
+                    <button type="button" onclick="rejectFileRequest('${req.id}')" class="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 hover:text-rose-700 border border-rose-200 hover:border-rose-300 text-xs font-bold rounded-xl transition flex items-center gap-1.5 cursor-pointer">
+                      <i class="fa-solid fa-xmark"></i> Recusar
+                    </button>
+                  </div>
+                </div>
+              `;
+            }).join('');
+          } else {
+            adminBox.classList.add('hidden');
+          }
+        }
+      } else {
+        // Modo Estudante
+        if (adminBox) adminBox.classList.add('hidden');
+        if (studentBox && studentList) {
+          const myId = state.currentUser ? state.currentUser.id : null;
+          const myRequests = requests.filter(r => r.studentId === myId);
+
+          if (myRequests.length > 0) {
+            studentBox.classList.remove('hidden');
+            if (studentCount) studentCount.textContent = myRequests.length;
+
+            studentList.innerHTML = myRequests.map(req => {
+              const subject = state.subjects.find(s => s.id === req.subjectId);
+              const subName = subject ? subject.name : 'Cadeira';
+              return `
+                <div class="p-3 bg-white rounded-xl border border-indigo-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2 shadow-xs">
+                  <div class="min-w-0">
+                    <div class="flex items-center gap-2 flex-wrap">
+                      <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">${subName}</span>
+                      <span class="font-bold text-xs text-slate-800">${req.title}</span>
+                      <span class="text-[11px] text-slate-400">(${req.fileName})</span>
+                    </div>
+                    <div class="flex items-center gap-2 mt-1">
+                      <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-200 flex items-center gap-1">
+                        <i class="fa-solid fa-hourglass-half text-[9px]"></i> A aguardar análise do Administrador
+                      </span>
+                      <span class="text-[10px] text-slate-400">${req.submittedAt}</span>
+                    </div>
+                  </div>
+                  <div class="flex items-center gap-2 self-end sm:self-auto shrink-0">
+                    <button type="button" onclick="previewPendingFile('${req.id}')" class="px-2.5 py-1 text-xs text-indigo-600 hover:text-indigo-800 font-bold bg-indigo-50 hover:bg-indigo-100 rounded-lg transition flex items-center gap-1 cursor-pointer">
+                      <i class="fa-solid fa-eye text-[11px]"></i> Ver
+                    </button>
+                    <button type="button" onclick="cancelStudentFileRequest('${req.id}')" class="px-2.5 py-1 text-xs text-rose-500 hover:text-rose-700 font-bold hover:bg-rose-50 rounded-lg transition flex items-center gap-1 cursor-pointer">
+                      <i class="fa-regular fa-trash-can text-[11px]"></i> Cancelar
+                    </button>
+                  </div>
+                </div>
+              `;
+            }).join('');
+          } else {
+            studentBox.classList.add('hidden');
+          }
+        }
+      }
+    }
+
+    // VISUALIZAR / ANALISAR FICHEIRO PENDENTE
+    function previewPendingFile(requestId) {
+      const req = (state.fileRequests || []).find(r => r.id === requestId);
+      if (!req || !req.dataUrl) return;
+
+      if (req.dataUrl.startsWith('data:application/pdf;base64,')) {
+        try {
+          const base64Data = req.dataUrl.split(',')[1];
+          const binaryString = window.atob(base64Data);
+          const len = binaryString.length;
+          const bytes = new Uint8Array(len);
+          for (let i = 0; i < len; i++) {
+            bytes[i] = binaryString.charCodeAt(i);
+          }
+          const blob = new Blob([bytes], { type: 'application/pdf' });
+          const blobUrl = URL.createObjectURL(blob);
+          window.open(blobUrl, '_blank');
+          return;
+        } catch(e) { console.error(e); }
+      }
+
+      if (req.dataUrl.startsWith('data:')) {
+        try {
+          const parts = req.dataUrl.split(',');
+          const mime = (parts[0].match(/:(.*?);/) || [])[1] || 'application/pdf';
+          const binaryString = window.atob(parts[1]);
+          const bytes = new Uint8Array(binaryString.length);
+          for (let i = 0; i < binaryString.length; i++) {
+            bytes[i] = binaryString.charCodeAt(i);
+          }
+          const blob = new Blob([bytes], { type: mime });
+          const blobUrl = URL.createObjectURL(blob);
+          window.open(blobUrl, '_blank');
+          return;
+        } catch(e) { console.error(e); }
+      }
+
+      window.open(req.dataUrl, '_blank');
+    }
+
+    // ADMIN: ACEITAR PEDIDO DE DOCUMENTO
+    function approveFileRequest(requestId) {
+      if (getActiveRole() !== 'admin') {
+        showToast("Apenas o Administrador pode aprovar documentos.", "error");
+        return;
+      }
+      const req = (state.fileRequests || []).find(r => r.id === requestId);
+      if (!req) return;
+
+      // Adicionar aos ficheiros publicados no arquivo
+      state.files.push({
+        id: 'file_' + Date.now(),
+        title: req.title,
+        subjectId: req.subjectId,
+        fileName: req.fileName,
+        fileSize: req.fileSize,
+        dataUrl: req.dataUrl,
+        uploadedBy: req.studentName || req.studentUsername,
+        uploadedAt: req.submittedAt
+      });
+
+      // Remover da lista de pendentes
+      state.fileRequests = state.fileRequests.filter(r => r.id !== requestId);
+
+      saveState();
+      renderPendingFiles();
+      renderArchiveTabs();
+      renderFiles();
+      showToast(`Documento "${req.title}" aceite e publicado com sucesso!`, "success");
+    }
+
+    // ADMIN: RECUSAR PEDIDO DE DOCUMENTO
+    function rejectFileRequest(requestId) {
+      if (getActiveRole() !== 'admin') {
+        showToast("Apenas o Administrador pode recusar documentos.", "error");
+        return;
+      }
+      const req = (state.fileRequests || []).find(r => r.id === requestId);
+      if (!req) return;
+
+      const confirmed = confirm(`Tens a certeza de que desejas recusar o pedido de "${req.title}" submetido por ${req.studentName || req.studentUsername}?`);
+      if (!confirmed) return;
+
+      state.fileRequests = state.fileRequests.filter(r => r.id !== requestId);
+      saveState();
+      renderPendingFiles();
+      showToast(`Pedido de "${req.title}" recusado.`, "info");
+    }
+
+    // ESTUDANTE: CANCELAR O PRÓPRIO PEDIDO
+    function cancelStudentFileRequest(requestId) {
+      const req = (state.fileRequests || []).find(r => r.id === requestId);
+      if (!req) return;
+
+      const confirmed = confirm(`Desejas cancelar o teu pedido de envio do documento "${req.title}"?`);
+      if (!confirmed) return;
+
+      state.fileRequests = state.fileRequests.filter(r => r.id !== requestId);
+      saveState();
+      renderPendingFiles();
+      showToast("Pedido cancelado.");
     }
 
     function deleteFile(fileId) {
@@ -3029,6 +3371,7 @@ ${480 + streamLen}
     }
 
     function renderFiles() {
+      renderPendingFiles();
       const container = document.getElementById('files-container');
       container.innerHTML = '';
 
@@ -3122,6 +3465,9 @@ ${480 + streamLen}
       delete state.grades[studentId];
       delete state.absences[studentId];
       delete state.enrolledSubjects[studentId];
+      if (Array.isArray(state.fileRequests)) {
+        state.fileRequests = state.fileRequests.filter(r => r.studentId !== studentId);
+      }
 
       saveState();
       renderStudentsList();
