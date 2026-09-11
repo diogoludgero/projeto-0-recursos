@@ -924,7 +924,6 @@
     if (typeof supabase !== 'undefined' && SUPABASE_URL && SUPABASE_ANON_KEY && SUPABASE_URL.startsWith('https://')) {
       try {
         supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        isCloudConnected = true;
         console.log("Supabase Cloud Database inicializado!");
       } catch (e) {
         console.warn("Aviso ao ligar ao Supabase:", e);
@@ -945,6 +944,21 @@
       }
     ];
 
+    // A cache do navegador é opcional; dados inválidos não devem impedir o arranque.
+    function readStoredJson(key) {
+      try {
+        const value = JSON.parse(localStorage.getItem(key));
+        const arrayKeys = ['study_users', 'study_subjects', 'study_files', 'study_file_requests'];
+        if (arrayKeys.includes(key)) {
+          return Array.isArray(value) && value.every(item => item && typeof item === 'object') ? value : null;
+        }
+        return value && typeof value === 'object' && !Array.isArray(value) ? value : null;
+      } catch (error) {
+        console.warn('Cache local indisponível ou inválida:', key);
+        return null;
+      }
+    }
+
     // LER SESSÃO ATIVA (LOCALSTORAGE OU SESSIONSTORAGE)
     let initialUser = null;
     let initialRemember = false;
@@ -964,8 +978,8 @@
     let state = {
       currentUser: initialUser,
       rememberMe: initialRemember,
-      users: JSON.parse(localStorage.getItem('study_users')) || INITIAL_USERS,
-      subjects: JSON.parse(localStorage.getItem('study_subjects')) || [
+      users: readStoredJson('study_users') || INITIAL_USERS,
+      subjects: readStoredJson('study_subjects') || [
         {
           id: 'sub_1',
           name: 'Programação Orientada a Objetos',
@@ -1007,34 +1021,17 @@
           ]
         }
       ],
-      absences: JSON.parse(localStorage.getItem('study_absences')) || {
+      absences: readStoredJson('study_absences') || {
         'usr_diogoludgero': []
       },
-      grades: JSON.parse(localStorage.getItem('study_grades')) || {
+      grades: readStoredJson('study_grades') || {
         'usr_diogoludgero': {}
       },
-      enrolledSubjects: JSON.parse(localStorage.getItem('study_enrolled_subjects')) || {
+      enrolledSubjects: readStoredJson('study_enrolled_subjects') || {
         'usr_diogoludgero': ['sub_1', 'sub_2', 'sub_3']
       },
-      fileRequests: JSON.parse(localStorage.getItem('study_file_requests')) || [],
-      files: JSON.parse(localStorage.getItem('study_files')) || [
-        {
-          id: 'file_demo_1',
-          title: 'Exame Época Normal 2023',
-          year: '2023/2024',
-          subjectId: 'sub_1',
-          fileName: 'POO_Exame_Normal_2023.pdf',
-          dataUrl: 'data:application/pdf;base64,JVBERi0xLjQKMSAwIG9iaiA8PC9UeXBlIC9DYXRhbG9nIC9QYWdlcyAyIDAgUj4+IGVuZG9iagoyIDAgb2JqIDw8L1R5cGUgL1BhZ2VzIC9LaWRzIFszIDAgUl0gL0NvdW50IDE+PiBlbmRvYmoKMyAwIG9iaiA8PC9UeXBlIC9QYWdlIC9QYXJlbnQgMiAwIFIgL01lZGlhQm94IFswIDAgNjEyIDc5Ml0gL1Jlc291cmNlcyA8PC9Gb250IDw8L0YxIDQgMCBSPj4+PiAvQ29udGVudHMgNSAwIFI+PiBlbmRvYmoKNCAwIG9iaiA8PC9UeXBlIC9Gb250IC9TdWJ0eXBlIC9UeXBlMSAvQmFzZUZvbnQgL0hlbHZldGljYS1Cb2xkPj4gZW5kb2JqCjUgMCBvYmogPDwvTGVuZ3RoIDM3MD4+IHN0cmVhbQpCVAovRjEgMTggVGYKNTAgNzIwIFRkCihQcm9ncmFtYWNhbyBPcmllbnRhZGEgYSBPYmpldG9zKSBUagovRjEgMTQgVGYKMCAtMzAgVGQKKEV4YW1lIEVwb2NhIE5vcm1hbCAyMDIzIC0gQW5vOiAyMDIzLzIwMjQpIFRqCi9GMSAxMSBUZgowIC0zNSBUZAooUHJvamV0byAyMCB2YWxvcmVzIC0gUGxhdGFmb3JtYSBkZSBFc3R1ZG8gRkVVUCkgVGoKMCAtMjIgVGQKKERvY3VtZW50byBQREYgYWJlcnRvIGVtIG5vdmEgYWJhIGRvIENocm9tZSBhIHBhcnRpciBkbyBBcnF1aXZvLikgVGoKMCAtMjAgVGQKKFV0aWxpemUgYXMgZmVycmFtZW50YXMgZG8gQ2hyb21lIG5vIHRvcG8gcGFyYSBhbXBsaWFyLCBkZXNjYXJyZWdhciBvdSBpbXByaW1pci4pIFRqCkVUCmVuZHN0cmVhbQplbmRvYmoKeHJlZgowIDYKMDAwMDAwMDAwMCA2NTUzNSBmIAowMDAwMDAwMDEwIDAwMDAwIG4gCjAwMDAwMDAwNjAgMDAwMDAgbiAKMDAwMDAwMDExNyAwMDAwMCBuIAowMDAwMDAwMjMyIDAwMDAwIG4gCjAwMDAwMDAzMDggMDAwMDAgbiAKdHJhaWxlciA8PC9TaXplIDYgL1Jvb3QgMSAwIFI+PgpzdGFydHhyZWYKNzkwCiUlRU9G'
-        },
-        {
-          id: 'file_demo_2',
-          title: 'Ficha de Exercícios de Matrizes',
-          year: '2023/2024',
-          subjectId: 'sub_2',
-          fileName: 'Algebra_Ficha_Matrizes.pdf',
-          dataUrl: 'data:application/pdf;base64,JVBERi0xLjQKMSAwIG9iaiA8PC9UeXBlIC9DYXRhbG9nIC9QYWdlcyAyIDAgUj4+IGVuZG9iagoyIDAgb2JqIDw8L1R5cGUgL1BhZ2VzIC9LaWRzIFszIDAgUl0gL0NvdW50IDE+PiBlbmRvYmoKMyAwIG9iaiA8PC9UeXBlIC9QYWdlIC9QYXJlbnQgMiAwIFIgL01lZGlhQm94IFswIDAgNjEyIDc5Ml0gL1Jlc291cmNlcyA8PC9Gb250IDw8L0YxIDQgMCBSPj4+PiAvQ29udGVudHMgNSAwIFI+PiBlbmRvYmoKNCAwIG9iaiA8PC9UeXBlIC9Gb250IC9TdWJ0eXBlIC9UeXBlMSAvQmFzZUZvbnQgL0hlbHZldGljYS1Cb2xkPj4gZW5kb2JqCjUgMCBvYmogPDwvTGVuZ3RoIDM2MT4+IHN0cmVhbQpCVAovRjEgMTggVGYKNTAgNzIwIFRkCihBbGdlYnJhIExpbmVhcikgVGoKL0YxIDE0IFRmCjAgLTMwIFRkCihGaWNoYSBkZSBFeGVyY2ljaW9zIGRlIE1hdHJpemVzIC0gQW5vOiAyMDIzLzIwMjQpIFRqCi9GMSAxMSBUZgowIC0zNSBUZAooUHJvamV0byAyMCB2YWxvcmVzIC0gUGxhdGFmb3JtYSBkZSBFc3R1ZG8gRkVVUCkgVGoKMCAtMjIgVGQKKERvY3VtZW50byBQREYgYWJlcnRvIGVtIG5vdmEgYWJhIGRvIENocm9tZSBhIHBhcnRpciBkbyBBcnF1aXZvLikgVGoKMCAtMjAgVGQKKFV0aWxpemUgYXMgZmVycmFtZW50YXMgZG8gQ2hyb21lIG5vIHRvcG8gcGFyYSBhbXBsaWFyLCBkZXNjYXJyZWdhciBvdSBpbXByaW1pci4pIFRqCkVUCmVuZHN0cmVhbQplbmRvYmoKeHJlZgowIDYKMDAwMDAwMDAwMCA2NTUzNSBmIAowMDAwMDAwMDEwIDAwMDAwIG4gCjAwMDAwMDAwNjAgMDAwMDAgbiAKMDAwMDAwMDExNyAwMDAwMCBuIAowMDAwMDAwMjMyIDAwMDAwIG4gCjAwMDAwMDAzMDggMDAwMDAgbiAKdHJhaWxlciA8PC9TaXplIDYgL1Jvb3QgMSAwIFI+PgpzdGFydHhyZWYKNzgxCiUlRU9G'
-        }
-      ],
+      fileRequests: readStoredJson('study_file_requests') || [],
+      files: readStoredJson('study_files') || [],
       selectedArchiveSubject: 'ALL'
     };
 
@@ -1084,29 +1081,38 @@
     })();
 
     function saveState() {
-      localStorage.setItem('study_users', JSON.stringify(state.users));
-      if (state.currentUser) {
-        if (state.rememberMe) {
-          localStorage.setItem('study_current_user', JSON.stringify(state.currentUser));
-          sessionStorage.removeItem('study_current_user');
-        } else {
-          sessionStorage.setItem('study_current_user', JSON.stringify(state.currentUser));
-          localStorage.removeItem('study_current_user');
+      // Guardar cada chave separadamente: ficheiros grandes não bloqueiam os restantes dados.
+      const cache = {
+        study_users: state.users,
+        study_subjects: state.subjects,
+        study_grades: state.grades,
+        study_enrolled_subjects: state.enrolledSubjects,
+        study_absences: state.absences,
+        study_files: state.files,
+        study_file_requests: state.fileRequests || []
+      };
+      Object.entries(cache).forEach(([key, value]) => {
+        try {
+          localStorage.setItem(key, JSON.stringify(value));
+        } catch (error) {
+          console.warn('Não foi possível guardar a cache local:', key);
         }
-      } else {
-        localStorage.removeItem('study_current_user');
-        sessionStorage.removeItem('study_current_user');
+      });
+      try {
+        if (state.currentUser) {
+          const storage = state.rememberMe ? localStorage : sessionStorage;
+          const otherStorage = state.rememberMe ? sessionStorage : localStorage;
+          storage.setItem('study_current_user', JSON.stringify(state.currentUser));
+          otherStorage.removeItem('study_current_user');
+        } else {
+          localStorage.removeItem('study_current_user');
+          sessionStorage.removeItem('study_current_user');
+        }
+      } catch (error) {
+        console.warn('Não foi possível guardar a sessão no navegador.');
       }
-      localStorage.setItem('study_subjects', JSON.stringify(state.subjects));
-      localStorage.setItem('study_grades', JSON.stringify(state.grades));
-      localStorage.setItem('study_enrolled_subjects', JSON.stringify(state.enrolledSubjects));
-      localStorage.setItem('study_files', JSON.stringify(state.files));
-      localStorage.setItem('study_file_requests', JSON.stringify(state.fileRequests || []));
-      localStorage.setItem('study_absences', JSON.stringify(state.absences));
     }
     // Salvaguarda e Migração para utilizadores existentes
-    const DEMO_PDF_POO = "data:application/pdf;base64,JVBERi0xLjQKMSAwIG9iaiA8PC9UeXBlIC9DYXRhbG9nIC9QYWdlcyAyIDAgUj4+IGVuZG9iagoyIDAgb2JqIDw8L1R5cGUgL1BhZ2VzIC9LaWRzIFszIDAgUl0gL0NvdW50IDE+PiBlbmRvYmoKMyAwIG9iaiA8PC9UeXBlIC9QYWdlIC9QYXJlbnQgMiAwIFIgL01lZGlhQm94IFswIDAgNjEyIDc5Ml0gL1Jlc291cmNlcyA8PC9Gb250IDw8L0YxIDQgMCBSPj4+PiAvQ29udGVudHMgNSAwIFI+PiBlbmRvYmoKNCAwIG9iaiA8PC9UeXBlIC9Gb250IC9TdWJ0eXBlIC9UeXBlMSAvQmFzZUZvbnQgL0hlbHZldGljYS1Cb2xkPj4gZW5kb2JqCjUgMCBvYmogPDwvTGVuZ3RoIDM3MD4+IHN0cmVhbQpCVAovRjEgMTggVGYKNTAgNzIwIFRkCihQcm9ncmFtYWNhbyBPcmllbnRhZGEgYSBPYmpldG9zKSBUagovRjEgMTQgVGYKMCAtMzAgVGQKKEV4YW1lIEVwb2NhIE5vcm1hbCAyMDIzIC0gQW5vOiAyMDIzLzIwMjQpIFRqCi9GMSAxMSBUZgowIC0zNSBUZAooUHJvamV0byAyMCB2YWxvcmVzIC0gUGxhdGFmb3JtYSBkZSBFc3R1ZG8gRkVVUCkgVGoKMCAtMjIgVGQKKERvY3VtZW50byBQREYgYWJlcnRvIGVtIG5vdmEgYWJhIGRvIENocm9tZSBhIHBhcnRpciBkbyBBcnF1aXZvLikgVGoKMCAtMjAgVGQKKFV0aWxpemUgYXMgZmVycmFtZW50YXMgZG8gQ2hyb21lIG5vIHRvcG8gcGFyYSBhbXBsaWFyLCBkZXNjYXJyZWdhciBvdSBpbXByaW1pci4pIFRqCkVUCmVuZHN0cmVhbQplbmRvYmoKeHJlZgowIDYKMDAwMDAwMDAwMCA2NTUzNSBmIAowMDAwMDAwMDEwIDAwMDAwIG4gCjAwMDAwMDAwNjAgMDAwMDAgbiAKMDAwMDAwMDExNyAwMDAwMCBuIAowMDAwMDAwMjMyIDAwMDAwIG4gCjAwMDAwMDAzMDggMDAwMDAgbiAKdHJhaWxlciA8PC9TaXplIDYgL1Jvb3QgMSAwIFI+PgpzdGFydHhyZWYKNzkwCiUlRU9G";
-    const DEMO_PDF_ALGEBRA = "data:application/pdf;base64,JVBERi0xLjQKMSAwIG9iaiA8PC9UeXBlIC9DYXRhbG9nIC9QYWdlcyAyIDAgUj4+IGVuZG9iagoyIDAgb2JqIDw8L1R5cGUgL1BhZ2VzIC9LaWRzIFszIDAgUl0gL0NvdW50IDE+PiBlbmRvYmoKMyAwIG9iaiA8PC9UeXBlIC9QYWdlIC9QYXJlbnQgMiAwIFIgL01lZGlhQm94IFswIDAgNjEyIDc5Ml0gL1Jlc291cmNlcyA8PC9Gb250IDw8L0YxIDQgMCBSPj4+PiAvQ29udGVudHMgNSAwIFI+PiBlbmRvYmoKNCAwIG9iaiA8PC9UeXBlIC9Gb250IC9TdWJ0eXBlIC9UeXBlMSAvQmFzZUZvbnQgL0hlbHZldGljYS1Cb2xkPj4gZW5kb2JqCjUgMCBvYmogPDwvTGVuZ3RoIDM2MT4+IHN0cmVhbQpCVAovRjEgMTggVGYKNTAgNzIwIFRkCihBbGdlYnJhIExpbmVhcikgVGoKL0YxIDE0IFRmCjAgLTMwIFRkCihGaWNoYSBkZSBFeGVyY2ljaW9zIGRlIE1hdHJpemVzIC0gQW5vOiAyMDIzLzIwMjQpIFRqCi9GMSAxMSBUZgowIC0zNSBUZAooUHJvamV0byAyMCB2YWxvcmVzIC0gUGxhdGFmb3JtYSBkZSBFc3R1ZG8gRkVVUCkgVGoKMCAtMjIgVGQKKERvY3VtZW50byBQREYgYWJlcnRvIGVtIG5vdmEgYWJhIGRvIENocm9tZSBhIHBhcnRpciBkbyBBcnF1aXZvLikgVGoKMCAtMjAgVGQKKFV0aWxpemUgYXMgZmVycmFtZW50YXMgZG8gQ2hyb21lIG5vIHRvcG8gcGFyYSBhbXBsaWFyLCBkZXNjYXJyZWdhciBvdSBpbXByaW1pci4pIFRqCkVUCmVuZHN0cmVhbQplbmRvYmoKeHJlZgowIDYKMDAwMDAwMDAwMCA2NTUzNSBmIAowMDAwMDAwMDEwIDAwMDAwIG4gCjAwMDAwMDAwNjAgMDAwMDAgbiAKMDAwMDAwMDExNyAwMDAwMCBuIAowMDAwMDAwMjMyIDAwMDAwIG4gCjAwMDAwMDAzMDggMDAwMDAgbiAKdHJhaWxlciA8PC9TaXplIDYgL1Jvb3QgMSAwIFI+PgpzdGFydHhyZWYKNzgxCiUlRU9G";
 
     state.subjects.forEach(sub => {
       if (!Array.isArray(sub.professors)) {
@@ -1147,17 +1153,15 @@
       saveState();
     }
 
-    // Atualizar demo files se ainda tiverem '#'
-    state.files.forEach(f => {
-      if (f.id === 'file_demo_1' && (!f.dataUrl || f.dataUrl === '#')) {
-        f.dataUrl = DEMO_PDF_POO;
-      }
-      if (f.id === 'file_demo_2' && (!f.dataUrl || f.dataUrl === '#')) {
-        f.dataUrl = DEMO_PDF_ALGEBRA;
-      }
-    });
-    saveState();
+    function escapeHtml(value) {
+      return String(value ?? '').replace(/[&<>"']/g, char => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      })[char]);
+    }
 
+    function inlineArgument(value) {
+      return escapeHtml(JSON.stringify(String(value)));
+    }
 
     // SISTEMA TOAST
     function showToast(message, type = 'success') {
@@ -1167,7 +1171,7 @@
       }`;
       toast.innerHTML = `
         <i class="fa-solid ${type === 'success' ? 'fa-circle-check' : 'fa-triangle-exclamation'}"></i>
-        <span>${message}</span>
+        <span>${escapeHtml(message)}</span>
       `;
       toast.classList.remove('hidden');
       setTimeout(() => {
@@ -1407,29 +1411,12 @@
         pendingName: null
       };
 
-      state.users.push(newUser);
+      if (!await createCloudUser(newUser)) return;
+
+      state.users = state.users.filter(user => user.id !== newUser.id).concat(newUser);
       state.currentUser = newUser;
       saveState();
       applyUserSession();
-
-      if (supabaseClient) {
-        try {
-          // Limpar qualquer resquício com este username na cloud para garantir criação limpa
-          await supabaseClient.from('users').delete().eq('username', newUser.username);
-          await supabaseClient.from('users').delete().eq('id', newUser.id);
-          const { error } = await supabaseClient.from('users').insert({
-            id: newUser.id,
-            username: newUser.username,
-            password: newUser.password,
-            name: newUser.name,
-            role: newUser.role,
-            is_student: true
-          });
-          if (error) console.error("Erro ao guardar aluno na cloud:", error);
-        } catch(err) {
-          console.error("Erro ao registar aluno no Supabase:", err);
-        }
-      }
 
       openEnrolledModal(true);
       showToast(`Conta criada! Seleciona as tuas cadeiras.`);
@@ -3572,116 +3559,120 @@ ${480 + streamLen}
     }
 
     // GESTÃO DE FICHEIROS NO ARQUIVO
-    function uploadFile(e) {
-      e.preventDefault();
-      const subjectId = document.getElementById('file-subject-select').value;
-      const title = document.getElementById('file-title').value.trim();
-      const fileInput = document.getElementById('file-input');
+    async function runArchiveOperation(key, action) {
+      if (pendingArchiveOperations.has(key)) return;
+      if (!supabaseClient) {
+        showToast('Não foi possível ligar ao Supabase. Volta a carregar a página antes de alterar o arquivo.', 'error');
+        return;
+      }
+      pendingArchiveOperations.add(key);
+      archiveRevision++;
+      try {
+        await action();
+      } catch (error) {
+        console.warn('Operação do arquivo não confirmada:', error.code || error.name || 'erro de rede');
+        showToast(error.archiveMessage || 'Não foi possível confirmar a operação na nuvem. Atualiza a página e verifica os dados antes de repetir.', 'error');
+      } finally {
+        archiveRevision++;
+        pendingArchiveOperations.delete(key);
+        fetchCloudState(true);
+      }
+    }
 
-      if (!subjectId) {
-        showToast("Por favor seleciona a cadeira.", "error");
+    async function deleteCloudRow(table, id, ownerId) {
+      let query = supabaseClient.from(table).delete().eq('id', id);
+      if (ownerId) query = query.eq('student_id', ownerId);
+      const { data, error } = await query.select('id');
+      if (error) throw error;
+      if (!Array.isArray(data) || !data.some(row => row.id === id)) {
+        const failure = new Error('DELETE não devolveu o registo esperado');
+        failure.archiveMessage = 'Nenhum registo eliminado. O documento pode já ter sido removido ou não tens permissão. Atualiza a página e verifica as permissões no Supabase.';
+        throw failure;
+      }
+    }
+
+    function readFileDataUrl(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => reject(reader.error || new Error('Erro ao ler ficheiro'));
+        reader.onabort = () => reject(new Error('Leitura do ficheiro cancelada'));
+        reader.readAsDataURL(file);
+      });
+    }
+
+    async function uploadFile(e) {
+      e.preventDefault();
+      if (!state.currentUser) return;
+      const subjectId = document.getElementById('file-subject-select').value;
+      const titleInput = document.getElementById('file-title');
+      const title = titleInput.value.trim();
+      const fileInput = document.getElementById('file-input');
+      if (!subjectId || !state.subjects.some(subject => subject.id === subjectId)) {
+        showToast('Por favor seleciona a cadeira.', 'error');
         return;
       }
       if (!title) {
-        showToast("Por favor introduz um título para o documento.", "error");
+        showToast('Por favor introduz um título para o documento.', 'error');
         return;
       }
       if (!fileInput.files.length) {
-        showToast("Por favor escolhe um ficheiro.", "error");
+        showToast('Por favor escolhe um ficheiro.', 'error');
         return;
       }
+      if (pendingArchiveOperations.has('upload')) return;
       const file = fileInput.files[0];
-      const activeRole = getActiveRole();
-      const isAdmin = activeRole === 'admin';
-
-      const reader = new FileReader();
-      reader.onload = function(event) {
-        const dataUrl = event.target.result;
-        const fileSizeStr = file.size > 1024 * 1024 
-          ? (file.size / (1024 * 1024)).toFixed(1) + ' MB' 
-          : (file.size / 1024).toFixed(1) + ' KB';
-
-        if (isAdmin) {
-          // Publicação direta do Administrador
-          const adminFileObj = {
-            id: 'file_' + Date.now(),
-            title: title,
-            subjectId: subjectId,
-            fileName: file.name,
-            fileSize: fileSizeStr,
-            dataUrl: dataUrl
+      const user = state.currentUser;
+      const isAdmin = getActiveRole() === 'admin';
+      const button = e.submitter;
+      if (button) button.disabled = true;
+      try {
+        await runArchiveOperation('upload', async () => {
+          const dataUrl = await readFileDataUrl(file);
+          if (state.currentUser?.id !== user.id || (getActiveRole() === 'admin') !== isAdmin) {
+            throw new Error('A sessão mudou durante o envio');
+          }
+          const documentFile = {
+            id: (isAdmin ? 'file_' : 'freq_') + crypto.randomUUID(),
+            title, subjectId, fileName: file.name, dataUrl,
+            fileSize: file.size > 1024 * 1024 ? (file.size / (1024 * 1024)).toFixed(1) + ' MB' : (file.size / 1024).toFixed(1) + ' KB'
           };
-          state.files.push(adminFileObj);
-
-          saveState();
-
-          if (supabaseClient) {
-            supabaseClient.from('files').insert({
-              id: adminFileObj.id,
-              title: adminFileObj.title,
-              subject_id: adminFileObj.subjectId,
-              file_name: adminFileObj.fileName,
-              file_size: adminFileObj.fileSize,
-              data_url: adminFileObj.dataUrl,
-              uploaded_by: 'Admin',
-              uploaded_at: new Date().toLocaleDateString('pt-PT')
-            }).then(({ error }) => {
-              if (error) console.error("Erro ao guardar ficheiro na cloud:", error);
+          const row = {
+            id: documentFile.id, title, subject_id: subjectId,
+            file_name: file.name, file_size: documentFile.fileSize, data_url: dataUrl
+          };
+          if (isAdmin) {
+            documentFile.uploadedBy = 'Admin';
+            documentFile.uploadedAt = new Date().toLocaleDateString('pt-PT');
+            row.uploaded_by = documentFile.uploadedBy;
+            row.uploaded_at = documentFile.uploadedAt;
+          } else {
+            Object.assign(documentFile, {
+              studentId: user.id, studentName: user.name || user.username,
+              studentUsername: user.username, studentAvatar: user.avatar || null,
+              submittedAt: new Date().toLocaleDateString('pt-PT', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })
+            });
+            Object.assign(row, {
+              student_id: documentFile.studentId, student_name: documentFile.studentName,
+              student_username: documentFile.studentUsername, student_avatar: documentFile.studentAvatar,
+              submitted_at: documentFile.submittedAt
             });
           }
+          const { data, error } = await supabaseClient.from(isAdmin ? 'files' : 'file_requests').insert(row).select('id').single();
+          if (error) throw error;
+          if (data?.id !== row.id) throw new Error('Publicação não confirmada');
+          if (isAdmin) state.files.push(documentFile);
+          else state.fileRequests.push(documentFile);
+          saveState();
           renderArchiveTabs();
           renderFiles();
-          fileInput.value = '';
-          document.getElementById('file-title').value = '';
-          showToast(`Documento "${title}" publicado no arquivo!`, "success");
-        } else {
-          // Pedido de alteração / sugestão do Estudante para análise do Admin
-          if (!Array.isArray(state.fileRequests)) {
-            state.fileRequests = [];
-          }
-
-          const user = state.currentUser || {};
-          const newRequest = {
-            id: 'freq_' + Date.now(),
-            title: title,
-            subjectId: subjectId,
-            fileName: file.name,
-            fileSize: fileSizeStr,
-            dataUrl: dataUrl,
-            studentId: user.id || 'usr_unknown',
-            studentName: user.name || user.username || 'Estudante',
-            studentUsername: user.username || 'aluno',
-            studentAvatar: user.avatar || null,
-            submittedAt: new Date().toLocaleDateString('pt-PT', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })
-          };
-
-          state.fileRequests.push(newRequest);
-          saveState();
-          renderPendingFiles();
-
-          if (supabaseClient) {
-            supabaseClient.from('file_requests').insert({
-              id: newRequest.id,
-              title: newRequest.title,
-              subject_id: newRequest.subjectId,
-              file_name: newRequest.fileName,
-              file_size: newRequest.fileSize,
-              data_url: newRequest.dataUrl,
-              student_id: newRequest.studentId,
-              student_name: newRequest.studentName,
-              student_username: newRequest.studentUsername,
-              student_avatar: newRequest.studentAvatar,
-              submitted_at: newRequest.submittedAt
-            }).then(({ error }) => {
-              if (error) console.error("Erro ao enviar pedido para a cloud:", error);
-            });
-          }
-          fileInput.value = '';
-          document.getElementById('file-title').value = '';
-          showToast(`Pedido enviado com sucesso! O Administrador irá analisar para aceitar ou recusar.`, "success");
-        }
-      };
-      reader.readAsDataURL(file);
+          if (fileInput.files[0] === file) fileInput.value = '';
+          if (titleInput.value.trim() === title) titleInput.value = '';
+          showToast(isAdmin ? 'Documento "' + title + '" publicado no arquivo!' : 'Pedido enviado com sucesso! O Administrador irá analisar para aceitar ou recusar.', 'success');
+        });
+      } finally {
+        if (button) button.disabled = false;
+      }
     }
 
     // RENDERIZAR PEDIDOS PENDENTES DE DOCUMENTOS (ADMIN E ESTUDANTE)
@@ -3729,8 +3720,8 @@ ${480 + streamLen}
               const subject = state.subjects.find(s => s.id === req.subjectId);
               const subName = subject ? subject.name : 'Cadeira Desconhecida';
               const avatarHtml = req.studentAvatar 
-                ? `<img src="${req.studentAvatar}" class="w-9 h-9 rounded-full object-cover border border-slate-200 shrink-0">`
-                : `<div class="w-9 h-9 rounded-full bg-indigo-100 text-indigo-700 font-bold text-xs flex items-center justify-center border border-indigo-200 shrink-0">${(req.studentName || req.studentUsername || 'E').charAt(0).toUpperCase()}</div>`;
+                ? `<img src="${escapeHtml(req.studentAvatar)}" class="w-9 h-9 rounded-full object-cover border border-slate-200 shrink-0">`
+                : `<div class="w-9 h-9 rounded-full bg-indigo-100 text-indigo-700 font-bold text-xs flex items-center justify-center border border-indigo-200 shrink-0">${escapeHtml((req.studentName || req.studentUsername || 'E').charAt(0).toUpperCase())}</div>`;
 
               return `
                 <div class="p-3.5 bg-white rounded-xl border border-amber-200 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-3">
@@ -3738,26 +3729,26 @@ ${480 + streamLen}
                     ${avatarHtml}
                     <div class="min-w-0">
                       <div class="flex items-center gap-2 flex-wrap">
-                        <span class="font-bold text-xs text-slate-800">${req.studentName || req.studentUsername}</span>
-                        <span class="text-[11px] text-slate-400">(@${req.studentUsername})</span>
-                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">${subName}</span>
-                        <span class="text-[10px] text-slate-400"><i class="fa-regular fa-clock mr-0.5"></i>${req.submittedAt}</span>
+                        <span class="font-bold text-xs text-slate-800">${escapeHtml(req.studentName || req.studentUsername)}</span>
+                        <span class="text-[11px] text-slate-400">(@${escapeHtml(req.studentUsername)})</span>
+                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">${escapeHtml(subName)}</span>
+                        <span class="text-[10px] text-slate-400"><i class="fa-regular fa-clock mr-0.5"></i>${escapeHtml(req.submittedAt)}</span>
                       </div>
-                      <h4 class="font-bold text-slate-800 text-sm mt-1">${req.title}</h4>
+                      <h4 class="font-bold text-slate-800 text-sm mt-1">${escapeHtml(req.title)}</h4>
                       <p class="text-[11px] text-slate-500 flex items-center gap-1 mt-0.5">
-                        <i class="fa-regular fa-file-lines text-slate-400"></i> ${req.fileName} 
-                        <span class="text-slate-400">(${req.fileSize || 'Ficheiro'})</span>
+                        <i class="fa-regular fa-file-lines text-slate-400"></i> ${escapeHtml(req.fileName)}
+                        <span class="text-slate-400">(${escapeHtml(req.fileSize || 'Ficheiro')})</span>
                       </p>
                     </div>
                   </div>
                   <div class="flex items-center gap-2 self-end md:self-center shrink-0">
-                    <button type="button" onclick="previewPendingFile('${req.id}')" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl border border-slate-200 transition flex items-center gap-1.5 cursor-pointer">
+                    <button type="button" onclick="previewPendingFile(${inlineArgument(req.id)})" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl border border-slate-200 transition flex items-center gap-1.5 cursor-pointer">
                       <i class="fa-solid fa-eye text-indigo-600"></i> Analisar
                     </button>
-                    <button type="button" onclick="approveFileRequest('${req.id}')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-xs transition flex items-center gap-1.5 cursor-pointer">
+                    <button type="button" onclick="approveFileRequest(${inlineArgument(req.id)})" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-xs transition flex items-center gap-1.5 cursor-pointer">
                       <i class="fa-solid fa-check"></i> Aceitar
                     </button>
-                    <button type="button" onclick="rejectFileRequest('${req.id}')" class="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 hover:text-rose-700 border border-rose-200 hover:border-rose-300 text-xs font-bold rounded-xl transition flex items-center gap-1.5 cursor-pointer">
+                    <button type="button" onclick="rejectFileRequest(${inlineArgument(req.id)})" class="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 hover:text-rose-700 border border-rose-200 hover:border-rose-300 text-xs font-bold rounded-xl transition flex items-center gap-1.5 cursor-pointer">
                       <i class="fa-solid fa-xmark"></i> Recusar
                     </button>
                   </div>
@@ -3786,22 +3777,22 @@ ${480 + streamLen}
                 <div class="p-3 bg-white rounded-xl border border-indigo-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2 shadow-xs">
                   <div class="min-w-0">
                     <div class="flex items-center gap-2 flex-wrap">
-                      <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">${subName}</span>
-                      <span class="font-bold text-xs text-slate-800">${req.title}</span>
-                      <span class="text-[11px] text-slate-400">(${req.fileName})</span>
+                      <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">${escapeHtml(subName)}</span>
+                      <span class="font-bold text-xs text-slate-800">${escapeHtml(req.title)}</span>
+                      <span class="text-[11px] text-slate-400">(${escapeHtml(req.fileName)})</span>
                     </div>
                     <div class="flex items-center gap-2 mt-1">
                       <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-200 flex items-center gap-1">
                         <i class="fa-solid fa-hourglass-half text-[9px]"></i> A aguardar análise do Administrador
                       </span>
-                      <span class="text-[10px] text-slate-400">${req.submittedAt}</span>
+                      <span class="text-[10px] text-slate-400">${escapeHtml(req.submittedAt)}</span>
                     </div>
                   </div>
                   <div class="flex items-center gap-2 self-end sm:self-auto shrink-0">
-                    <button type="button" onclick="previewPendingFile('${req.id}')" class="px-2.5 py-1 text-xs text-indigo-600 hover:text-indigo-800 font-bold bg-indigo-50 hover:bg-indigo-100 rounded-lg transition flex items-center gap-1 cursor-pointer">
+                    <button type="button" onclick="previewPendingFile(${inlineArgument(req.id)})" class="px-2.5 py-1 text-xs text-indigo-600 hover:text-indigo-800 font-bold bg-indigo-50 hover:bg-indigo-100 rounded-lg transition flex items-center gap-1 cursor-pointer">
                       <i class="fa-solid fa-eye text-[11px]"></i> Ver
                     </button>
-                    <button type="button" onclick="cancelStudentFileRequest('${req.id}')" class="px-2.5 py-1 text-xs text-rose-500 hover:text-rose-700 font-bold hover:bg-rose-50 rounded-lg transition flex items-center gap-1 cursor-pointer">
+                    <button type="button" onclick="cancelStudentFileRequest(${inlineArgument(req.id)})" class="px-2.5 py-1 text-xs text-rose-500 hover:text-rose-700 font-bold hover:bg-rose-50 rounded-lg transition flex items-center gap-1 cursor-pointer">
                       <i class="fa-regular fa-trash-can text-[11px]"></i> Cancelar
                     </button>
                   </div>
@@ -3904,62 +3895,54 @@ ${480 + streamLen}
     }
 
     // ADMIN: RECUSAR PEDIDO DE DOCUMENTO
-    function rejectFileRequest(requestId) {
+    async function rejectFileRequest(requestId) {
       if (getActiveRole() !== 'admin') {
-        showToast("Apenas o Administrador pode recusar documentos.", "error");
+        showToast('Apenas o Administrador pode recusar documentos.', 'error');
         return;
       }
-      const req = (state.fileRequests || []).find(r => r.id === requestId);
-      if (!req) return;
-
-      const confirmed = confirm(`Tens a certeza de que desejas recusar o pedido de "${req.title}" submetido por ${req.studentName || req.studentUsername}?`);
-      if (!confirmed) return;
-
-      state.fileRequests = state.fileRequests.filter(r => r.id !== requestId);
-      saveState();
-      renderPendingFiles();
-
-      if (supabaseClient) {
-        supabaseClient.from('file_requests').delete().eq('id', requestId).then(() => {});
-      }
-
-      showToast(`Pedido de "${req.title}" recusado.`, "info");
+      const req = state.fileRequests.find(r => r.id === requestId);
+      if (!req || pendingArchiveOperations.has('request:' + requestId)) return;
+      if (!confirm('Tens a certeza de que desejas recusar o pedido de "' + req.title + '" submetido por ' + (req.studentName || req.studentUsername) + '?')) return;
+      await runArchiveOperation('request:' + requestId, async () => {
+        await deleteCloudRow('file_requests', requestId);
+        state.fileRequests = state.fileRequests.filter(r => r.id !== requestId);
+        saveState();
+        renderPendingFiles();
+        showToast('Pedido de "' + req.title + '" recusado.', 'info');
+      });
     }
 
     // ESTUDANTE: CANCELAR O PRÓPRIO PEDIDO
-    function cancelStudentFileRequest(requestId) {
-      const req = (state.fileRequests || []).find(r => r.id === requestId);
-      if (!req) return;
-
-      const confirmed = confirm(`Desejas cancelar o teu pedido de envio do documento "${req.title}"?`);
-      if (!confirmed) return;
-
-      state.fileRequests = state.fileRequests.filter(r => r.id !== requestId);
-      saveState();
-      renderPendingFiles();
-      showToast("Pedido cancelado.");
+    async function cancelStudentFileRequest(requestId) {
+      const req = state.fileRequests.find(r => r.id === requestId);
+      if (!req || !state.currentUser || req.studentId !== state.currentUser.id) return;
+      if (pendingArchiveOperations.has('request:' + requestId)) return;
+      if (!confirm('Desejas cancelar o teu pedido de envio do documento "' + req.title + '"?')) return;
+      await runArchiveOperation('request:' + requestId, async () => {
+        await deleteCloudRow('file_requests', requestId, req.studentId);
+        state.fileRequests = state.fileRequests.filter(r => r.id !== requestId);
+        saveState();
+        renderPendingFiles();
+        showToast('Pedido cancelado.');
+      });
     }
 
-    function deleteFile(fileId) {
-      if (confirm("Tens a certeza de que pretendes eliminar este documento do arquivo?")) {
-        state.files = state.files.filter(f => f.id !== fileId);
-        // Garantir que a cloud foi marcada como inicializada para não resemenar ficheiros eliminados
-        localStorage.setItem('study_supabase_files_seeded', 'true');
+    async function deleteFile(fileId) {
+      if (getActiveRole() !== 'admin') {
+        showToast('Apenas o Administrador pode eliminar documentos.', 'error');
+        return;
+      }
+      if (!state.files.some(file => file.id === fileId) || pendingArchiveOperations.has('file:' + fileId)) return;
+      if (!confirm('Tens a certeza de que pretendes eliminar este documento do arquivo?')) return;
+      await runArchiveOperation('file:' + fileId, async () => {
+        // data_url contém o próprio ficheiro; eliminar a linha elimina também o conteúdo.
+        await deleteCloudRow('files', fileId);
+        state.files = state.files.filter(file => file.id !== fileId);
         saveState();
         renderArchiveTabs();
         renderFiles();
-
-        if (supabaseClient) {
-          supabaseClient.from('files').delete().eq('id', fileId).then(({ error }) => {
-            if (error) {
-              console.error("Erro ao apagar ficheiro no Supabase:", error);
-              showToast("Erro ao apagar na nuvem: " + error.message, "error");
-            }
-          });
-        }
-
-        showToast("Documento removido com sucesso.");
-      }
+        showToast('Documento removido com sucesso.');
+      });
     }
 
     function renderFiles() {
@@ -3995,29 +3978,29 @@ ${480 + streamLen}
               <div class="p-3.5 sm:p-4 bg-slate-50 border border-slate-200 rounded-xl flex flex-col justify-between hover:shadow-md hover:border-indigo-200 transition group">
                 <div>
                   <div class="flex items-center justify-between gap-1 mb-1">
-                    <span class="text-[9px] uppercase font-bold text-indigo-700 bg-indigo-100 px-2 py-0.5 rounded">${subjectName}</span>
+                    <span class="text-[9px] uppercase font-bold text-indigo-700 bg-indigo-100 px-2 py-0.5 rounded">${escapeHtml(subjectName)}</span>
                     <span class="text-[10px] text-rose-600 font-bold bg-rose-50 border border-rose-100 px-1.5 py-0.5 rounded flex items-center gap-1">
                       <i class="fa-solid fa-file-pdf"></i> PDF
                     </span>
                   </div>
-                  <h4 onclick="openPdfFile('${f.id}')" class="font-bold text-slate-800 text-xs sm:text-sm mt-1.5 truncate cursor-pointer hover:text-indigo-600 transition" title="Clique para abrir ${f.title} no Chrome">
-                    ${f.title}
+                  <h4 onclick="openPdfFile(${inlineArgument(f.id)})" class="font-bold text-slate-800 text-xs sm:text-sm mt-1.5 truncate cursor-pointer hover:text-indigo-600 transition" title="Clique para abrir ${escapeHtml(f.title)} no Chrome">
+                    ${escapeHtml(f.title)}
                   </h4>
                   <p class="text-[11px] text-slate-400 truncate mt-1 flex items-center gap-1">
-                    <i class="fa-regular fa-file-lines text-slate-400"></i> ${f.fileName}
+                    <i class="fa-regular fa-file-lines text-slate-400"></i> ${escapeHtml(f.fileName)}
                   </p>
                 </div>
                 <div class="mt-3.5 pt-2.5 border-t border-slate-200 flex justify-between items-center gap-2">
                   <!-- ABRIR NOUTRA ABA DO CHROME EM VEZ DE FAZER DOWNLOAD -->
-                  <button onclick="openPdfFile('${f.id}')" class="text-xs font-bold text-indigo-600 hover:text-indigo-800 flex items-center gap-1.5 transition py-1 px-1.5 rounded-lg hover:bg-indigo-50 cursor-pointer" title="Abrir documento numa nova aba do Chrome">
+                  <button onclick="openPdfFile(${inlineArgument(f.id)})" class="text-xs font-bold text-indigo-600 hover:text-indigo-800 flex items-center gap-1.5 transition py-1 px-1.5 rounded-lg hover:bg-indigo-50 cursor-pointer" title="Abrir documento numa nova aba do Chrome">
                     <i class="fa-solid fa-arrow-up-right-from-square text-indigo-500"></i> Abrir no Chrome
                   </button>
                   <div class="flex items-center gap-1">
-                    <button onclick="downloadPdfFile('${f.id}')" class="text-slate-400 hover:text-slate-700 text-xs font-semibold p-1.5 hover:bg-slate-200/70 rounded-lg transition cursor-pointer" title="Descarregar cópia para o computador">
+                    <button onclick="downloadPdfFile(${inlineArgument(f.id)})" class="text-slate-400 hover:text-slate-700 text-xs font-semibold p-1.5 hover:bg-slate-200/70 rounded-lg transition cursor-pointer" title="Descarregar cópia para o computador">
                       <i class="fa-solid fa-download"></i>
                     </button>
                     ${isAdmin ? `
-                      <button onclick="deleteFile('${f.id}')" class="text-rose-600 hover:text-rose-800 text-xs font-semibold p-1.5 hover:bg-rose-50 rounded-lg transition" title="Eliminar documento">
+                      <button onclick="deleteFile(${inlineArgument(f.id)})" class="text-rose-600 hover:text-rose-800 text-xs font-semibold p-1.5 hover:bg-rose-50 rounded-lg transition" title="Eliminar documento">
                         <i class="fa-regular fa-trash-can"></i>
                       </button>
                     ` : ''}
@@ -4035,6 +4018,34 @@ ${480 + streamLen}
         // REGISTO DE ELIMINADOS RECENTES (Prevenção de corrida com Supabase Realtime)
     const recentlyDeletedUserIds = new Set();
     const recentlyDeletedUsernames = new Set();
+
+    const pendingAccountCreations = new Set();
+
+    async function createCloudUser(user) {
+      const usernameKey = user.username.toLowerCase();
+      if (pendingAccountCreations.has(usernameKey)) return false;
+      if (!supabaseClient) {
+        showToast('Não foi possível ligar ao Supabase. A conta não foi criada.', 'error');
+        return false;
+      }
+      pendingAccountCreations.add(usernameKey);
+      try {
+        // Uma criação nunca apaga uma conta que já existe no servidor.
+        const { data, error } = await supabaseClient.from('users').insert({
+          id: user.id, username: user.username, password: user.password,
+          name: user.name, role: user.role, is_student: true
+        }).select('id').single();
+        if (error) throw error;
+        if (data?.id !== user.id) throw new Error('Criação de conta não confirmada');
+        return true;
+      } catch (error) {
+        console.warn('Não foi possível confirmar a criação da conta:', error.code || error.name);
+        showToast(error.code === '23505' ? 'Já existe uma conta com este nome de utilizador.' : 'Não foi possível confirmar a criação da conta. Atualiza a página antes de repetir.', 'error');
+        return false;
+      } finally {
+        pendingAccountCreations.delete(usernameKey);
+      }
+    }
 
     // ADMIN: REMOVER CONTA DE ESTUDANTE
     async function deleteStudentAccount(studentId) {
@@ -4128,6 +4139,7 @@ ${480 + streamLen}
 
     async function handleAdminCreateStudent(e) {
       e.preventDefault();
+      if (getActiveRole() !== 'admin') return;
       const name = document.getElementById('admin-new-student-name').value.trim();
       const username = document.getElementById('admin-new-student-username').value.trim();
       const password = document.getElementById('admin-new-student-password').value.trim();
@@ -4157,12 +4169,25 @@ ${480 + streamLen}
         pendingName: null
       };
 
+      if (!await createCloudUser(newStudent)) return;
+      let enrollmentSaved = true;
+      if (selectedSubs.length > 0) {
+        try {
+          const { data, error } = await supabaseClient.from('student_enrolled').upsert({ student_id: newStudent.id, subjects: selectedSubs }).select('student_id').single();
+          if (error) throw error;
+          if (data?.student_id !== newStudent.id) throw new Error('Inscrições não confirmadas');
+        } catch (error) {
+          enrollmentSaved = false;
+          console.warn('Conta criada, mas não foi possível guardar as inscrições:', error.code || error.name);
+        }
+      }
+
       // Limpar de eliminados recentes para permitir recriação imediata
       recentlyDeletedUsernames.delete(username.toLowerCase());
       recentlyDeletedUserIds.delete(newStudent.id);
 
-      state.users.push(newStudent);
-      state.enrolledSubjects[newStudent.id] = selectedSubs;
+      state.users = state.users.filter(user => user.id !== newStudent.id).concat(newStudent);
+      state.enrolledSubjects[newStudent.id] = enrollmentSaved ? selectedSubs : [];
       state.grades[newStudent.id] = {};
       state.absences[newStudent.id] = [];
 
@@ -4170,34 +4195,7 @@ ${480 + streamLen}
       renderStudentsList();
       closeAdminCreateStudentModal();
 
-      if (supabaseClient) {
-        try {
-          // Limpar qualquer resquício com este username ou id na cloud antes de inserir
-          await supabaseClient.from('users').delete().eq('username', newStudent.username);
-          await supabaseClient.from('users').delete().eq('id', newStudent.id);
-
-          const { error: insErr } = await supabaseClient.from('users').insert({
-            id: newStudent.id,
-            username: newStudent.username,
-            password: newStudent.password,
-            name: newStudent.name,
-            role: newStudent.role,
-            is_student: true
-          });
-          if (insErr) console.error("Erro ao inserir aluno no Supabase:", insErr);
-
-          if (selectedSubs.length > 0) {
-            await supabaseClient.from('student_enrolled').upsert({
-              student_id: newStudent.id,
-              subjects: selectedSubs
-            });
-          }
-        } catch(err) {
-          console.error("Erro ao guardar novo aluno no Supabase:", err);
-        }
-      }
-
-      showToast(`Aluno "${name}" registado com sucesso!`, "success");
+      showToast(enrollmentSaved ? 'Aluno "' + name + '" registado com sucesso!' : 'Conta criada, mas não foi possível guardar as inscrições. Seleciona as cadeiras na conta do aluno.', enrollmentSaved ? 'success' : 'error');
     }
 
     function renderStudentsList() {
@@ -4315,46 +4313,66 @@ ${480 + streamLen}
     // ==============================================
     // SINCRONIZAÇÃO COM SUPABASE (CLOUD SYNC)
     // ==============================================
+    let cloudRefreshPromise = null;
+    let cloudRefreshQueued = false;
+    let cloudSyncErrorShown = false;
+    let archiveRevision = 0;
+    const pendingArchiveOperations = new Set();
+
+    async function readCloudRows(table) {
+      const rows = [];
+      const key = table.startsWith('student_') ? 'student_id' : 'id';
+      const pageSize = 500;
+      for (let offset = 0; ; offset += pageSize) {
+        const { data, error } = await supabaseClient.from(table).select('*').order(key).range(offset, offset + pageSize - 1);
+        if (error) throw error;
+        if (!Array.isArray(data)) throw new Error('Resposta inválida ao ler ' + table);
+        rows.push(...data);
+        if (data.length < pageSize) return rows;
+      }
+    }
+
     async function fetchCloudState(silent = false) {
       if (!supabaseClient) return;
-
+      cloudRefreshQueued = true;
+      if (pendingArchiveOperations.size > 0) return;
+      if (cloudRefreshPromise) return cloudRefreshPromise;
+      cloudRefreshPromise = (async () => {
+        do {
+          cloudRefreshQueued = false;
+          await refreshCloudState(silent);
+        } while (cloudRefreshQueued && pendingArchiveOperations.size === 0);
+      })();
       try {
-        // 0. Cadeiras / Disciplinas
-        const { data: cloudSubjects, error: subErr } = await supabaseClient.from('subjects').select('*');
-        if (!subErr && cloudSubjects) {
-          const hasSeededSubjects = localStorage.getItem('study_supabase_subjects_seeded');
-          if (cloudSubjects.length > 0) {
-            state.subjects = cloudSubjects.map(cs => ({
-              id: cs.id,
-              name: cs.name,
-              maxAbsencesTheory: cs.max_absences_theory,
-              maxAbsencesPractice: cs.max_absences_practice,
-              professors: cs.professors || [],
-              tests: cs.tests || []
-            }));
-            localStorage.setItem('study_supabase_subjects_seeded', 'true');
-          } else if (!hasSeededSubjects) {
-            // Apenas semeia na primeira execução da história do projeto
-            for (const s of state.subjects) {
-              await supabaseClient.from('subjects').insert({
-                id: s.id,
-                name: s.name,
-                max_absences_theory: s.maxAbsencesTheory || 4,
-                max_absences_practice: s.maxAbsencesPractice || 3,
-                professors: s.professors || [],
-                tests: s.tests || []
-              });
-            }
-            localStorage.setItem('study_supabase_subjects_seeded', 'true');
-          } else {
-            // Se o admin apagou todas as cadeiras da cloud, respeita a lista vazia
-            state.subjects = [];
-          }
+        await cloudRefreshPromise;
+      } finally {
+        cloudRefreshPromise = null;
+      }
+    }
+
+    async function refreshCloudState(silent) {
+      const revision = archiveRevision;
+      try {
+        const [cloudSubjects, cloudUsers, cloudFiles, cloudRequests, cloudGrades, cloudEnrolled, cloudAbsences] =
+          await Promise.all(['subjects', 'users', 'files', 'file_requests', 'student_grades', 'student_enrolled', 'student_absences'].map(readCloudRows));
+        // Descartar a resposta completa se uma operação começou ou terminou durante a leitura.
+        if (revision !== archiveRevision || pendingArchiveOperations.size > 0) {
+          cloudRefreshQueued = true;
+          return;
         }
 
+        // A base de dados é a autoridade, incluindo resultados vazios.
+        const subjectsChanged = JSON.stringify(state.subjects) !== JSON.stringify(cloudSubjects.map(cs => ({
+          id: cs.id, name: cs.name, maxAbsencesTheory: cs.max_absences_theory,
+          maxAbsencesPractice: cs.max_absences_practice, professors: cs.professors || [], tests: cs.tests || []
+        })));
+        state.subjects = cloudSubjects.map(cs => ({
+          id: cs.id, name: cs.name, maxAbsencesTheory: cs.max_absences_theory,
+          maxAbsencesPractice: cs.max_absences_practice, professors: cs.professors || [], tests: cs.tests || []
+        }));
+
         // 1. Utilizadores (Supabase Cloud é a autoridade central)
-        const { data: cloudUsers, error: usersErr } = await supabaseClient.from('users').select('*');
-        if (!usersErr && cloudUsers) {
+        if (cloudUsers) {
           const validUsers = cloudUsers
             .filter(cu => !recentlyDeletedUserIds.has(cu.id) && !(cu.username && recentlyDeletedUsernames.has(cu.username.toLowerCase())))
             .map(cu => ({
@@ -4389,48 +4407,15 @@ ${480 + streamLen}
           state.users = validUsers;
         }
 
-        // 2. Ficheiros publicados
-        const { data: cloudFiles, error: filesErr } = await supabaseClient.from('files').select('*');
-        if (!filesErr && cloudFiles) {
-          const hasSeededFiles = localStorage.getItem('study_supabase_files_seeded');
-          if (cloudFiles.length > 0) {
-            state.files = cloudFiles.map(cf => ({
-              id: cf.id,
-              title: cf.title,
-              subjectId: cf.subject_id,
-              year: cf.year,
-              fileName: cf.file_name,
-              fileSize: cf.file_size,
-              dataUrl: cf.data_url,
-              uploadedBy: cf.uploaded_by,
-              uploadedAt: cf.uploaded_at
-            }));
-            localStorage.setItem('study_supabase_files_seeded', 'true');
-          } else if (!hasSeededFiles) {
-            // Apenas semeia ficheiros base na primeira execução da história
-            for (const f of state.files) {
-              await supabaseClient.from('files').insert({
-                id: f.id,
-                title: f.title,
-                subject_id: f.subjectId,
-                year: f.year || '2023/2024',
-                file_name: f.fileName,
-                file_size: f.fileSize || '300 KB',
-                data_url: f.dataUrl,
-                uploaded_by: 'Administrador',
-                uploaded_at: '10/09/2026'
-              });
-            }
-            localStorage.setItem('study_supabase_files_seeded', 'true');
-          } else {
-            // Se o admin apagou todos os ficheiros da cloud, respeita a lista vazia!
-            state.files = [];
-          }
-        }
+        // Uma leitura nunca volta a inserir ficheiros da cache ou de demonstração.
+        state.files = cloudFiles.map(cf => ({
+          id: cf.id, title: cf.title, subjectId: cf.subject_id, year: cf.year,
+          fileName: cf.file_name, fileSize: cf.file_size, dataUrl: cf.data_url,
+          uploadedBy: cf.uploaded_by, uploadedAt: cf.uploaded_at
+        }));
 
         // 3. Pedidos de alteração / ficheiros pendentes
-        const { data: cloudRequests, error: reqErr } = await supabaseClient.from('file_requests').select('*');
-        if (!reqErr && cloudRequests) {
+        if (cloudRequests) {
           state.fileRequests = cloudRequests.map(cr => ({
             id: cr.id,
             title: cr.title,
@@ -4447,8 +4432,7 @@ ${480 + streamLen}
         }
 
         // 4. Notas
-        const { data: cloudGrades, error: gradesErr } = await supabaseClient.from('student_grades').select('*');
-        if (!gradesErr && cloudGrades) {
+        if (cloudGrades) {
           cloudGrades.forEach(cg => {
             if (cg.student_id && cg.grades) {
               state.grades[cg.student_id] = cg.grades;
@@ -4457,8 +4441,7 @@ ${480 + streamLen}
         }
 
         // 5. Cadeiras inscritas
-        const { data: cloudEnrolled, error: enrolledErr } = await supabaseClient.from('student_enrolled').select('*');
-        if (!enrolledErr && cloudEnrolled) {
+        if (cloudEnrolled) {
           cloudEnrolled.forEach(ce => {
             if (ce.student_id && ce.subjects) {
               state.enrolledSubjects[ce.student_id] = ce.subjects;
@@ -4467,8 +4450,7 @@ ${480 + streamLen}
         }
 
         // 6. Faltas
-        const { data: cloudAbsences, error: absErr } = await supabaseClient.from('student_absences').select('*');
-        if (!absErr && cloudAbsences) {
+        if (cloudAbsences) {
           cloudAbsences.forEach(ca => {
             if (ca.student_id && ca.absences) {
               state.absences[ca.student_id] = ca.absences;
@@ -4476,18 +4458,35 @@ ${480 + streamLen}
           });
         }
 
+        isCloudConnected = true;
+        cloudSyncErrorShown = false;
         saveState();
+        if (subjectsChanged) {
+          const selects = ['test-subject-select', 'file-subject-select', 'docent-subject-select', 'absence-admin-subject-select', 'absence-input-subject'];
+          const values = selects.map(id => document.getElementById(id)?.value);
+          updateSubjectSelects();
+          selects.forEach((id, index) => {
+            const select = document.getElementById(id);
+            if (select && Array.from(select.options).some(option => option.value === values[index])) select.value = values[index];
+          });
+        }
         renderStudentsList();
         renderArchiveTabs();
         renderFiles();
         renderPendingFiles();
         renderGrades();
+        if (state.currentUser) renderAbsences();
 
         if (!silent) {
           console.log("Dados sincronizados com sucesso com o Supabase!");
         }
       } catch (err) {
-        console.warn("Erro ao sincronizar com o Supabase:", err);
+        isCloudConnected = false;
+        console.warn('Erro ao sincronizar com o Supabase:', err.code || err.name || 'erro de rede');
+        if (!cloudSyncErrorShown) {
+          cloudSyncErrorShown = true;
+          showToast('Não foi possível atualizar os dados da nuvem. A informação apresentada pode estar desatualizada.', 'error');
+        }
       }
     }
 
@@ -4500,12 +4499,23 @@ ${480 + streamLen}
           .on('postgres_changes', { event: '*', schema: 'public' }, () => {
             fetchCloudState(true);
           })
-          .subscribe();
+          .subscribe(status => {
+            if (status === 'SUBSCRIBED') fetchCloudState(true);
+            if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+              console.warn('Ligação Realtime indisponível; os dados serão atualizados ao retomar a página.');
+            }
+          });
         console.log("Canal Realtime ativo no Supabase!");
       } catch (e) {
         console.warn("Erro ao configurar realtime:", e);
       }
     }
+
+    window.addEventListener('online', () => fetchCloudState(true));
+    window.addEventListener('focus', () => fetchCloudState(true));
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') fetchCloudState(true);
+    });
 
     // INICIALIZAÇÃO
     applyUserSession();
