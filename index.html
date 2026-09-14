@@ -833,22 +833,39 @@
         </div>
         <p id="files-panel-desc" class="text-xs text-slate-500 mb-4">Carrega ficheiros, testes e apontamentos para disponibilizar a toda a turma.</p>
 
-        <form onsubmit="uploadFile(event)" class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 items-end bg-slate-50 p-4 rounded-xl border border-slate-200">
-          <div>
-            <label class="block text-xs font-bold text-slate-600 mb-1">Cadeira</label>
-            <select id="file-subject-select" required class="w-full px-3 py-2.5 border rounded-xl text-sm bg-white outline-none focus:border-indigo-600">
-              <option value="">Seleciona a cadeira...</option>
-            </select>
+        <form onsubmit="uploadFile(event)" class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 items-end">
+            <div>
+              <label class="block text-xs font-bold text-slate-600 mb-1">Cadeira</label>
+              <select id="file-subject-select" required class="w-full px-3 py-2.5 border rounded-xl text-sm bg-white outline-none focus:border-indigo-600 transition">
+                <option value="">Seleciona a cadeira...</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-600 mb-1">Secção da Cadeira</label>
+              <select id="file-section-select" onchange="toggleCustomSectionInput()" required class="w-full px-3 py-2.5 border rounded-xl text-sm bg-white outline-none focus:border-indigo-600 transition">
+                <option value="Exames">Exames</option>
+                <option value="Testes">Testes</option>
+                <option value="Fichas">Fichas / Exercícios</option>
+                <option value="Apontamentos">Apontamentos / Teóricas</option>
+                <option value="Trabalhos">Trabalhos / Projetos</option>
+                <option value="Outros">Outros</option>
+                <option value="custom">Outra (Personalizada)...</option>
+              </select>
+              <div id="file-custom-section-box" class="hidden mt-2">
+                <input type="text" id="file-custom-section" placeholder="Ex: Laboratórios" class="w-full px-3 py-1.5 border rounded-lg text-xs bg-white outline-none focus:border-indigo-600 transition">
+              </div>
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-600 mb-1">Título do Documento</label>
+              <input type="text" id="file-title" placeholder="Ex: Época Normal 2024" required class="w-full px-3 py-2.5 border rounded-xl text-sm bg-white outline-none focus:border-indigo-600 transition">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-600 mb-1">Ficheiro</label>
+              <input type="file" id="file-input" accept=".pdf,application/pdf,image/*" required class="w-full text-xs text-slate-500 file:mr-2 file:py-2 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-indigo-100 file:text-indigo-800 hover:file:bg-indigo-200 cursor-pointer">
+            </div>
           </div>
-          <div>
-            <label class="block text-xs font-bold text-slate-600 mb-1">Título</label>
-            <input type="text" id="file-title" placeholder="Ex: Exame Época Normal" required class="w-full px-3 py-2.5 border rounded-xl text-sm bg-white outline-none focus:border-indigo-600">
-          </div>
-          <div>
-            <label class="block text-xs font-bold text-slate-600 mb-1">Ficheiro</label>
-            <input type="file" id="file-input" accept=".pdf,application/pdf,image/*" required class="w-full text-xs text-slate-500 file:mr-2 file:py-2 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-indigo-100 file:text-indigo-800 hover:file:bg-indigo-200 cursor-pointer">
-          </div>
-          <div class="sm:col-span-3 flex justify-end pt-2">
+          <div class="flex justify-end pt-1">
             <button id="files-submit-btn" type="submit" class="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-6 py-2.5 rounded-xl shadow transition flex items-center justify-center gap-2 cursor-pointer">
               <i id="files-submit-icon" class="fa-solid fa-cloud-arrow-up"></i>
               <span id="files-submit-text">Publicar Documento</span>
@@ -4030,10 +4047,87 @@ ${480 + streamLen}
       });
     }
 
+    function toggleCustomSectionInput() {
+      const sel = document.getElementById('file-section-select');
+      const box = document.getElementById('file-custom-section-box');
+      const input = document.getElementById('file-custom-section');
+      if (sel && box) {
+        if (sel.value === 'custom') {
+          box.classList.remove('hidden');
+          if (input) {
+            input.required = true;
+            input.focus();
+          }
+        } else {
+          box.classList.add('hidden');
+          if (input) {
+            input.required = false;
+            input.value = '';
+          }
+        }
+      }
+    }
+
+    function getSectionMeta(sectionName) {
+      const norm = (sectionName || 'Outros').trim().toLowerCase();
+      if (norm.includes('exame')) {
+        return {
+          label: sectionName || 'Exames',
+          icon: '<i class="fa-solid fa-graduation-cap"></i>',
+          badgeClass: 'bg-indigo-50 text-indigo-700 border border-indigo-200',
+          headerBg: 'bg-indigo-100 text-indigo-700'
+        };
+      }
+      if (norm.includes('teste')) {
+        return {
+          label: sectionName || 'Testes',
+          icon: '<i class="fa-solid fa-file-pen"></i>',
+          badgeClass: 'bg-blue-50 text-blue-700 border border-blue-200',
+          headerBg: 'bg-blue-100 text-blue-700'
+        };
+      }
+      if (norm.includes('ficha') || norm.includes('exerc')) {
+        return {
+          label: sectionName || 'Fichas',
+          icon: '<i class="fa-solid fa-pen-ruler"></i>',
+          badgeClass: 'bg-emerald-50 text-emerald-700 border border-emerald-200',
+          headerBg: 'bg-emerald-100 text-emerald-700'
+        };
+      }
+      if (norm.includes('aponta') || norm.includes('teór') || norm.includes('teor')) {
+        return {
+          label: sectionName || 'Apontamentos',
+          icon: '<i class="fa-solid fa-book-bookmark"></i>',
+          badgeClass: 'bg-amber-50 text-amber-700 border border-amber-200',
+          headerBg: 'bg-amber-100 text-amber-700'
+        };
+      }
+      if (norm.includes('trabalho') || norm.includes('projet')) {
+        return {
+          label: sectionName || 'Trabalhos',
+          icon: '<i class="fa-solid fa-diagram-project"></i>',
+          badgeClass: 'bg-purple-50 text-purple-700 border border-purple-200',
+          headerBg: 'bg-purple-100 text-purple-700'
+        };
+      }
+      return {
+        label: sectionName || 'Outros',
+        icon: '<i class="fa-solid fa-folder-open"></i>',
+        badgeClass: 'bg-slate-100 text-slate-700 border border-slate-200',
+        headerBg: 'bg-slate-100 text-slate-700'
+      };
+    }
+
     async function uploadFile(e) {
       e.preventDefault();
       if (!state.currentUser) return;
       const subjectId = document.getElementById('file-subject-select').value;
+      const sectionSelect = document.getElementById('file-section-select');
+      let section = sectionSelect ? sectionSelect.value : 'Outros';
+      if (section === 'custom') {
+        const customInput = document.getElementById('file-custom-section');
+        section = (customInput ? customInput.value.trim() : '') || 'Outros';
+      }
       const titleInput = document.getElementById('file-title');
       const title = titleInput.value.trim();
       const fileInput = document.getElementById('file-input');
@@ -4063,27 +4157,41 @@ ${480 + streamLen}
           }
           const documentFile = {
             id: (isAdmin ? 'file_' : 'freq_') + crypto.randomUUID(),
-            title, subjectId, fileName: file.name, dataUrl,
+            title,
+            section,
+            subjectId,
+            year: section,
+            fileName: file.name,
+            dataUrl,
             fileSize: file.size > 1024 * 1024 ? (file.size / (1024 * 1024)).toFixed(1) + ' MB' : (file.size / 1024).toFixed(1) + ' KB'
           };
           const row = {
-            id: documentFile.id, title, subject_id: subjectId,
-            file_name: file.name, file_size: documentFile.fileSize, data_url: dataUrl
+            id: documentFile.id,
+            title: `[${section}] ${title}`,
+            subject_id: subjectId,
+            file_name: file.name,
+            file_size: documentFile.fileSize,
+            data_url: dataUrl
           };
           if (isAdmin) {
             documentFile.uploadedBy = 'Admin';
             documentFile.uploadedAt = new Date().toLocaleDateString('pt-PT');
             row.uploaded_by = documentFile.uploadedBy;
             row.uploaded_at = documentFile.uploadedAt;
+            row.year = section;
           } else {
             Object.assign(documentFile, {
-              studentId: user.id, studentName: user.name || user.username,
-              studentUsername: user.username, studentAvatar: user.avatar || null,
+              studentId: user.id,
+              studentName: user.name || user.username,
+              studentUsername: user.username,
+              studentAvatar: user.avatar || null,
               submittedAt: new Date().toLocaleDateString('pt-PT', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })
             });
             Object.assign(row, {
-              student_id: documentFile.studentId, student_name: documentFile.studentName,
-              student_username: documentFile.studentUsername, student_avatar: documentFile.studentAvatar,
+              student_id: documentFile.studentId,
+              student_name: documentFile.studentName,
+              student_username: documentFile.studentUsername,
+              student_avatar: documentFile.studentAvatar,
               submitted_at: documentFile.submittedAt
             });
           }
@@ -4097,6 +4205,10 @@ ${480 + streamLen}
           renderFiles();
           if (fileInput.files[0] === file) fileInput.value = '';
           if (titleInput.value.trim() === title) titleInput.value = '';
+          if (sectionSelect) {
+            sectionSelect.value = 'Exames';
+            toggleCustomSectionInput();
+          }
           showToast(isAdmin ? 'Documento "' + title + '" publicado no arquivo!' : 'Pedido enviado com sucesso! O Administrador irá analisar para aceitar ou recusar.', 'success');
         });
       } finally {
@@ -4148,6 +4260,7 @@ ${480 + streamLen}
             adminList.innerHTML = requests.map(req => {
               const subject = state.subjects.find(s => s.id === req.subjectId);
               const subName = subject ? subject.name : 'Cadeira Desconhecida';
+              const secMeta = getSectionMeta(req.section || 'Outros');
               const avatarHtml = req.studentAvatar 
                 ? `<img src="${escapeHtml(req.studentAvatar)}" class="w-9 h-9 rounded-full object-cover border border-slate-200 shrink-0">`
                 : `<div class="w-9 h-9 rounded-full bg-indigo-100 text-indigo-700 font-bold text-xs flex items-center justify-center border border-indigo-200 shrink-0">${escapeHtml((req.studentName || req.studentUsername || 'E').charAt(0).toUpperCase())}</div>`;
@@ -4161,6 +4274,7 @@ ${480 + streamLen}
                         <span class="font-bold text-xs text-slate-800">${escapeHtml(req.studentName || req.studentUsername)}</span>
                         <span class="text-[11px] text-slate-400">(@${escapeHtml(req.studentUsername)})</span>
                         <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">${escapeHtml(subName)}</span>
+                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${secMeta.badgeClass} flex items-center gap-1">${secMeta.icon} ${escapeHtml(req.section || 'Outros')}</span>
                         <span class="text-[10px] text-slate-400"><i class="fa-regular fa-clock mr-0.5"></i>${escapeHtml(req.submittedAt)}</span>
                       </div>
                       <h4 class="font-bold text-slate-800 text-sm mt-1">${escapeHtml(req.title)}</h4>
@@ -4202,11 +4316,13 @@ ${480 + streamLen}
             studentList.innerHTML = myRequests.map(req => {
               const subject = state.subjects.find(s => s.id === req.subjectId);
               const subName = subject ? subject.name : 'Cadeira';
+              const secMeta = getSectionMeta(req.section || 'Outros');
               return `
                 <div class="p-3 bg-white rounded-xl border border-indigo-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2 shadow-xs">
                   <div class="min-w-0">
                     <div class="flex items-center gap-2 flex-wrap">
                       <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">${escapeHtml(subName)}</span>
+                      <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${secMeta.badgeClass} flex items-center gap-1">${secMeta.icon} ${escapeHtml(req.section || 'Outros')}</span>
                       <span class="font-bold text-xs text-slate-800">${escapeHtml(req.title)}</span>
                       <span class="text-[11px] text-slate-400">(${escapeHtml(req.fileName)})</span>
                     </div>
@@ -4284,14 +4400,18 @@ ${480 + streamLen}
       const req = (state.fileRequests || []).find(r => r.id === requestId);
       if (!req) return;
 
+      const sec = req.section || 'Outros';
+
       // Adicionar aos ficheiros publicados no arquivo
       const approvedFile = {
         id: 'file_' + Date.now(),
         title: req.title,
+        section: sec,
         subjectId: req.subjectId,
         fileName: req.fileName,
         fileSize: req.fileSize,
         dataUrl: req.dataUrl,
+        year: sec,
         uploadedBy: req.studentName || req.studentUsername,
         uploadedAt: req.submittedAt
       };
@@ -4308,8 +4428,9 @@ ${480 + streamLen}
       if (supabaseClient) {
         supabaseClient.from('files').insert({
           id: approvedFile.id,
-          title: approvedFile.title,
+          title: `[${approvedFile.section}] ${approvedFile.title}`,
           subject_id: approvedFile.subjectId,
+          year: approvedFile.section,
           file_name: approvedFile.fileName,
           file_size: approvedFile.fileSize,
           data_url: approvedFile.dataUrl,
@@ -4396,51 +4517,89 @@ ${480 + streamLen}
       }
 
       const isAdmin = getActiveRole() === 'admin';
-      const section = document.createElement('div');
-      section.className = "bg-white rounded-2xl p-4 sm:p-6 shadow-sm border border-slate-200";
-      section.innerHTML = `
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-          ${filteredFiles.map(f => {
-            const subject = state.subjects.find(s => s.id === f.subjectId);
-            const subjectName = subject ? subject.name : 'Geral';
-            return `
-              <div class="p-3.5 sm:p-4 bg-slate-50 border border-slate-200 rounded-xl flex flex-col justify-between hover:shadow-md hover:border-indigo-200 transition group">
-                <div>
-                  <div class="flex items-center justify-between gap-1 mb-1">
-                    <span class="text-[9px] uppercase font-bold text-indigo-700 bg-indigo-100 px-2 py-0.5 rounded">${escapeHtml(subjectName)}</span>
-                    <span class="text-[10px] text-rose-600 font-bold bg-rose-50 border border-rose-100 px-1.5 py-0.5 rounded flex items-center gap-1">
-                      <i class="fa-solid fa-file-pdf"></i> PDF
-                    </span>
-                  </div>
-                  <h4 onclick="openPdfFile(${inlineArgument(f.id)})" class="font-bold text-slate-800 text-xs sm:text-sm mt-1.5 truncate cursor-pointer hover:text-indigo-600 transition" title="Clique para abrir ${escapeHtml(f.title)} no Chrome">
-                    ${escapeHtml(f.title)}
-                  </h4>
-                  <p class="text-[11px] text-slate-400 truncate mt-1 flex items-center gap-1">
-                    <i class="fa-regular fa-file-lines text-slate-400"></i> ${escapeHtml(f.fileName)}
-                  </p>
-                </div>
-                <div class="mt-3.5 pt-2.5 border-t border-slate-200 flex justify-between items-center gap-2">
-                  <!-- ABRIR NOUTRA ABA DO CHROME EM VEZ DE FAZER DOWNLOAD -->
-                  <button onclick="openPdfFile(${inlineArgument(f.id)})" class="text-xs font-bold text-indigo-600 hover:text-indigo-800 flex items-center gap-1.5 transition py-1 px-1.5 rounded-lg hover:bg-indigo-50 cursor-pointer" title="Abrir documento numa nova aba do Chrome">
-                    <i class="fa-solid fa-arrow-up-right-from-square text-indigo-500"></i> Abrir no Chrome
-                  </button>
-                  <div class="flex items-center gap-1">
-                    <button onclick="downloadPdfFile(${inlineArgument(f.id)})" class="text-slate-400 hover:text-slate-700 text-xs font-semibold p-1.5 hover:bg-slate-200/70 rounded-lg transition cursor-pointer" title="Descarregar cópia para o computador">
-                      <i class="fa-solid fa-download"></i>
-                    </button>
-                    ${isAdmin ? `
-                      <button onclick="deleteFile(${inlineArgument(f.id)})" class="text-rose-600 hover:text-rose-800 text-xs font-semibold p-1.5 hover:bg-rose-50 rounded-lg transition" title="Eliminar documento">
-                        <i class="fa-regular fa-trash-can"></i>
-                      </button>
-                    ` : ''}
-                  </div>
-                </div>
+
+      // Agrupar ficheiros por secção da cadeira (Exames, Testes, Fichas, etc.)
+      const standardOrder = ['Exames', 'Testes', 'Fichas', 'Apontamentos', 'Trabalhos', 'Outros'];
+      const grouped = {};
+      filteredFiles.forEach(f => {
+        const sec = f.section || 'Outros';
+        if (!grouped[sec]) grouped[sec] = [];
+        grouped[sec].push(f);
+      });
+
+      // Ordenar as secções respeitando standardOrder e depois outras personalizadas
+      const sectionKeys = Object.keys(grouped).sort((a, b) => {
+        const idxA = standardOrder.indexOf(a);
+        const idxB = standardOrder.indexOf(b);
+        if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+        if (idxA !== -1) return -1;
+        if (idxB !== -1) return 1;
+        return a.localeCompare(b);
+      });
+
+      sectionKeys.forEach(secName => {
+        const secFiles = grouped[secName];
+        const meta = getSectionMeta(secName);
+
+        const secEl = document.createElement('div');
+        secEl.className = "bg-white rounded-2xl p-4 sm:p-6 shadow-sm border border-slate-200 mb-6 last:mb-0";
+        secEl.innerHTML = `
+          <div class="flex items-center justify-between gap-2 mb-4 pb-2.5 border-b border-slate-100">
+            <div class="flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-xl ${meta.headerBg} flex items-center justify-center font-bold text-sm shadow-xs">
+                ${meta.icon}
               </div>
-            `;
-          }).join('')}
-        </div>
-      `;
-      container.appendChild(section);
+              <div>
+                <h3 class="font-bold text-slate-800 text-sm sm:text-base leading-tight">${escapeHtml(secName)}</h3>
+                <p class="text-[11px] text-slate-400">${secFiles.length} ${secFiles.length === 1 ? 'documento' : 'documentos'}</p>
+              </div>
+            </div>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+            ${secFiles.map(f => {
+              const subject = state.subjects.find(s => s.id === f.subjectId);
+              const subjectName = subject ? subject.name : 'Geral';
+              return `
+                <div class="p-3.5 sm:p-4 bg-slate-50 border border-slate-200 rounded-xl flex flex-col justify-between hover:shadow-md hover:border-indigo-200 transition group">
+                  <div>
+                    <div class="flex items-center justify-between gap-1 mb-1.5">
+                      <div class="flex items-center gap-1.5 min-w-0">
+                        <span class="text-[9px] uppercase font-bold text-indigo-700 bg-indigo-100 px-2 py-0.5 rounded truncate max-w-[130px]">${escapeHtml(subjectName)}</span>
+                        <span class="text-[9px] font-bold px-1.5 py-0.5 rounded ${meta.badgeClass} flex items-center gap-1 shrink-0">${meta.icon} ${escapeHtml(f.section || secName)}</span>
+                      </div>
+                      <span class="text-[10px] text-rose-600 font-bold bg-rose-50 border border-rose-100 px-1.5 py-0.5 rounded flex items-center gap-1 shrink-0">
+                        <i class="fa-solid fa-file-pdf"></i> PDF
+                      </span>
+                    </div>
+                    <h4 onclick="openPdfFile(${inlineArgument(f.id)})" class="font-bold text-slate-800 text-xs sm:text-sm mt-1 truncate cursor-pointer hover:text-indigo-600 transition" title="Clique para abrir ${escapeHtml(f.title)} no Chrome">
+                      ${escapeHtml(f.title)}
+                    </h4>
+                    <p class="text-[11px] text-slate-400 truncate mt-1 flex items-center gap-1">
+                      <i class="fa-regular fa-file-lines text-slate-400"></i> ${escapeHtml(f.fileName)}
+                    </p>
+                  </div>
+                  <div class="mt-3.5 pt-2.5 border-t border-slate-200 flex justify-between items-center gap-2">
+                    <button onclick="openPdfFile(${inlineArgument(f.id)})" class="text-xs font-bold text-indigo-600 hover:text-indigo-800 flex items-center gap-1.5 transition py-1 px-1.5 rounded-lg hover:bg-indigo-50 cursor-pointer" title="Abrir documento numa nova aba do Chrome">
+                      <i class="fa-solid fa-arrow-up-right-from-square text-indigo-500"></i> Abrir no Chrome
+                    </button>
+                    <div class="flex items-center gap-1">
+                      <button onclick="downloadPdfFile(${inlineArgument(f.id)})" class="text-slate-400 hover:text-slate-700 text-xs font-semibold p-1.5 hover:bg-slate-200/70 rounded-lg transition cursor-pointer" title="Descarregar cópia para o computador">
+                        <i class="fa-solid fa-download"></i>
+                      </button>
+                      ${isAdmin ? `
+                        <button onclick="deleteFile(${inlineArgument(f.id)})" class="text-rose-600 hover:text-rose-800 text-xs font-semibold p-1.5 hover:bg-rose-50 rounded-lg transition cursor-pointer" title="Eliminar documento">
+                          <i class="fa-regular fa-trash-can"></i>
+                        </button>
+                      ` : ''}
+                    </div>
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        `;
+        container.appendChild(secEl);
+      });
     }
 
     // ADMIN: CONSULTA DE ALUNOS E SUAS CADEIRAS
@@ -4837,27 +4996,53 @@ ${480 + streamLen}
         }
 
         // Uma leitura nunca volta a inserir ficheiros da cache ou de demonstração.
-        state.files = cloudFiles.map(cf => ({
-          id: cf.id, title: cf.title, subjectId: cf.subject_id, year: cf.year,
-          fileName: cf.file_name, fileSize: cf.file_size, dataUrl: cf.data_url,
-          uploadedBy: cf.uploaded_by, uploadedAt: cf.uploaded_at
-        }));
+        state.files = cloudFiles.map(cf => {
+          const titleMatch = (cf.title || '').match(/^\[(.*?)\]\s*(.*)$/);
+          let sec = 'Outros';
+          let cleanTitle = cf.title || '';
+          if (titleMatch) {
+            sec = titleMatch[1];
+            cleanTitle = titleMatch[2];
+          } else if (cf.section) {
+            sec = cf.section;
+          } else if (cf.year && !cf.year.includes('/')) {
+            sec = cf.year;
+          }
+          return {
+            id: cf.id,
+            title: cleanTitle,
+            section: sec,
+            subjectId: cf.subject_id,
+            year: cf.year || sec,
+            fileName: cf.file_name,
+            fileSize: cf.file_size,
+            dataUrl: cf.data_url,
+            uploadedBy: cf.uploaded_by,
+            uploadedAt: cf.uploaded_at
+          };
+        });
 
         // 3. Pedidos de alteração / ficheiros pendentes
         if (cloudRequests) {
-          state.fileRequests = cloudRequests.map(cr => ({
-            id: cr.id,
-            title: cr.title,
-            subjectId: cr.subject_id,
-            fileName: cr.file_name,
-            fileSize: cr.file_size,
-            dataUrl: cr.data_url,
-            studentId: cr.student_id,
-            studentName: cr.student_name,
-            studentUsername: cr.student_username,
-            studentAvatar: cr.student_avatar,
-            submittedAt: cr.submitted_at
-          }));
+          state.fileRequests = cloudRequests.map(cr => {
+            const titleMatch = (cr.title || '').match(/^\[(.*?)\]\s*(.*)$/);
+            const sec = titleMatch ? titleMatch[1] : (cr.section || 'Outros');
+            const cleanTitle = titleMatch ? titleMatch[2] : (cr.title || '');
+            return {
+              id: cr.id,
+              title: cleanTitle,
+              section: sec,
+              subjectId: cr.subject_id,
+              fileName: cr.file_name,
+              fileSize: cr.file_size,
+              dataUrl: cr.data_url,
+              studentId: cr.student_id,
+              studentName: cr.student_name,
+              studentUsername: cr.student_username,
+              studentAvatar: cr.student_avatar,
+              submittedAt: cr.submitted_at
+            };
+          });
         }
 
         // 4. Notas
