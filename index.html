@@ -3161,6 +3161,19 @@
     // ESTUDANTE: GUARDAR NOTA
     function saveGrade(testId, val) {
       if (!state.currentUser) return;
+
+      // Localizar o teste e validar permissão de inserção de nota
+      let currentTest = null;
+      for (const s of state.subjects) {
+        const found = (s.tests || []).find(t => t.id === testId);
+        if (found) { currentTest = found; break; }
+      }
+      if (currentTest && !isGradeInputAllowed(currentTest)) {
+        showToast("Esta avaliação ainda não está disponível para lançamento de notas.", "error");
+        renderGrades();
+        return;
+      }
+
       const userId = state.currentUser.id;
       if (!state.grades[userId]) state.grades[userId] = {};
 
@@ -3174,11 +3187,19 @@
       renderGrades();
     }
 
+    function getLocalDateString() {
+      const d = new Date();
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+
     function isGradeInputAllowed(test) {
-      if (state.currentUser && state.currentUser.role === 'admin') return true;
-      if (!test.openDate) return true;
+      if (!test) return false;
       if (test.openDate === 'pending') return false;
-      const today = new Date().toISOString().split('T')[0];
+      if (!test.openDate) return true;
+      const today = getLocalDateString();
       return today >= test.openDate;
     }
 
@@ -3468,7 +3489,7 @@
                       const grade = userGrades[test.id] !== undefined ? userGrades[test.id] : '';
                       const isAllowed = isGradeInputAllowed(test);
                       const isPending = test.openDate === 'pending';
-                      const today = new Date().toISOString().split('T')[0];
+                      const today = getLocalDateString();
 
                       let availabilityHtml = '';
                       if (isPending) {
@@ -3553,7 +3574,7 @@
                   const grade = userGrades[test.id] !== undefined ? userGrades[test.id] : '';
                   const isAllowed = isGradeInputAllowed(test);
                   const isPending = test.openDate === 'pending';
-                  const today = new Date().toISOString().split('T')[0];
+                  const today = getLocalDateString();
 
                   let mobileAvailabilityHtml = '';
                   if (isPending) {
