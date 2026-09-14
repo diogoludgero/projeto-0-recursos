@@ -392,6 +392,75 @@
   </div>
 
 
+  <!-- MODAL: ORGANIZAR ORDEM DAS SECÇÕES DO ARQUIVO -->
+  <div id="modal-reorder-sections" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-4 animate-fade">
+    <div class="bg-white rounded-2xl max-w-md w-full p-5 sm:p-6 shadow-2xl border border-slate-200">
+      <div class="flex items-center justify-between mb-3 pb-2 border-b border-slate-100">
+        <h3 class="font-bold text-slate-800 text-sm sm:text-base flex items-center gap-2">
+          <i class="fa-solid fa-layer-group text-indigo-600"></i> Organizar Ordem das Secções
+        </h3>
+        <button type="button" onclick="closeReorderSectionsModal()" class="text-slate-400 hover:text-slate-600 p-1 rounded-lg cursor-pointer">
+          <i class="fa-solid fa-xmark text-sm"></i>
+        </button>
+      </div>
+      <p class="text-xs text-slate-500 mb-3">
+        Altera a ordem de apresentação das secções de ficheiros (<span id="reorder-sections-context-label" class="font-bold text-indigo-600">Geral</span>):
+      </p>
+
+      <div id="modal-reorder-sections-list" class="space-y-2 mb-4 max-h-80 overflow-y-auto pr-1">
+        <!-- Injetado dinamicamente via JS -->
+      </div>
+
+      <div class="flex items-center justify-between pt-3 border-t border-slate-100">
+        <button type="button" onclick="resetSectionOrderToDefault()" class="text-xs text-slate-500 hover:text-indigo-600 font-bold transition cursor-pointer underline">
+          Restaurar Padrão
+        </button>
+        <button type="button" onclick="closeReorderSectionsModal()" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-xs transition cursor-pointer">
+          Concluído
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: MOVER DOCUMENTO PARA OUTRA SECÇÃO -->
+  <div id="modal-move-file-section" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-4 animate-fade">
+    <div class="bg-white rounded-2xl max-w-md w-full p-5 sm:p-6 shadow-2xl border border-slate-200">
+      <div class="flex items-center justify-between mb-3 pb-2 border-b border-slate-100">
+        <h3 class="font-bold text-slate-800 text-sm sm:text-base flex items-center gap-2">
+          <i class="fa-solid fa-arrow-right-arrow-left text-indigo-600"></i> Mover para Outra Secção
+        </h3>
+        <button type="button" onclick="closeMoveFileSectionModal()" class="text-slate-400 hover:text-slate-600 p-1 rounded-lg cursor-pointer">
+          <i class="fa-solid fa-xmark text-sm"></i>
+        </button>
+      </div>
+      <p class="text-xs text-slate-500 mb-2">Documento selecionado:</p>
+      <div id="move-file-doc-title" class="text-xs font-bold text-slate-800 mb-4 bg-slate-50 p-3 rounded-xl border border-slate-200 truncate flex items-center gap-2">
+        <i class="fa-solid fa-file-pdf text-rose-500"></i> <span></span>
+      </div>
+
+      <div class="space-y-2 mb-5">
+        <label class="block text-xs font-bold text-slate-600">Secção de Destino</label>
+        <select id="move-file-target-section" class="w-full px-3 py-2.5 border rounded-xl text-sm bg-white outline-none focus:border-indigo-600 transition">
+          <option value="Exames">Exames</option>
+          <option value="Testes">Testes</option>
+          <option value="Fichas">Fichas / Exercícios</option>
+          <option value="Apontamentos">Apontamentos / Teóricas</option>
+          <option value="Trabalhos">Trabalhos / Projetos</option>
+          <option value="Outros">Outros</option>
+        </select>
+      </div>
+
+      <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+        <button type="button" onclick="closeMoveFileSectionModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-bold transition cursor-pointer">
+          Cancelar
+        </button>
+        <button type="button" onclick="confirmMoveFileSection()" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-xs transition cursor-pointer flex items-center gap-1.5">
+          <i class="fa-solid fa-check"></i> Mover Documento
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- ============================================== -->
   <!-- ECRÃ DE AUTENTICAÇÃO (LOGIN / REGISTO)         -->
   <!-- ============================================== -->
@@ -885,6 +954,31 @@
         <!-- Barra de Abas / Pills das Cadeiras com scroll suave -->
         <div id="file-subject-tabs" class="flex gap-2 overflow-x-auto pb-1 scrollbar-thin">
           <!-- Injetado via JS -->
+        </div>
+      </div>
+
+      <!-- BARRA DE CONTROLO E ORDENAÇÃO DO ARQUIVO -->
+      <div class="flex flex-wrap items-center justify-between gap-3 mb-4 sm:mb-6 bg-slate-50/90 p-3 sm:p-3.5 rounded-2xl border border-slate-200">
+        <div class="flex items-center gap-2 flex-wrap">
+          <span class="text-xs font-bold text-slate-600 flex items-center gap-1.5">
+            <i class="fa-solid fa-arrow-down-short-wide text-indigo-600"></i> Ordenar Ficheiros:
+          </span>
+          <select id="archive-sort-select" onchange="changeArchiveSort(this.value)" class="text-xs font-semibold px-2.5 py-1.5 rounded-xl border border-slate-200 bg-white text-slate-700 outline-none focus:border-indigo-600 transition cursor-pointer shadow-2xs">
+            <option value="custom">Ordem Manual</option>
+            <option value="date-desc">Mais Recentes Primeiro</option>
+            <option value="date-asc">Mais Antigos Primeiro</option>
+            <option value="name-asc">Nome (A - Z)</option>
+            <option value="name-desc">Nome (Z - A)</option>
+          </select>
+        </div>
+        <div class="flex items-center gap-2 flex-wrap">
+          <button id="btn-toggle-empty-sections" type="button" onclick="toggleHideEmptySections()" class="px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 border border-slate-200 bg-white hover:bg-slate-100 text-slate-600 shadow-2xs cursor-pointer">
+            <i id="icon-toggle-empty-sections" class="fa-solid fa-eye-slash text-indigo-600"></i>
+            <span id="text-toggle-empty-sections">Ocultar Secções Vazias</span>
+          </button>
+          <button type="button" onclick="openReorderSectionsModal()" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-white hover:bg-slate-100 text-slate-700 transition flex items-center gap-1.5 border border-slate-200 shadow-2xs cursor-pointer">
+            <i class="fa-solid fa-layer-group text-indigo-600"></i> Organizar Secções
+          </button>
         </div>
       </div>
 
@@ -3836,7 +3930,7 @@
       tabsContainer.appendChild(allBtn);
 
       state.subjects.forEach(sub => {
-        const count = state.files.filter(f => f.subjectId === sub.id).length;
+        const count = state.files.filter(f => isFileInSubject(f, sub.id)).length;
         const isSelected = state.selectedArchiveSubject === sub.id;
         const btn = document.createElement('button');
         btn.type = 'button';
@@ -4066,6 +4160,267 @@ ${480 + streamLen}
           }
         }
       }
+    }
+
+    function normalizeSectionName(name) {
+      if (!name) return 'Outros';
+      const clean = name.trim();
+      const lower = clean.toLowerCase();
+      if (lower.startsWith('exame')) return 'Exames';
+      if (lower.startsWith('teste') || lower.includes('mini-teste')) return 'Testes';
+      if (lower.startsWith('ficha') || lower.includes('exercício') || lower.includes('exercicio')) return 'Fichas';
+      if (lower.startsWith('aponta') || lower.startsWith('teór') || lower.startsWith('teor') || lower.includes('resumo') || lower.includes('slides')) return 'Apontamentos';
+      if (lower.startsWith('trabalho') || lower.startsWith('projet')) return 'Trabalhos';
+      if (lower === 'outros' || lower === 'geral') return 'Outros';
+      return clean;
+    }
+
+    function detectSection(title, rawSection, year) {
+      if (rawSection && rawSection !== 'Outros' && rawSection !== 'Geral') {
+        return normalizeSectionName(rawSection);
+      }
+      if (year && !year.includes('/') && year !== 'Outros' && year !== 'Geral') {
+        return normalizeSectionName(year);
+      }
+      const t = (title || '').toLowerCase();
+      if (t.includes('exame')) return 'Exames';
+      if (t.includes('mini-teste') || t.includes('teste')) return 'Testes';
+      if (t.includes('ficha') || t.includes('exerc')) return 'Fichas';
+      if (t.includes('aponta') || t.includes('teór') || t.includes('teor') || t.includes('resumo') || t.includes('slides')) return 'Apontamentos';
+      if (t.includes('trabalho') || t.includes('projet')) return 'Trabalhos';
+      return rawSection ? normalizeSectionName(rawSection) : 'Outros';
+    }
+
+    function isFileInSubject(file, subjectId) {
+      if (!subjectId || subjectId === 'ALL') return true;
+      if (file.subjectId === subjectId || file.subject_id === subjectId) return true;
+      const sub = state.subjects.find(s => s.id === subjectId);
+      if (sub && (file.subjectId === sub.name || file.subject_id === sub.name)) return true;
+      return false;
+    }
+
+    const DEFAULT_SECTION_ORDER = ['Exames', 'Testes', 'Fichas', 'Apontamentos', 'Trabalhos', 'Outros'];
+
+    function getStoredSectionOrders() {
+      try {
+        return JSON.parse(localStorage.getItem('study_archive_section_order')) || {};
+      } catch (e) {
+        return {};
+      }
+    }
+
+    function saveStoredSectionOrders(orders) {
+      try {
+        localStorage.setItem('study_archive_section_order', JSON.stringify(orders));
+      } catch (e) {}
+    }
+
+    function getSubjectSectionOrder(subjectId) {
+      const orders = getStoredSectionOrders();
+      const currentSubjectKey = (subjectId && subjectId !== 'ALL') ? subjectId : 'GLOBAL';
+      const saved = orders[currentSubjectKey] || orders['GLOBAL'] || DEFAULT_SECTION_ORDER;
+      const list = [...saved];
+      DEFAULT_SECTION_ORDER.forEach(sec => {
+        if (!list.includes(sec)) list.push(sec);
+      });
+      state.files.forEach(f => {
+        if (isFileInSubject(f, subjectId)) {
+          const sec = normalizeSectionName(f.section || 'Outros');
+          if (!list.includes(sec)) list.push(sec);
+        }
+      });
+      return list;
+    }
+
+    function moveSectionOrder(sectionName, direction) {
+      const subjectKey = (state.selectedArchiveSubject && state.selectedArchiveSubject !== 'ALL') 
+        ? state.selectedArchiveSubject 
+        : 'GLOBAL';
+      const order = getSubjectSectionOrder(state.selectedArchiveSubject);
+      const idx = order.indexOf(sectionName);
+      if (idx < 0) return;
+      const newIdx = idx + direction;
+      if (newIdx < 0 || newIdx >= order.length) return;
+
+      const temp = order[idx];
+      order[idx] = order[newIdx];
+      order[newIdx] = temp;
+
+      const orders = getStoredSectionOrders();
+      orders[subjectKey] = order;
+      saveStoredSectionOrders(orders);
+
+      renderFiles();
+      if (!document.getElementById('modal-reorder-sections').classList.contains('hidden')) {
+        renderReorderSectionsModalList();
+      }
+    }
+
+    function resetSectionOrderToDefault() {
+      const subjectKey = (state.selectedArchiveSubject && state.selectedArchiveSubject !== 'ALL') 
+        ? state.selectedArchiveSubject 
+        : 'GLOBAL';
+      const orders = getStoredSectionOrders();
+      delete orders[subjectKey];
+      saveStoredSectionOrders(orders);
+      renderFiles();
+      renderReorderSectionsModalList();
+      showToast('Ordem das secções restaurada para o padrão.', 'info');
+    }
+
+    function openReorderSectionsModal() {
+      const modal = document.getElementById('modal-reorder-sections');
+      const label = document.getElementById('reorder-sections-context-label');
+      if (label) {
+        if (state.selectedArchiveSubject && state.selectedArchiveSubject !== 'ALL') {
+          const sub = state.subjects.find(s => s.id === state.selectedArchiveSubject);
+          label.textContent = sub ? sub.name : 'Cadeira Selecionada';
+        } else {
+          label.textContent = 'Todas as Cadeiras (Geral)';
+        }
+      }
+      renderReorderSectionsModalList();
+      if (modal) modal.classList.remove('hidden');
+    }
+
+    function closeReorderSectionsModal() {
+      const modal = document.getElementById('modal-reorder-sections');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function renderReorderSectionsModalList() {
+      const listContainer = document.getElementById('modal-reorder-sections-list');
+      if (!listContainer) return;
+      const order = getSubjectSectionOrder(state.selectedArchiveSubject);
+      const subjectId = state.selectedArchiveSubject || 'ALL';
+
+      listContainer.innerHTML = order.map((secName, idx) => {
+        const meta = getSectionMeta(secName);
+        const count = state.files.filter(f => isFileInSubject(f, subjectId) && normalizeSectionName(f.section) === secName).length;
+        const isFirst = idx === 0;
+        const isLast = idx === order.length - 1;
+
+        return `
+          <div class="flex items-center justify-between p-2.5 bg-slate-50 border border-slate-200 rounded-xl">
+            <div class="flex items-center gap-2.5 min-w-0">
+              <span class="w-6 text-center text-xs font-bold text-slate-400">#${idx + 1}</span>
+              <div class="w-7 h-7 rounded-lg ${meta.headerBg} flex items-center justify-center text-xs font-bold shrink-0 shadow-2xs">
+                ${meta.icon}
+              </div>
+              <span class="text-xs font-bold text-slate-800 truncate">${escapeHtml(secName)}</span>
+              <span class="text-[10px] text-slate-400 font-semibold bg-white border border-slate-200 px-1.5 py-0.5 rounded-full shrink-0">
+                ${count} doc(s)
+              </span>
+            </div>
+            <div class="flex items-center gap-1 shrink-0">
+              <button type="button" onclick="moveSectionOrder('${escapeHtml(secName)}', -1)" ${isFirst ? 'disabled class="p-1 px-2 text-slate-300 rounded cursor-not-allowed"' : 'class="p-1 px-2 bg-white hover:bg-slate-200 text-slate-700 rounded border border-slate-200 transition cursor-pointer"'} title="Subir">
+                <i class="fa-solid fa-arrow-up text-xs"></i>
+              </button>
+              <button type="button" onclick="moveSectionOrder('${escapeHtml(secName)}', 1)" ${isLast ? 'disabled class="p-1 px-2 text-slate-300 rounded cursor-not-allowed"' : 'class="p-1 px-2 bg-white hover:bg-slate-200 text-slate-700 rounded border border-slate-200 transition cursor-pointer"'} title="Descer">
+                <i class="fa-solid fa-arrow-down text-xs"></i>
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function toggleHideEmptySections() {
+      const current = localStorage.getItem('study_archive_hide_empty') === 'true';
+      const next = !current;
+      localStorage.setItem('study_archive_hide_empty', next ? 'true' : 'false');
+      renderFiles();
+      showToast(next ? 'Secções vazias ocultadas.' : 'Todas as secções visíveis.', 'info');
+    }
+
+    function changeArchiveSort(sortType) {
+      localStorage.setItem('study_archive_sort_pref', sortType);
+      renderFiles();
+    }
+
+    let activeMovingFileId = null;
+
+    function openMoveFileSectionModal(fileId) {
+      const file = state.files.find(f => f.id === fileId);
+      if (!file) return;
+      activeMovingFileId = fileId;
+      const titleEl = document.getElementById('move-file-doc-title');
+      if (titleEl) {
+        const span = titleEl.querySelector('span');
+        if (span) span.textContent = file.title;
+      }
+      const selectEl = document.getElementById('move-file-target-section');
+      if (selectEl) {
+        const curSec = normalizeSectionName(file.section || 'Outros');
+        selectEl.value = curSec;
+      }
+      const modal = document.getElementById('modal-move-file-section');
+      if (modal) modal.classList.remove('hidden');
+    }
+
+    function closeMoveFileSectionModal() {
+      activeMovingFileId = null;
+      const modal = document.getElementById('modal-move-file-section');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    async function confirmMoveFileSection() {
+      if (!activeMovingFileId) return;
+      const file = state.files.find(f => f.id === activeMovingFileId);
+      if (!file) return;
+      const selectEl = document.getElementById('move-file-target-section');
+      const newSec = selectEl ? selectEl.value : 'Outros';
+
+      file.section = newSec;
+      file.year = newSec;
+      saveState();
+      renderFiles();
+      closeMoveFileSectionModal();
+
+      if (supabaseClient) {
+        try {
+          await supabaseClient.from('files').update({
+            year: newSec,
+            title: `[${newSec}] ${file.title}`
+          }).eq('id', file.id);
+        } catch(err) {
+          console.warn('Erro ao atualizar secção na cloud:', err);
+        }
+      }
+      showToast(`Documento movido para "${newSec}" com sucesso!`, 'success');
+    }
+
+    function moveFileOrder(fileId, direction) {
+      const file = state.files.find(f => f.id === fileId);
+      if (!file) return;
+      const subjectId = state.selectedArchiveSubject || 'ALL';
+      const sec = normalizeSectionName(file.section || 'Outros');
+
+      const sameSectionFiles = state.files.filter(f => 
+        isFileInSubject(f, subjectId) && normalizeSectionName(f.section || 'Outros') === sec
+      );
+
+      const idx = sameSectionFiles.findIndex(f => f.id === fileId);
+      if (idx < 0) return;
+      const targetIdx = idx + direction;
+      if (targetIdx < 0 || targetIdx >= sameSectionFiles.length) return;
+
+      const targetFile = sameSectionFiles[targetIdx];
+
+      const globalIdxA = state.files.findIndex(f => f.id === file.id);
+      const globalIdxB = state.files.findIndex(f => f.id === targetFile.id);
+      if (globalIdxA >= 0 && globalIdxB >= 0) {
+        const temp = state.files[globalIdxA];
+        state.files[globalIdxA] = state.files[globalIdxB];
+        state.files[globalIdxB] = temp;
+      }
+
+      const fileIds = state.files.map(f => f.id);
+      localStorage.setItem('study_archive_file_order', JSON.stringify(fileIds));
+      localStorage.setItem('study_archive_sort_pref', 'custom');
+
+      saveState();
+      renderFiles();
     }
 
     function getSectionMeta(sectionName) {
@@ -4498,14 +4853,23 @@ ${480 + streamLen}
     function renderFiles() {
       renderPendingFiles();
       const container = document.getElementById('files-container');
+      if (!container) return;
       container.innerHTML = '';
 
-      let filteredFiles = state.files;
-      if (state.selectedArchiveSubject && state.selectedArchiveSubject !== 'ALL') {
-        filteredFiles = filteredFiles.filter(f => f.subjectId === state.selectedArchiveSubject);
-      }
+      const subjectId = state.selectedArchiveSubject || 'ALL';
+      let subjectFiles = state.files.filter(f => isFileInSubject(f, subjectId));
 
-      if (filteredFiles.length === 0) {
+      const sortPref = localStorage.getItem('study_archive_sort_pref') || 'custom';
+      const sortSelect = document.getElementById('archive-sort-select');
+      if (sortSelect && sortSelect.value !== sortPref) sortSelect.value = sortPref;
+
+      const hideEmpty = localStorage.getItem('study_archive_hide_empty') === 'true';
+      const textToggle = document.getElementById('text-toggle-empty-sections');
+      const iconToggle = document.getElementById('icon-toggle-empty-sections');
+      if (textToggle) textToggle.textContent = hideEmpty ? 'Mostrar Todas as Secções' : 'Ocultar Secções Vazias';
+      if (iconToggle) iconToggle.className = hideEmpty ? 'fa-solid fa-eye text-indigo-600' : 'fa-solid fa-eye-slash text-indigo-600';
+
+      if (subjectFiles.length === 0 && hideEmpty) {
         container.innerHTML = `
           <div class="p-8 sm:p-12 text-center text-slate-400 bg-white rounded-2xl border border-slate-200">
             <i class="fa-solid fa-folder-open text-3xl mb-2 text-slate-300"></i>
@@ -4518,35 +4882,48 @@ ${480 + streamLen}
 
       const isAdmin = getActiveRole() === 'admin';
 
-      // Agrupar ficheiros por secção da cadeira (Exames, Testes, Fichas, etc.)
-      const standardOrder = ['Exames', 'Testes', 'Fichas', 'Apontamentos', 'Trabalhos', 'Outros'];
+      // Agrupar ficheiros por secção normalizada
       const grouped = {};
-      filteredFiles.forEach(f => {
-        const sec = f.section || 'Outros';
+      subjectFiles.forEach(f => {
+        const sec = normalizeSectionName(f.section || detectSection(f.title, null, f.year));
         if (!grouped[sec]) grouped[sec] = [];
         grouped[sec].push(f);
       });
 
-      // Ordenar as secções respeitando standardOrder e depois outras personalizadas
-      const sectionKeys = Object.keys(grouped).sort((a, b) => {
-        const idxA = standardOrder.indexOf(a);
-        const idxB = standardOrder.indexOf(b);
-        if (idxA !== -1 && idxB !== -1) return idxA - idxB;
-        if (idxA !== -1) return -1;
-        if (idxB !== -1) return 1;
-        return a.localeCompare(b);
+      // Ordenar ficheiros dentro de cada secção de acordo com a preferência selecionada
+      Object.keys(grouped).forEach(secName => {
+        if (sortPref === 'name-asc') {
+          grouped[secName].sort((a, b) => (a.title || '').localeCompare(b.title || '', 'pt'));
+        } else if (sortPref === 'name-desc') {
+          grouped[secName].sort((a, b) => (b.title || '').localeCompare(a.title || '', 'pt'));
+        } else if (sortPref === 'date-desc') {
+          grouped[secName].sort((a, b) => (b.id || '').localeCompare(a.id || ''));
+        } else if (sortPref === 'date-asc') {
+          grouped[secName].sort((a, b) => (a.id || '').localeCompare(b.id || ''));
+        }
       });
 
-      sectionKeys.forEach(secName => {
-        const secFiles = grouped[secName];
+      // Obter ordem das secções da cadeira selecionada (ou global)
+      const sectionKeys = getSubjectSectionOrder(subjectId);
+
+      let renderedAny = false;
+
+      sectionKeys.forEach((secName, sIdx) => {
+        const secFiles = grouped[secName] || [];
+        if (hideEmpty && secFiles.length === 0) return;
+
+        renderedAny = true;
         const meta = getSectionMeta(secName);
+        const isFirst = sIdx === 0;
+        const isLast = sIdx === sectionKeys.length - 1;
 
         const secEl = document.createElement('div');
+        secEl.setAttribute('data-section-name', secName);
         secEl.className = "bg-white rounded-2xl p-4 sm:p-6 shadow-sm border border-slate-200 mb-6 last:mb-0";
         secEl.innerHTML = `
           <div class="flex items-center justify-between gap-2 mb-4 pb-2.5 border-b border-slate-100">
             <div class="flex items-center gap-2.5">
-              <div class="w-8 h-8 rounded-xl ${meta.headerBg} flex items-center justify-center font-bold text-sm shadow-xs">
+              <div class="w-8 h-8 rounded-xl ${meta.headerBg} flex items-center justify-center font-bold text-sm shadow-2xs">
                 ${meta.icon}
               </div>
               <div>
@@ -4554,52 +4931,90 @@ ${480 + streamLen}
                 <p class="text-[11px] text-slate-400">${secFiles.length} ${secFiles.length === 1 ? 'documento' : 'documentos'}</p>
               </div>
             </div>
+            <div class="flex items-center gap-1.5">
+              <button type="button" onclick="moveSectionOrder('${escapeHtml(secName)}', -1)" ${isFirst ? 'disabled class="p-1.5 px-2 bg-slate-50 text-slate-300 rounded-lg text-xs font-bold cursor-not-allowed"' : 'class="p-1.5 px-2 bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-600 rounded-lg text-xs font-bold transition flex items-center gap-1 cursor-pointer"'} title="Mover secção para cima">
+                <i class="fa-solid fa-arrow-up text-[11px]"></i> <span class="hidden sm:inline">Subir</span>
+              </button>
+              <button type="button" onclick="moveSectionOrder('${escapeHtml(secName)}', 1)" ${isLast ? 'disabled class="p-1.5 px-2 bg-slate-50 text-slate-300 rounded-lg text-xs font-bold cursor-not-allowed"' : 'class="p-1.5 px-2 bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-600 rounded-lg text-xs font-bold transition flex items-center gap-1 cursor-pointer"'} title="Mover secção para baixo">
+                <i class="fa-solid fa-arrow-down text-[11px]"></i> <span class="hidden sm:inline">Descer</span>
+              </button>
+            </div>
           </div>
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-            ${secFiles.map(f => {
-              const subject = state.subjects.find(s => s.id === f.subjectId);
-              const subjectName = subject ? subject.name : 'Geral';
-              return `
-                <div class="p-3.5 sm:p-4 bg-slate-50 border border-slate-200 rounded-xl flex flex-col justify-between hover:shadow-md hover:border-indigo-200 transition group">
-                  <div>
-                    <div class="flex items-center justify-between gap-1 mb-1.5">
-                      <div class="flex items-center gap-1.5 min-w-0">
-                        <span class="text-[9px] uppercase font-bold text-indigo-700 bg-indigo-100 px-2 py-0.5 rounded truncate max-w-[130px]">${escapeHtml(subjectName)}</span>
-                        <span class="text-[9px] font-bold px-1.5 py-0.5 rounded ${meta.badgeClass} flex items-center gap-1 shrink-0">${meta.icon} ${escapeHtml(f.section || secName)}</span>
+          ${secFiles.length === 0 ? `
+            <div class="py-4 px-4 text-center border-2 border-dashed border-slate-200 rounded-xl bg-slate-50/60 text-slate-400 text-xs flex items-center justify-center gap-2">
+              <i class="fa-regular fa-folder-open text-slate-300"></i> Sem documentos publicados nesta secção
+            </div>
+          ` : `
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+              ${secFiles.map((f, fIdx) => {
+                const subject = state.subjects.find(s => s.id === f.subjectId || s.id === f.subject_id);
+                const subjectName = subject ? subject.name : 'Geral';
+                const isFirstFile = fIdx === 0;
+                const isLastFile = fIdx === secFiles.length - 1;
+                return `
+                  <div class="p-3.5 sm:p-4 bg-slate-50 border border-slate-200 rounded-xl flex flex-col justify-between hover:shadow-md hover:border-indigo-200 transition group">
+                    <div>
+                      <div class="flex items-center justify-between gap-1 mb-1.5">
+                        <div class="flex items-center gap-1.5 min-w-0">
+                          <span class="text-[9px] uppercase font-bold text-indigo-700 bg-indigo-100 px-2 py-0.5 rounded truncate max-w-[130px]">${escapeHtml(subjectName)}</span>
+                          <span class="text-[9px] font-bold px-1.5 py-0.5 rounded ${meta.badgeClass} flex items-center gap-1 shrink-0">${meta.icon} ${escapeHtml(secName)}</span>
+                        </div>
+                        <span class="text-[10px] text-rose-600 font-bold bg-rose-50 border border-rose-100 px-1.5 py-0.5 rounded flex items-center gap-1 shrink-0">
+                          <i class="fa-solid fa-file-pdf"></i> PDF
+                        </span>
                       </div>
-                      <span class="text-[10px] text-rose-600 font-bold bg-rose-50 border border-rose-100 px-1.5 py-0.5 rounded flex items-center gap-1 shrink-0">
-                        <i class="fa-solid fa-file-pdf"></i> PDF
-                      </span>
+                      <h4 onclick="openPdfFile(${inlineArgument(f.id)})" class="font-bold text-slate-800 text-xs sm:text-sm mt-1 truncate cursor-pointer hover:text-indigo-600 transition" title="Clique para abrir ${escapeHtml(f.title)} no Chrome">
+                        ${escapeHtml(f.title)}
+                      </h4>
+                      <p class="text-[11px] text-slate-400 truncate mt-1 flex items-center gap-1">
+                        <i class="fa-regular fa-file-lines text-slate-400"></i> ${escapeHtml(f.fileName)}
+                        ${f.fileSize ? `<span class="text-slate-400">(${escapeHtml(f.fileSize)})</span>` : ''}
+                      </p>
                     </div>
-                    <h4 onclick="openPdfFile(${inlineArgument(f.id)})" class="font-bold text-slate-800 text-xs sm:text-sm mt-1 truncate cursor-pointer hover:text-indigo-600 transition" title="Clique para abrir ${escapeHtml(f.title)} no Chrome">
-                      ${escapeHtml(f.title)}
-                    </h4>
-                    <p class="text-[11px] text-slate-400 truncate mt-1 flex items-center gap-1">
-                      <i class="fa-regular fa-file-lines text-slate-400"></i> ${escapeHtml(f.fileName)}
-                    </p>
-                  </div>
-                  <div class="mt-3.5 pt-2.5 border-t border-slate-200 flex justify-between items-center gap-2">
-                    <button onclick="openPdfFile(${inlineArgument(f.id)})" class="text-xs font-bold text-indigo-600 hover:text-indigo-800 flex items-center gap-1.5 transition py-1 px-1.5 rounded-lg hover:bg-indigo-50 cursor-pointer" title="Abrir documento numa nova aba do Chrome">
-                      <i class="fa-solid fa-arrow-up-right-from-square text-indigo-500"></i> Abrir no Chrome
-                    </button>
-                    <div class="flex items-center gap-1">
-                      <button onclick="downloadPdfFile(${inlineArgument(f.id)})" class="text-slate-400 hover:text-slate-700 text-xs font-semibold p-1.5 hover:bg-slate-200/70 rounded-lg transition cursor-pointer" title="Descarregar cópia para o computador">
-                        <i class="fa-solid fa-download"></i>
+                    <div class="mt-3.5 pt-2.5 border-t border-slate-200 flex justify-between items-center gap-2">
+                      <button onclick="openPdfFile(${inlineArgument(f.id)})" class="text-xs font-bold text-indigo-600 hover:text-indigo-800 flex items-center gap-1.5 transition py-1 px-1.5 rounded-lg hover:bg-indigo-50 cursor-pointer" title="Abrir documento numa nova aba do Chrome">
+                        <i class="fa-solid fa-arrow-up-right-from-square text-indigo-500"></i> Abrir no Chrome
                       </button>
-                      ${isAdmin ? `
-                        <button onclick="deleteFile(${inlineArgument(f.id)})" class="text-rose-600 hover:text-rose-800 text-xs font-semibold p-1.5 hover:bg-rose-50 rounded-lg transition cursor-pointer" title="Eliminar documento">
-                          <i class="fa-regular fa-trash-can"></i>
+                      <div class="flex items-center gap-1">
+                        <button type="button" onclick="moveFileOrder(${inlineArgument(f.id)}, -1)" ${isFirstFile ? 'disabled class="text-slate-300 p-1 rounded cursor-not-allowed"' : 'class="text-slate-400 hover:text-indigo-600 p-1 hover:bg-slate-200/70 rounded-lg transition cursor-pointer"'} title="Mover ficheiro para a esquerda">
+                          <i class="fa-solid fa-arrow-left text-[11px]"></i>
                         </button>
-                      ` : ''}
+                        <button type="button" onclick="moveFileOrder(${inlineArgument(f.id)}, 1)" ${isLastFile ? 'disabled class="text-slate-300 p-1 rounded cursor-not-allowed"' : 'class="text-slate-400 hover:text-indigo-600 p-1 hover:bg-slate-200/70 rounded-lg transition cursor-pointer"'} title="Mover ficheiro para a direita">
+                          <i class="fa-solid fa-arrow-right text-[11px]"></i>
+                        </button>
+                        ${isAdmin ? `
+                          <button type="button" onclick="openMoveFileSectionModal(${inlineArgument(f.id)})" class="text-slate-400 hover:text-indigo-600 text-xs font-semibold p-1 hover:bg-indigo-50 rounded-lg transition cursor-pointer" title="Alterar secção deste documento">
+                            <i class="fa-solid fa-arrow-right-arrow-left text-[11px]"></i>
+                          </button>
+                        ` : ''}
+                        <button onclick="downloadPdfFile(${inlineArgument(f.id)})" class="text-slate-400 hover:text-slate-700 text-xs font-semibold p-1 hover:bg-slate-200/70 rounded-lg transition cursor-pointer" title="Descarregar cópia para o computador">
+                          <i class="fa-solid fa-download"></i>
+                        </button>
+                        ${isAdmin ? `
+                          <button onclick="deleteFile(${inlineArgument(f.id)})" class="text-rose-600 hover:text-rose-800 text-xs font-semibold p-1 hover:bg-rose-50 rounded-lg transition cursor-pointer" title="Eliminar documento">
+                            <i class="fa-regular fa-trash-can"></i>
+                          </button>
+                        ` : ''}
+                      </div>
                     </div>
                   </div>
-                </div>
-              `;
-            }).join('')}
-          </div>
+                `;
+              }).join('')}
+            </div>
+          `}
         `;
         container.appendChild(secEl);
       });
+
+      if (!renderedAny) {
+        container.innerHTML = `
+          <div class="p-8 sm:p-12 text-center text-slate-400 bg-white rounded-2xl border border-slate-200">
+            <i class="fa-solid fa-folder-open text-3xl mb-2 text-slate-300"></i>
+            <p class="font-bold text-slate-600">Nenhum ficheiro encontrado nesta seleção.</p>
+            <p class="text-xs mt-1">Todas as secções estão vazias ou ocultadas.</p>
+          </div>
+        `;
+      }
     }
 
     // ADMIN: CONSULTA DE ALUNOS E SUAS CADEIRAS
@@ -4998,16 +5413,9 @@ ${480 + streamLen}
         // Uma leitura nunca volta a inserir ficheiros da cache ou de demonstração.
         state.files = cloudFiles.map(cf => {
           const titleMatch = (cf.title || '').match(/^\[(.*?)\]\s*(.*)$/);
-          let sec = 'Outros';
-          let cleanTitle = cf.title || '';
-          if (titleMatch) {
-            sec = titleMatch[1];
-            cleanTitle = titleMatch[2];
-          } else if (cf.section) {
-            sec = cf.section;
-          } else if (cf.year && !cf.year.includes('/')) {
-            sec = cf.year;
-          }
+          let rawSec = cf.section || (titleMatch ? titleMatch[1] : ((cf.year && !cf.year.includes('/')) ? cf.year : null));
+          let cleanTitle = titleMatch ? titleMatch[2] : (cf.title || '');
+          const sec = detectSection(cleanTitle, rawSec, cf.year);
           return {
             id: cf.id,
             title: cleanTitle,
@@ -5022,12 +5430,26 @@ ${480 + streamLen}
           };
         });
 
+        // Aplicar ordenação manual guardada aos ficheiros sincronizados
+        const savedFileOrder = readStoredJson('study_archive_file_order');
+        if (Array.isArray(savedFileOrder) && savedFileOrder.length > 0) {
+          state.files.sort((a, b) => {
+            const idxA = savedFileOrder.indexOf(a.id);
+            const idxB = savedFileOrder.indexOf(b.id);
+            if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+            if (idxA !== -1) return -1;
+            if (idxB !== -1) return 1;
+            return 0;
+          });
+        }
+
         // 3. Pedidos de alteração / ficheiros pendentes
         if (cloudRequests) {
           state.fileRequests = cloudRequests.map(cr => {
             const titleMatch = (cr.title || '').match(/^\[(.*?)\]\s*(.*)$/);
-            const sec = titleMatch ? titleMatch[1] : (cr.section || 'Outros');
-            const cleanTitle = titleMatch ? titleMatch[2] : (cr.title || '');
+            let rawSec = cr.section || (titleMatch ? titleMatch[1] : null);
+            let cleanTitle = titleMatch ? titleMatch[2] : (cr.title || '');
+            const sec = detectSection(cleanTitle, rawSec, null);
             return {
               id: cr.id,
               title: cleanTitle,
