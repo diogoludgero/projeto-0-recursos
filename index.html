@@ -973,8 +973,8 @@
         </div>
         <div class="flex items-center gap-2 flex-wrap">
           <button id="btn-toggle-empty-sections" type="button" onclick="toggleHideEmptySections()" class="px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 border border-slate-200 bg-white hover:bg-slate-100 text-slate-600 shadow-2xs cursor-pointer">
-            <i id="icon-toggle-empty-sections" class="fa-solid fa-eye-slash text-indigo-600"></i>
-            <span id="text-toggle-empty-sections">Ocultar Secções Vazias</span>
+            <i id="icon-toggle-empty-sections" class="fa-solid fa-eye text-indigo-600"></i>
+            <span id="text-toggle-empty-sections">Mostrar Secções Vazias</span>
           </button>
           <button id="btn-open-reorder-sections" type="button" onclick="openReorderSectionsModal()" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-white hover:bg-slate-100 text-slate-700 transition flex items-center gap-1.5 border border-slate-200 shadow-2xs cursor-pointer">
             <i class="fa-solid fa-layer-group text-indigo-600"></i> Organizar Secções
@@ -4359,11 +4359,12 @@ ${480 + streamLen}
     }
 
     function toggleHideEmptySections() {
-      const current = localStorage.getItem('study_archive_hide_empty') === 'true';
+      if (getActiveRole() !== 'admin') return;
+      const current = localStorage.getItem('study_archive_hide_empty') !== 'false';
       const next = !current;
       localStorage.setItem('study_archive_hide_empty', next ? 'true' : 'false');
       renderFiles();
-      showToast(next ? 'Secções vazias ocultadas.' : 'Todas as secções visíveis.', 'info');
+      showToast(next ? 'Secções sem ficheiros ocultadas.' : 'Todas as secções visíveis.', 'info');
     }
 
     function changeArchiveSort(sortType) {
@@ -4931,11 +4932,22 @@ ${480 + streamLen}
       const sortSelect = document.getElementById('archive-sort-select');
       if (sortSelect && sortSelect.value !== sortPref) sortSelect.value = sortPref;
 
-      const hideEmpty = localStorage.getItem('study_archive_hide_empty') === 'true';
+      const isAdmin = getActiveRole() === 'admin';
+      const hideEmpty = localStorage.getItem('study_archive_hide_empty') !== 'false';
       const textToggle = document.getElementById('text-toggle-empty-sections');
       const iconToggle = document.getElementById('icon-toggle-empty-sections');
-      if (textToggle) textToggle.textContent = hideEmpty ? 'Mostrar Todas as Secções' : 'Ocultar Secções Vazias';
+      if (textToggle) textToggle.textContent = hideEmpty ? 'Mostrar Secções Vazias' : 'Ocultar Secções Vazias';
       if (iconToggle) iconToggle.className = hideEmpty ? 'fa-solid fa-eye text-indigo-600' : 'fa-solid fa-eye-slash text-indigo-600';
+
+      const btnToggleEmpty = document.getElementById('btn-toggle-empty-sections');
+      if (btnToggleEmpty) {
+        btnToggleEmpty.style.display = isAdmin ? '' : 'none';
+      }
+
+      const reorderSecBtn = document.getElementById('btn-open-reorder-sections');
+      if (reorderSecBtn) {
+        reorderSecBtn.style.display = isAdmin ? '' : 'none';
+      }
 
       if (subjectFiles.length === 0 && hideEmpty) {
         container.innerHTML = `
@@ -4946,13 +4958,6 @@ ${480 + streamLen}
           </div>
         `;
         return;
-      }
-
-      const isAdmin = getActiveRole() === 'admin';
-
-      const reorderSecBtn = document.getElementById('btn-open-reorder-sections');
-      if (reorderSecBtn) {
-        reorderSecBtn.style.display = isAdmin ? '' : 'none';
       }
 
       // Agrupar ficheiros por secção normalizada
@@ -4983,7 +4988,7 @@ ${480 + streamLen}
 
       sectionKeys.forEach((secName, sIdx) => {
         const secFiles = grouped[secName] || [];
-        if (hideEmpty && secFiles.length === 0) return;
+        if (secFiles.length === 0 && (!isAdmin || hideEmpty)) return;
 
         renderedAny = true;
         const meta = getSectionMeta(secName);
