@@ -2288,14 +2288,28 @@
                   </div>
                   <div class="min-w-0">
                     <div class="flex items-center gap-1.5 flex-wrap">
-                      <h4 class="font-bold text-slate-800 text-sm truncate">${prof.name}</h4>
+                      <h4 class="font-bold text-slate-800 text-sm truncate">${escapeHtml(prof.name)}</h4>
+                      ${prof.sigla ? `<span class="text-[10px] font-mono font-bold text-slate-500 bg-slate-200/70 px-1.5 py-0.5 rounded">${escapeHtml(prof.sigla)}</span>` : ''}
                       ${renderProfessorBadges(prof)}
                     </div>
-                    <div class="flex items-center gap-1.5 text-xs text-slate-600 mt-1">
-                      <i class="fa-regular fa-envelope text-slate-400"></i>
-                      <a href="mailto:${prof.email}" class="text-indigo-600 hover:text-indigo-800 hover:underline font-mono truncate" title="Clique para enviar email">
-                        ${prof.email}
-                      </a>
+                    <div class="flex items-center gap-3 text-xs text-slate-600 mt-1 flex-wrap">
+                      <div class="flex items-center gap-1.5">
+                        <i class="fa-regular fa-envelope text-slate-400"></i>
+                        <a href="mailto:${escapeHtml(prof.email)}" class="text-indigo-600 hover:text-indigo-800 hover:underline font-mono truncate" title="Clique para enviar email">
+                          ${escapeHtml(prof.email)}
+                        </a>
+                      </div>
+                      ${prof.salas ? `
+                        <div class="flex items-center gap-1 text-[11px] text-slate-500">
+                          <i class="fa-solid fa-door-open text-slate-400"></i>
+                          <span>Gabinete: <strong class="text-slate-700">${escapeHtml(prof.salas)}</strong></span>
+                        </div>
+                      ` : ''}
+                      ${prof.categoria ? `
+                        <div class="flex items-center gap-1 text-[11px] text-slate-400">
+                          <span>${escapeHtml(prof.categoria)}</span>
+                        </div>
+                      ` : ''}
                     </div>
                   </div>
                 </div>
@@ -5845,7 +5859,8 @@ ${480 + streamLen}
         // A base de dados é a autoridade, incluindo resultados vazios.
         const mappedSubjects = cloudSubjects.map(cs => {
           const localSub = (state.subjects || []).find(s => s.id === cs.id);
-          const sem = (cs.semester !== undefined && cs.semester !== null) ? cs.semester : (localSub?.semester || 1);
+          const defaultSem = (cs.name && cs.name.trim().endsWith('2')) ? 2 : 1;
+          const sem = (cs.semester !== undefined && cs.semester !== null) ? cs.semester : (localSub?.semester || defaultSem);
           return {
             id: cs.id,
             name: cs.name,
