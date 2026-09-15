@@ -302,6 +302,65 @@
     </div>
   </div>
 
+  <!-- ============================================== -->
+  <!-- MODAL: EDITAR CADEIRA (ADMIN)                  -->
+  <!-- ============================================== -->
+  <div id="modal-edit-subject" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-4 animate-fade">
+    <div class="bg-white w-full max-w-lg rounded-2xl shadow-2xl border border-slate-100 overflow-hidden flex flex-col max-h-[90vh]">
+      
+      <div class="bg-slate-900 text-white p-5 flex items-center justify-between border-b border-slate-800">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-indigo-600/30 border border-indigo-400/40 flex items-center justify-center text-indigo-300">
+            <i class="fa-solid fa-pen-to-square text-lg"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-bold">Editar Cadeira</h3>
+            <p class="text-xs text-slate-400">Atualizar dados e semestre da disciplina</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeEditSubjectModal()" class="text-slate-400 hover:text-white p-1 rounded-lg transition cursor-pointer">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <form onsubmit="saveEditSubjectModal(event)" class="p-5 sm:p-6 overflow-y-auto flex-1 space-y-4">
+        <input type="hidden" id="edit-subject-id">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Nome da Cadeira</label>
+          <input type="text" id="edit-subject-name" required class="w-full px-3.5 py-2.5 border rounded-xl text-sm outline-none focus:border-indigo-600 bg-white transition shadow-2xs">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Semestre</label>
+          <select id="edit-subject-semester" required class="w-full px-3.5 py-2.5 border rounded-xl text-sm outline-none focus:border-indigo-600 bg-white transition shadow-2xs text-slate-700 cursor-pointer">
+            <option value="1">1.º Semestre</option>
+            <option value="2">2.º Semestre</option>
+          </select>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Limite Faltas Teóricas</label>
+            <input type="number" id="edit-subject-max-theory" min="0" max="20" required class="w-full px-3.5 py-2.5 border rounded-xl text-sm outline-none focus:border-indigo-600 bg-white transition shadow-2xs">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Limite Faltas Práticas</label>
+            <input type="number" id="edit-subject-max-practice" min="0" max="20" required class="w-full px-3.5 py-2.5 border rounded-xl text-sm outline-none focus:border-indigo-600 bg-white transition shadow-2xs">
+          </div>
+        </div>
+
+        <div class="p-4 sm:p-5 bg-slate-50 -mx-5 -mb-6 mt-6 border-t border-slate-200 flex justify-end gap-2">
+          <button type="button" onclick="closeEditSubjectModal()" class="px-4 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl text-xs font-bold transition cursor-pointer">
+            Cancelar
+          </button>
+          <button type="submit" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm cursor-pointer">
+            <i class="fa-solid fa-check"></i> Guardar Alterações
+          </button>
+        </div>
+      </form>
+
+    </div>
+  </div>
 
   <!-- ============================================== -->
   <!-- MODAL: MAIS INFORMAÇÕES DA CADEIRA (DOCENTES)  -->
@@ -716,12 +775,23 @@
               <h3 class="font-bold text-xs uppercase tracking-wider text-slate-600 mb-2.5 flex items-center gap-1.5">
                 <i class="fa-solid fa-book-bookmark text-indigo-600"></i> Nova Cadeira
               </h3>
-              <div>
-                <input type="text" id="new-subject-name" placeholder="Ex: Análise Matemática I" required class="w-full px-3.5 py-2.5 border rounded-xl text-sm outline-none focus:border-indigo-600 bg-white transition">
+              <div class="space-y-2.5">
+                <div>
+                  <label class="block text-[11px] font-bold text-slate-600 mb-1">Nome da Cadeira</label>
+                  <input type="text" id="new-subject-name" placeholder="Ex: Análise Matemática I" required class="w-full px-3.5 py-2.5 border rounded-xl text-sm outline-none focus:border-indigo-600 bg-white transition shadow-2xs">
+                </div>
+                <div>
+                  <label class="block text-[11px] font-bold text-slate-600 mb-1">Semestre</label>
+                  <select id="new-subject-semester" required class="w-full px-3.5 py-2.5 border rounded-xl text-sm outline-none focus:border-indigo-600 bg-white transition shadow-2xs text-slate-700 cursor-pointer">
+                    <option value="" disabled selected>Seleciona o semestre...</option>
+                    <option value="1">1.º Semestre</option>
+                    <option value="2">2.º Semestre</option>
+                  </select>
+                </div>
               </div>
             </div>
             <div class="mt-4 flex justify-end">
-              <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow transition flex items-center justify-center gap-1.5">
+              <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow transition flex items-center justify-center gap-1.5 cursor-pointer">
                 <i class="fa-solid fa-plus"></i> Criar Cadeira
               </button>
             </div>
@@ -943,17 +1013,22 @@
         </form>
       </div>
 
-      <!-- ABAS DE CADEIRAS NO ARQUIVO (ORGANIZADO POR CADEIRAS EM CIMA) -->
-      <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 mb-6">
-        <div class="flex items-center justify-between mb-3 pb-2 border-b border-slate-100">
-          <span class="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
-            <i class="fa-solid fa-book-open text-indigo-600"></i> Cadeiras no Arquivo
-          </span>
-        </div>
-
-        <!-- Barra de Abas / Pills das Cadeiras com scroll suave -->
-        <div id="file-subject-tabs" class="flex gap-2 overflow-x-auto pb-1 scrollbar-thin">
-          <!-- Injetado via JS -->
+      <!-- SELETOR DE CADEIRA NO ARQUIVO -->
+      <div class="bg-white p-4 sm:p-5 rounded-2xl shadow-sm border border-slate-200 mb-6">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div class="w-full sm:max-w-md">
+            <label for="archive-subject-select" class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2 flex items-center gap-1.5">
+              <i class="fa-solid fa-book-open text-indigo-600"></i> Cadeira no Arquivo
+            </label>
+            <select id="archive-subject-select" onchange="onArchiveSubjectChange(this.value)" class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm bg-white text-slate-700 outline-none focus:border-indigo-600 transition shadow-2xs cursor-pointer">
+              <option value="">Seleciona a cadeira...</option>
+            </select>
+          </div>
+          <div id="archive-subject-info-btn-container" class="hidden">
+            <button id="btn-archive-docents-info" type="button" onclick="openSubjectInfoModal(state.selectedArchiveSubject)" class="px-3.5 py-2 rounded-xl text-xs font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 transition flex items-center gap-1.5 cursor-pointer shadow-2xs">
+              <i class="fa-solid fa-circle-info text-indigo-600"></i> Docentes da Cadeira
+            </button>
+          </div>
         </div>
       </div>
 
@@ -1089,9 +1164,20 @@
             </h2>
             <p class="text-xs text-slate-500">Consulta as cadeiras frequentadas, notas e gere as contas dos estudantes.</p>
           </div>
-          <button type="button" onclick="openAdminCreateStudentModal()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm shrink-0 self-start sm:self-auto cursor-pointer">
-            <i class="fa-solid fa-user-plus"></i> Registar Aluno
-          </button>
+          <div class="flex items-center gap-3 flex-wrap">
+            <div class="flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200 shadow-2xs">
+              <label for="admin-current-semester-select" class="text-xs font-bold text-slate-700 flex items-center gap-1.5 cursor-pointer">
+                <i class="fa-solid fa-calendar-week text-indigo-600"></i> Semestre atual:
+              </label>
+              <select id="admin-current-semester-select" onchange="changeCurrentSemester(this.value)" class="px-2.5 py-1 border border-slate-200 rounded-lg text-xs font-bold bg-white text-slate-800 outline-none focus:border-indigo-600 cursor-pointer shadow-2xs transition">
+                <option value="1">1.º Semestre</option>
+                <option value="2">2.º Semestre</option>
+              </select>
+            </div>
+            <button type="button" onclick="openAdminCreateStudentModal()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm shrink-0 self-start sm:self-auto cursor-pointer">
+              <i class="fa-solid fa-user-plus"></i> Registar Aluno
+            </button>
+          </div>
         </div>
         
         <div id="students-list-container" class="space-y-4"></div>
@@ -1267,7 +1353,8 @@
       },
       fileRequests: readStoredJson('study_file_requests') || [],
       files: readStoredJson('study_files') || [],
-      selectedArchiveSubject: 'ALL'
+      selectedArchiveSubject: '',
+      currentSemester: parseInt(localStorage.getItem('study_current_semester'), 10) || 1
     };
 
     // SINCRONIZAÇÃO AUTOMÁTICA DA CONTA DIOGOLUDGERO E PURGA DE DEMOS
@@ -1333,6 +1420,9 @@
           console.warn('Não foi possível guardar a cache local:', key);
         }
       });
+      try {
+        localStorage.setItem('study_current_semester', String(state.currentSemester || 1));
+      } catch (e) {}
       try {
         if (state.currentUser) {
           const storage = state.rememberMe ? localStorage : sessionStorage;
@@ -1864,6 +1954,9 @@
       studentActionsBar.classList.remove('hidden');
       if (dropEnrolledBtn) dropEnrolledBtn.classList.remove('hidden');
 
+      const semSelect = document.getElementById('admin-current-semester-select');
+      if (semSelect) semSelect.value = String(getCurrentSemester());
+
       updateSubjectSelects();
       renderGrades();
       renderArchiveTabs();
@@ -1892,22 +1985,26 @@
 
       const userId = state.currentUser ? state.currentUser.id : null;
       const enrolled = (userId && state.enrolledSubjects[userId]) ? state.enrolledSubjects[userId] : [];
+      const currentSem = getCurrentSemester();
 
-      if (state.subjects.length === 0) {
+      // Alunos só podem ver as cadeiras do semestre atual definido pelo administrador
+      const semesterSubjects = state.subjects.filter(s => (s.semester || 1) === currentSem);
+
+      if (semesterSubjects.length === 0) {
         list.innerHTML = `
           <div class="text-center p-6 text-slate-400">
             <i class="fa-solid fa-info-circle text-2xl mb-2"></i>
-            <p class="text-sm">Ainda não existem cadeiras criadas pelo Administrador.</p>
+            <p class="text-sm">Ainda não existem cadeiras registadas para o ${currentSem}.º Semestre.</p>
           </div>
         `;
       } else {
-        list.innerHTML = state.subjects.map(sub => {
+        list.innerHTML = semesterSubjects.map(sub => {
           const isChecked = enrolled.includes(sub.id);
           return `
             <label class="flex items-center justify-between p-3.5 bg-slate-50 hover:bg-indigo-50/50 rounded-xl border border-slate-200 hover:border-indigo-300 cursor-pointer transition">
               <div class="flex items-center gap-3">
                 <input type="checkbox" value="${sub.id}" class="subject-enrolled-checkbox w-4 h-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500" ${isChecked ? 'checked' : ''}>
-                <span class="text-sm font-bold text-slate-800">${sub.name}</span>
+                <span class="text-sm font-bold text-slate-800">${escapeHtml(sub.name)}</span>
               </div>
               <span class="text-xs text-slate-400 font-medium">${sub.tests.length} avaliação(ões)</span>
             </label>
@@ -1931,17 +2028,39 @@
       if (!state.currentUser) return;
       const userId = state.currentUser.id;
       const checkboxes = document.querySelectorAll('.subject-enrolled-checkbox:checked');
-      const selectedIds = Array.from(checkboxes).map(cb => cb.value);
+      const selectedSemesterIds = Array.from(checkboxes).map(cb => cb.value);
+      const currentSem = getCurrentSemester();
 
-      state.enrolledSubjects[userId] = selectedIds;
+      // Obter as cadeiras já inscritas deste utilizador
+      const currentEnrolled = Array.isArray(state.enrolledSubjects[userId]) ? state.enrolledSubjects[userId] : [];
+
+      // Preservar as cadeiras de OUTROS semestres (para não apagar histórico nem dados de semestres anteriores)
+      const otherSemestersEnrolled = currentEnrolled.filter(id => {
+        const sub = state.subjects.find(s => s.id === id);
+        return sub && (sub.semester || 1) !== currentSem;
+      });
+
+      // Validação de segurança: apenas aceitar cadeiras que pertençam de facto ao semestre atual
+      const validSemesterSelected = selectedSemesterIds.filter(id => {
+        const sub = state.subjects.find(s => s.id === id);
+        return sub && (sub.semester || 1) === currentSem;
+      });
+
+      const updatedEnrolled = [...otherSemestersEnrolled, ...validSemesterSelected];
+
+      state.enrolledSubjects[userId] = updatedEnrolled;
       saveState();
       closeEnrolledModal();
       renderGrades();
+      renderArchiveDropdown();
+      renderFiles();
+      updateSubjectSelects();
+      renderAbsences();
 
       if (supabaseClient) {
         supabaseClient.from('student_enrolled').upsert({
           student_id: userId,
-          subjects: selectedIds
+          subjects: updatedEnrolled
         }).then(() => {});
       }
 
@@ -3019,6 +3138,68 @@
       });
     }
 
+    // GESTÃO DE SEMESTRES E CADEIRAS ACESSÍVEIS
+    function getCurrentSemester() {
+      return parseInt(state.currentSemester, 10) || 1;
+    }
+
+    async function changeCurrentSemester(newVal) {
+      if (getActiveRole() !== 'admin') {
+        showToast('Apenas o Administrador pode alterar o semestre atual.', 'error');
+        return;
+      }
+      const semesterNum = parseInt(newVal, 10);
+      if (semesterNum !== 1 && semesterNum !== 2) return;
+
+      state.currentSemester = semesterNum;
+      localStorage.setItem('study_current_semester', String(semesterNum));
+      saveState();
+
+      if (supabaseClient) {
+        try {
+          await supabaseClient.from('app_settings').upsert({
+            key: 'current_semester',
+            value: semesterNum,
+            updated_at: new Date().toISOString()
+          });
+        } catch (err) {
+          console.warn('Aviso ao guardar semestre atual no Supabase:', err);
+        }
+      }
+
+      const semSelect = document.getElementById('admin-current-semester-select');
+      if (semSelect && semSelect.value !== String(semesterNum)) {
+        semSelect.value = String(semesterNum);
+      }
+
+      updateSubjectSelects();
+      renderGrades();
+      renderArchiveDropdown();
+      renderFiles();
+      showToast(`Semestre atual alterado para o ${semesterNum}.º Semestre!`, 'success');
+    }
+
+    function getStudentEnrolledSubjectIds(userId) {
+      if (!userId) return [];
+      const enrolled = state.enrolledSubjects ? state.enrolledSubjects[userId] : null;
+      return Array.isArray(enrolled) ? enrolled : [];
+    }
+
+    function getArchiveAccessibleSubjects() {
+      const isAdmin = getActiveRole() === 'admin';
+      if (isAdmin) {
+        return state.subjects || [];
+      }
+      const userId = state.currentUser ? state.currentUser.id : null;
+      if (!userId) return [];
+      const currentSem = getCurrentSemester();
+      const enrolled = getStudentEnrolledSubjectIds(userId);
+      return (state.subjects || []).filter(sub => {
+        const subSem = sub.semester || 1;
+        return subSem === currentSem && enrolled.includes(sub.id);
+      });
+    }
+
     // SELECTS DE CADEIRAS
     function updateSubjectSelects() {
       const testSelect = document.getElementById('test-subject-select');
@@ -3027,42 +3208,64 @@
       const absenceAdminSelect = document.getElementById('absence-admin-subject-select');
       const absenceInputSelect = document.getElementById('absence-input-subject');
 
-      const options = state.subjects.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
-      if (testSelect) testSelect.innerHTML = '<option value="">Seleciona a cadeira...</option>' + options;
-      if (fileSelect) fileSelect.innerHTML = '<option value="">Seleciona a cadeira...</option>' + options;
-      if (docentSelect) docentSelect.innerHTML = '<option value="">Seleciona a cadeira...</option>' + options;
+      const allOptions = state.subjects.map(s => {
+        const semLabel = s.semester ? ` (${s.semester}.º Sem.)` : '';
+        return `<option value="${s.id}">${escapeHtml(s.name)}${semLabel}</option>`;
+      }).join('');
+
+      if (testSelect) testSelect.innerHTML = '<option value="">Seleciona a cadeira...</option>' + allOptions;
+      if (docentSelect) docentSelect.innerHTML = '<option value="">Seleciona a cadeira...</option>' + allOptions;
       
       if (absenceAdminSelect) {
         const currentVal = absenceAdminSelect.value;
-        absenceAdminSelect.innerHTML = '<option value="">Seleciona a cadeira...</option>' + options;
+        absenceAdminSelect.innerHTML = '<option value="">Seleciona a cadeira...</option>' + allOptions;
         if (currentVal) absenceAdminSelect.value = currentVal;
       }
 
-      if (absenceInputSelect) {
-        const userId = state.currentUser ? state.currentUser.id : null;
-        const isAdmin = getActiveRole() === 'admin';
-        let allowedSubjects = state.subjects;
-        if (!isAdmin && userId) {
-          const enrolled = state.enrolledSubjects[userId] || [];
-          if (enrolled.length > 0) {
-            allowedSubjects = state.subjects.filter(s => enrolled.includes(s.id));
-          }
+      const isAdmin = getActiveRole() === 'admin';
+      const studentAllowedSubjects = getArchiveAccessibleSubjects();
+      const studentOptions = studentAllowedSubjects.map(s => `<option value="${s.id}">${escapeHtml(s.name)}</option>`).join('');
+
+      if (fileSelect) {
+        const currentVal = fileSelect.value;
+        fileSelect.innerHTML = '<option value="">Seleciona a cadeira...</option>' + (isAdmin ? allOptions : studentOptions);
+        if (currentVal && (isAdmin || studentAllowedSubjects.some(s => s.id === currentVal))) {
+          fileSelect.value = currentVal;
         }
-        const studentOptions = allowedSubjects.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
-        absenceInputSelect.innerHTML = '<option value="">Seleciona a cadeira...</option>' + studentOptions;
       }
+
+      if (absenceInputSelect) {
+        const currentVal = absenceInputSelect.value;
+        absenceInputSelect.innerHTML = '<option value="">Seleciona a cadeira...</option>' + studentOptions;
+        if (currentVal && studentAllowedSubjects.some(s => s.id === currentVal)) {
+          absenceInputSelect.value = currentVal;
+        }
+      }
+
+      renderArchiveDropdown();
     }
 
-    // ADMIN: CRIAR / APAGAR CADEIRAS
+    // ADMIN: CRIAR / EDITAR / APAGAR CADEIRAS
     function addSubject(e) {
       e.preventDefault();
+      if (getActiveRole() !== 'admin') {
+        showToast('Apenas o Administrador pode criar cadeiras.', 'error');
+        return;
+      }
       const input = document.getElementById('new-subject-name');
+      const semesterSelect = document.getElementById('new-subject-semester');
       const name = input.value.trim();
+      const semester = parseInt(semesterSelect ? semesterSelect.value : '1', 10);
       if (!name) return;
+      if (semester !== 1 && semester !== 2) {
+        showToast('Por favor seleciona o semestre da cadeira.', 'error');
+        return;
+      }
 
       const newSub = {
         id: 'sub_' + Date.now(),
         name: name,
+        semester: semester,
         maxAbsencesTheory: 4,
         maxAbsencesPractice: 3,
         professors: [],
@@ -3072,24 +3275,118 @@
       state.subjects.push(newSub);
       saveState();
       input.value = '';
+      if (semesterSelect) semesterSelect.selectedIndex = 0;
       updateSubjectSelects();
       renderGrades();
-      renderArchiveTabs();
+      renderArchiveDropdown();
+      renderFiles();
 
       if (supabaseClient) {
         supabaseClient.from('subjects').insert({
           id: newSub.id,
           name: newSub.name,
+          semester: newSub.semester,
           max_absences_theory: newSub.maxAbsencesTheory,
           max_absences_practice: newSub.maxAbsencesPractice,
           professors: newSub.professors,
           tests: newSub.tests
         }).then(({ error }) => {
-          if (error) console.error("Erro ao guardar cadeira no Supabase:", error);
+          if (error) {
+            console.error("Erro ao guardar cadeira no Supabase:", error);
+            if (error.message && error.message.includes('semester')) {
+              supabaseClient.from('subjects').insert({
+                id: newSub.id,
+                name: newSub.name,
+                max_absences_theory: newSub.maxAbsencesTheory,
+                max_absences_practice: newSub.maxAbsencesPractice,
+                professors: newSub.professors,
+                tests: newSub.tests
+              }).then(() => {});
+            }
+          }
         });
       }
 
-      showToast(`Cadeira "${name}" criada!`);
+      showToast(`Cadeira "${name}" criada no ${semester}.º Semestre!`);
+    }
+
+    function openEditSubjectModal(subjectId) {
+      if (getActiveRole() !== 'admin') {
+        showToast('Apenas o Administrador pode editar cadeiras.', 'error');
+        return;
+      }
+      const subject = state.subjects.find(s => s.id === subjectId);
+      if (!subject) return;
+
+      document.getElementById('edit-subject-id').value = subject.id;
+      document.getElementById('edit-subject-name').value = subject.name || '';
+      document.getElementById('edit-subject-semester').value = String(subject.semester || 1);
+      document.getElementById('edit-subject-max-theory').value = subject.maxAbsencesTheory !== undefined ? subject.maxAbsencesTheory : 4;
+      document.getElementById('edit-subject-max-practice').value = subject.maxAbsencesPractice !== undefined ? subject.maxAbsencesPractice : 3;
+
+      document.getElementById('modal-edit-subject').classList.remove('hidden');
+    }
+
+    function closeEditSubjectModal() {
+      const modal = document.getElementById('modal-edit-subject');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    async function saveEditSubjectModal(e) {
+      e.preventDefault();
+      if (getActiveRole() !== 'admin') {
+        showToast('Apenas o Administrador pode editar cadeiras.', 'error');
+        return;
+      }
+      const subjectId = document.getElementById('edit-subject-id').value;
+      const subject = state.subjects.find(s => s.id === subjectId);
+      if (!subject) return;
+
+      const newName = document.getElementById('edit-subject-name').value.trim();
+      const newSemester = parseInt(document.getElementById('edit-subject-semester').value, 10) || 1;
+      const newTheory = parseInt(document.getElementById('edit-subject-max-theory').value, 10);
+      const newPractice = parseInt(document.getElementById('edit-subject-max-practice').value, 10);
+
+      if (!newName) {
+        showToast('Por favor introduz o nome da cadeira.', 'error');
+        return;
+      }
+
+      subject.name = newName;
+      subject.semester = newSemester;
+      subject.maxAbsencesTheory = isNaN(newTheory) ? 4 : newTheory;
+      subject.maxAbsencesPractice = isNaN(newPractice) ? 3 : newPractice;
+
+      saveState();
+      closeEditSubjectModal();
+      updateSubjectSelects();
+      renderGrades();
+      renderArchiveDropdown();
+      renderFiles();
+      renderAbsences();
+
+      if (supabaseClient) {
+        try {
+          const { error } = await supabaseClient.from('subjects').update({
+            name: subject.name,
+            semester: subject.semester,
+            max_absences_theory: subject.maxAbsencesTheory,
+            max_absences_practice: subject.maxAbsencesPractice
+          }).eq('id', subjectId);
+
+          if (error && error.message && error.message.includes('semester')) {
+            await supabaseClient.from('subjects').update({
+              name: subject.name,
+              max_absences_theory: subject.maxAbsencesTheory,
+              max_absences_practice: subject.maxAbsencesPractice
+            }).eq('id', subjectId);
+          }
+        } catch (err) {
+          console.warn('Aviso ao atualizar cadeira no Supabase:', err);
+        }
+      }
+
+      showToast(`Cadeira "${newName}" atualizada com sucesso!`, 'success');
     }
 
     function deleteSubject(subjectId) {
@@ -3653,8 +3950,11 @@
             <div>
               <div class="flex items-center gap-2 flex-wrap">
                 <h3 class="font-bold text-slate-800 text-sm sm:text-base flex items-center gap-2">
-                  <i class="fa-solid fa-book text-indigo-500 text-xs sm:text-sm"></i> ${subject.name}
+                  <i class="fa-solid fa-book text-indigo-500 text-xs sm:text-sm"></i> ${escapeHtml(subject.name)}
                 </h3>
+                <span class="text-[10px] ${(subject.semester || 1) === 2 ? 'text-purple-700 bg-purple-50 border-purple-200' : 'text-indigo-700 bg-indigo-50 border-indigo-200'} border px-2 py-0.5 rounded-full font-bold flex items-center gap-1 shadow-2xs">
+                  <i class="fa-solid fa-calendar-days text-[10px]"></i> ${(subject.semester || 1)}.º Semestre
+                </span>
                 ${(subject.professors && subject.professors.length > 0) ? `
                   <span class="text-[10px] text-slate-600 bg-white border border-slate-200 px-2 py-0.5 rounded-full font-medium flex items-center gap-1 shadow-sm">
                     <i class="fa-solid fa-chalkboard-user text-indigo-500 text-[10px]"></i> ${subject.professors.length} docente(s)
@@ -3672,7 +3972,10 @@
               </button>
               ${isStudent ? statusBadge : ''}
               ${isAdmin ? `
-                <button onclick="deleteSubject('${subject.id}')" class="text-rose-600 hover:text-rose-700 text-xs font-bold px-2.5 py-1.5 rounded-lg hover:bg-rose-50 transition" title="Eliminar Cadeira">
+                <button onclick="openEditSubjectModal('${subject.id}')" class="text-indigo-600 hover:text-indigo-700 text-xs font-bold px-2.5 py-1.5 rounded-lg hover:bg-indigo-50 transition flex items-center gap-1 cursor-pointer" title="Editar Cadeira">
+                  <i class="fa-regular fa-pen-to-square"></i> Editar
+                </button>
+                <button onclick="deleteSubject('${subject.id}')" class="text-rose-600 hover:text-rose-700 text-xs font-bold px-2.5 py-1.5 rounded-lg hover:bg-rose-50 transition flex items-center gap-1 cursor-pointer" title="Eliminar Cadeira">
                   <i class="fa-regular fa-trash-can mr-1"></i> Eliminar
                 </button>
               ` : ''}
@@ -3926,55 +4229,90 @@
       });
     }
 
-    // ARQUIVO: RENDERIZAR ABAS DE CADEIRAS NO TOPO
-    function renderArchiveTabs() {
-      const tabsContainer = document.getElementById('file-subject-tabs');
-      if (!tabsContainer) return;
-      tabsContainer.innerHTML = '';
+    // ARQUIVO: SELETOR DE CADEIRA
+    function renderArchiveDropdown() {
+      const select = document.getElementById('archive-subject-select');
+      const infoContainer = document.getElementById('archive-subject-info-btn-container');
+      if (!select) return;
 
-      const isAllSelected = state.selectedArchiveSubject === 'ALL';
-      const allBtn = document.createElement('button');
-      allBtn.type = 'button';
-      allBtn.className = `px-3.5 py-1.5 rounded-xl text-xs font-bold shrink-0 transition ${
-        isAllSelected 
-          ? 'bg-indigo-600 text-white shadow-sm' 
-          : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-      }`;
-      allBtn.innerHTML = `<i class="fa-solid fa-border-all mr-1"></i> Todas (${state.files.length})`;
-      allBtn.onclick = () => {
-        state.selectedArchiveSubject = 'ALL';
-        renderArchiveTabs();
-        renderFiles();
-      };
-      tabsContainer.appendChild(allBtn);
+      const isAdmin = getActiveRole() === 'admin';
+      const accessibleSubjects = getArchiveAccessibleSubjects();
 
-      state.subjects.forEach(sub => {
-        const count = state.files.filter(f => isFileInSubject(f, sub.id)).length;
-        const isSelected = state.selectedArchiveSubject === sub.id;
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = `px-3.5 py-1.5 rounded-xl text-xs font-bold shrink-0 transition ${
-          isSelected 
-            ? 'bg-indigo-600 text-white shadow-sm' 
-            : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-        }`;
-        btn.innerHTML = `${sub.name} <span class="text-[10px] ml-1 opacity-75">(${count})</span>`;
-        btn.onclick = () => {
-          state.selectedArchiveSubject = sub.id;
-          renderArchiveTabs();
-          renderFiles();
-        };
-        tabsContainer.appendChild(btn);
-      });
-
-      if (state.selectedArchiveSubject !== 'ALL') {
-        const infoBtn = document.createElement('button');
-        infoBtn.type = 'button';
-        infoBtn.className = "px-3 py-1.5 rounded-xl text-xs font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 shrink-0 transition flex items-center gap-1.5 ml-auto cursor-pointer";
-        infoBtn.innerHTML = '<i class="fa-solid fa-circle-info text-indigo-600"></i> Docentes da Cadeira';
-        infoBtn.onclick = () => openSubjectInfoModal(state.selectedArchiveSubject);
-        tabsContainer.appendChild(infoBtn);
+      // Se a cadeira atualmente selecionada já não for acessível, repor seleção vazia
+      if (!state.selectedArchiveSubject || state.selectedArchiveSubject === 'ALL' || !state.subjects.some(s => s.id === state.selectedArchiveSubject)) {
+        state.selectedArchiveSubject = '';
       }
+      if (!isAdmin && state.selectedArchiveSubject && !accessibleSubjects.some(s => s.id === state.selectedArchiveSubject)) {
+        state.selectedArchiveSubject = '';
+      }
+
+      let optionsHtml = '<option value="">Seleciona a cadeira...</option>';
+
+      if (isAdmin) {
+        const sem1 = (state.subjects || []).filter(s => (s.semester || 1) === 1);
+        const sem2 = (state.subjects || []).filter(s => (s.semester || 1) === 2);
+        const other = (state.subjects || []).filter(s => (s.semester || 1) !== 1 && (s.semester || 1) !== 2);
+
+        if (sem1.length > 0) {
+          optionsHtml += '<optgroup label="1.º Semestre">';
+          sem1.forEach(sub => {
+            const count = (state.files || []).filter(f => isFileInSubject(f, sub.id)).length;
+            optionsHtml += `<option value="${sub.id}">${escapeHtml(sub.name)} (${count})</option>`;
+          });
+          optionsHtml += '</optgroup>';
+        }
+
+        if (sem2.length > 0) {
+          optionsHtml += '<optgroup label="2.º Semestre">';
+          sem2.forEach(sub => {
+            const count = (state.files || []).filter(f => isFileInSubject(f, sub.id)).length;
+            optionsHtml += `<option value="${sub.id}">${escapeHtml(sub.name)} (${count})</option>`;
+          });
+          optionsHtml += '</optgroup>';
+        }
+
+        if (other.length > 0) {
+          optionsHtml += '<optgroup label="Outras Cadeiras">';
+          other.forEach(sub => {
+            const count = (state.files || []).filter(f => isFileInSubject(f, sub.id)).length;
+            optionsHtml += `<option value="${sub.id}">${escapeHtml(sub.name)} (${count})</option>`;
+          });
+          optionsHtml += '</optgroup>';
+        }
+      } else {
+        accessibleSubjects.forEach(sub => {
+          const count = (state.files || []).filter(f => isFileInSubject(f, sub.id)).length;
+          optionsHtml += `<option value="${sub.id}">${escapeHtml(sub.name)} (${count})</option>`;
+        });
+      }
+
+      select.innerHTML = optionsHtml;
+      select.value = state.selectedArchiveSubject || '';
+
+      if (infoContainer) {
+        if (state.selectedArchiveSubject) {
+          infoContainer.classList.remove('hidden');
+        } else {
+          infoContainer.classList.add('hidden');
+        }
+      }
+    }
+
+    function onArchiveSubjectChange(val) {
+      state.selectedArchiveSubject = val || '';
+      const infoContainer = document.getElementById('archive-subject-info-btn-container');
+      if (infoContainer) {
+        if (state.selectedArchiveSubject) {
+          infoContainer.classList.remove('hidden');
+        } else {
+          infoContainer.classList.add('hidden');
+        }
+      }
+      renderFiles();
+    }
+
+    function renderArchiveTabs() {
+      renderArchiveDropdown();
     }
 
 
@@ -4305,11 +4643,11 @@ ${480 + streamLen}
       const modal = document.getElementById('modal-reorder-sections');
       const label = document.getElementById('reorder-sections-context-label');
       if (label) {
-        if (state.selectedArchiveSubject && state.selectedArchiveSubject !== 'ALL') {
+        if (state.selectedArchiveSubject) {
           const sub = state.subjects.find(s => s.id === state.selectedArchiveSubject);
           label.textContent = sub ? sub.name : 'Cadeira Selecionada';
         } else {
-          label.textContent = 'Todas as Cadeiras (Geral)';
+          label.textContent = 'Geral (Padrão)';
         }
       }
       renderReorderSectionsModalList();
@@ -4325,7 +4663,7 @@ ${480 + streamLen}
       const listContainer = document.getElementById('modal-reorder-sections-list');
       if (!listContainer) return;
       const order = getSubjectSectionOrder(state.selectedArchiveSubject);
-      const subjectId = state.selectedArchiveSubject || 'ALL';
+      const subjectId = state.selectedArchiveSubject || '';
 
       listContainer.innerHTML = order.map((secName, idx) => {
         const meta = getSectionMeta(secName);
@@ -4441,7 +4779,8 @@ ${480 + streamLen}
       }
       const file = state.files.find(f => f.id === fileId);
       if (!file) return;
-      const subjectId = state.selectedArchiveSubject || 'ALL';
+      const subjectId = state.selectedArchiveSubject;
+      if (!subjectId) return;
       const sec = normalizeSectionName(file.section || 'Outros');
 
       const sameSectionFiles = state.files.filter(f => 
@@ -4558,6 +4897,13 @@ ${480 + streamLen}
       if (!subjectId || !state.subjects.some(subject => subject.id === subjectId)) {
         showToast('Por favor seleciona a cadeira.', 'error');
         return;
+      }
+      if (getActiveRole() !== 'admin') {
+        const studentAllowedSubjects = getArchiveAccessibleSubjects();
+        if (!studentAllowedSubjects.some(s => s.id === subjectId)) {
+          showToast('Apenas podes enviar documentos para as tuas cadeiras selecionadas.', 'error');
+          return;
+        }
       }
       if (!title) {
         showToast('Por favor introduz um título para o documento.', 'error');
@@ -4925,20 +5271,7 @@ ${480 + streamLen}
       if (!container) return;
       container.innerHTML = '';
 
-      const subjectId = state.selectedArchiveSubject || 'ALL';
-      let subjectFiles = state.files.filter(f => isFileInSubject(f, subjectId));
-
-      const sortPref = localStorage.getItem('study_archive_sort_pref') || 'custom';
-      const sortSelect = document.getElementById('archive-sort-select');
-      if (sortSelect && sortSelect.value !== sortPref) sortSelect.value = sortPref;
-
       const isAdmin = getActiveRole() === 'admin';
-      const hideEmpty = localStorage.getItem('study_archive_hide_empty') !== 'false';
-      const textToggle = document.getElementById('text-toggle-empty-sections');
-      const iconToggle = document.getElementById('icon-toggle-empty-sections');
-      if (textToggle) textToggle.textContent = hideEmpty ? 'Mostrar Secções Vazias' : 'Ocultar Secções Vazias';
-      if (iconToggle) iconToggle.className = hideEmpty ? 'fa-solid fa-eye text-indigo-600' : 'fa-solid fa-eye-slash text-indigo-600';
-
       const btnToggleEmpty = document.getElementById('btn-toggle-empty-sections');
       if (btnToggleEmpty) {
         btnToggleEmpty.style.display = isAdmin ? '' : 'none';
@@ -4948,6 +5281,49 @@ ${480 + streamLen}
       if (reorderSecBtn) {
         reorderSecBtn.style.display = isAdmin ? '' : 'none';
       }
+
+      const accessibleSubjects = getArchiveAccessibleSubjects();
+
+      if (!isAdmin && accessibleSubjects.length === 0) {
+        container.innerHTML = `
+          <div class="p-8 sm:p-12 text-center text-slate-400 bg-white rounded-2xl border border-slate-200">
+            <i class="fa-solid fa-graduation-cap text-3xl mb-2 text-slate-300"></i>
+            <p class="font-bold text-slate-600">Nenhuma cadeira selecionada no teu plano do ${getCurrentSemester()}.º Semestre.</p>
+            <p class="text-xs mt-1">Seleciona as tuas cadeiras para acederes aos respetivos ficheiros no arquivo.</p>
+            <button onclick="openEnrolledModal()" class="mt-4 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow transition inline-flex items-center gap-2 cursor-pointer">
+              <i class="fa-solid fa-list-check"></i> Selecionar Cadeiras
+            </button>
+          </div>
+        `;
+        return;
+      }
+
+      if (!isAdmin && state.selectedArchiveSubject && !accessibleSubjects.some(s => s.id === state.selectedArchiveSubject)) {
+        state.selectedArchiveSubject = '';
+      }
+
+      if (!state.selectedArchiveSubject || state.selectedArchiveSubject === 'ALL') {
+        container.innerHTML = `
+          <div class="p-8 sm:p-12 text-center text-slate-500 bg-white rounded-2xl border border-slate-200 space-y-3">
+            <i class="fa-solid fa-folder-open text-4xl text-indigo-400"></i>
+            <h3 class="font-bold text-slate-800 text-base">Seleciona uma cadeira para consultar os arquivos.</h3>
+            <p class="text-xs text-slate-400 max-w-sm mx-auto">Utiliza o seletor acima para escolher a cadeira cujos documentos pretendes visualizar.</p>
+          </div>
+        `;
+        return;
+      }
+
+      const subjectId = state.selectedArchiveSubject;
+      const subjectFiles = state.files.filter(f => isFileInSubject(f, subjectId));
+
+      const sortPref = localStorage.getItem('study_archive_sort_pref') || 'custom';
+      const sortSelect = document.getElementById('archive-sort-select');
+      if (sortSelect && sortSelect.value !== sortPref) sortSelect.value = sortPref;
+      const hideEmpty = localStorage.getItem('study_archive_hide_empty') !== 'false';
+      const textToggle = document.getElementById('text-toggle-empty-sections');
+      const iconToggle = document.getElementById('icon-toggle-empty-sections');
+      if (textToggle) textToggle.textContent = hideEmpty ? 'Mostrar Secções Vazias' : 'Ocultar Secções Vazias';
+      if (iconToggle) iconToggle.className = hideEmpty ? 'fa-solid fa-eye text-indigo-600' : 'fa-solid fa-eye-slash text-indigo-600';
 
       if (subjectFiles.length === 0 && hideEmpty) {
         container.innerHTML = `
@@ -5404,7 +5780,7 @@ ${480 + streamLen}
 
     async function readCloudRows(table) {
       const rows = [];
-      const key = table.startsWith('student_') ? 'student_id' : 'id';
+      const key = table.startsWith('student_') ? 'student_id' : (table === 'app_settings' ? 'key' : 'id');
       const pageSize = 500;
       for (let offset = 0; ; offset += pageSize) {
         const { data, error } = await supabaseClient.from(table).select('*').order(key).range(offset, offset + pageSize - 1);
@@ -5436,6 +5812,16 @@ ${480 + streamLen}
     async function refreshCloudState(silent) {
       const revision = archiveRevision;
       try {
+        let cloudAppSettings = [];
+        try {
+          const { data, error } = await supabaseClient.from('app_settings').select('*');
+          if (!error && Array.isArray(data)) {
+            cloudAppSettings = data;
+          }
+        } catch (e) {
+          // Tabela app_settings pode ainda não existir antes da migração na cloud
+        }
+
         const [cloudSubjects, cloudUsers, cloudFiles, cloudRequests, cloudGrades, cloudEnrolled, cloudAbsences] =
           await Promise.all(['subjects', 'users', 'files', 'file_requests', 'student_grades', 'student_enrolled', 'student_absences'].map(readCloudRows));
         // Descartar a resposta completa se uma operação começou ou terminou durante a leitura.
@@ -5444,15 +5830,35 @@ ${480 + streamLen}
           return;
         }
 
+        // Sincronizar semestre atual se configurado na cloud
+        const curSemRow = cloudAppSettings.find(r => r.key === 'current_semester');
+        if (curSemRow && curSemRow.value !== undefined) {
+          const remoteSem = parseInt(curSemRow.value, 10);
+          if (remoteSem === 1 || remoteSem === 2) {
+            state.currentSemester = remoteSem;
+            localStorage.setItem('study_current_semester', String(remoteSem));
+            const semSelect = document.getElementById('admin-current-semester-select');
+            if (semSelect) semSelect.value = String(remoteSem);
+          }
+        }
+
         // A base de dados é a autoridade, incluindo resultados vazios.
-        const subjectsChanged = JSON.stringify(state.subjects) !== JSON.stringify(cloudSubjects.map(cs => ({
-          id: cs.id, name: cs.name, maxAbsencesTheory: cs.max_absences_theory,
-          maxAbsencesPractice: cs.max_absences_practice, professors: cs.professors || [], tests: cs.tests || []
-        })));
-        state.subjects = cloudSubjects.map(cs => ({
-          id: cs.id, name: cs.name, maxAbsencesTheory: cs.max_absences_theory,
-          maxAbsencesPractice: cs.max_absences_practice, professors: cs.professors || [], tests: cs.tests || []
-        }));
+        const mappedSubjects = cloudSubjects.map(cs => {
+          const localSub = (state.subjects || []).find(s => s.id === cs.id);
+          const sem = (cs.semester !== undefined && cs.semester !== null) ? cs.semester : (localSub?.semester || 1);
+          return {
+            id: cs.id,
+            name: cs.name,
+            semester: sem,
+            maxAbsencesTheory: cs.max_absences_theory !== undefined ? cs.max_absences_theory : (localSub?.maxAbsencesTheory || 4),
+            maxAbsencesPractice: cs.max_absences_practice !== undefined ? cs.max_absences_practice : (localSub?.maxAbsencesPractice || 3),
+            professors: cs.professors || [],
+            tests: cs.tests || []
+          };
+        });
+
+        const subjectsChanged = JSON.stringify(state.subjects) !== JSON.stringify(mappedSubjects);
+        state.subjects = mappedSubjects;
 
         // 1. Utilizadores (Supabase Cloud é a autoridade central)
         if (cloudUsers) {
