@@ -1460,6 +1460,13 @@
           delete p.gabinete;
           delete p.carreira;
           delete p.grupo;
+          delete p.sigla;
+          delete p.initials;
+          delete p.abbreviation;
+          delete p.acronym;
+          delete p.short_code;
+          delete p.code;
+          delete p.short_name;
           if (p.role && /catedr|associad|auxiliar|convidad|regente|diretor|coordenador|cargo|docente/i.test(p.role)) {
             p.role = '';
           }
@@ -2305,7 +2312,6 @@
                   <div class="min-w-0">
                     <div class="flex items-center gap-1.5 flex-wrap">
                       <h4 class="font-bold text-slate-800 text-sm truncate">${escapeHtml(prof.name)}</h4>
-                      ${prof.sigla ? `<span class="text-[10px] font-mono font-bold text-slate-500 bg-slate-200/70 px-1.5 py-0.5 rounded">${escapeHtml(prof.sigla)}</span>` : ''}
                       ${renderProfessorBadges(prof)}
                     </div>
                     <div class="flex items-center gap-3 text-xs text-slate-600 mt-1 flex-wrap">
@@ -5927,6 +5933,13 @@ ${480 + streamLen}
               delete cleanP.gabinete;
               delete cleanP.carreira;
               delete cleanP.grupo;
+              delete cleanP.sigla;
+              delete cleanP.initials;
+              delete cleanP.abbreviation;
+              delete cleanP.acronym;
+              delete cleanP.short_code;
+              delete cleanP.code;
+              delete cleanP.short_name;
               if (cleanP.role && /catedr|associad|auxiliar|convidad|regente|diretor|coordenador|cargo|docente/i.test(cleanP.role)) {
                 cleanP.role = '';
               }
