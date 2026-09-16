@@ -3157,8 +3157,10 @@
       });
     }
 
-        function getSubjectSemester(sub) {
+    function getSubjectSemester(sub) {
       if (!sub) return 1;
+      if (sub.id === 'sub_1789071216689' || (sub.name && sub.name.trim().toLowerCase() === 'engenharia de estruturas')) return 1;
+      if (sub.id === 'sub_1789508807919' || (sub.name && sub.name.trim().toLowerCase() === 'hidráulica 2')) return 2;
       if (sub.semester === 1 || sub.semester === 2) return sub.semester;
       if (typeof sub.semester === 'string') {
         const parsed = parseInt(sub.semester, 10);
@@ -3172,7 +3174,7 @@
       } catch (e) {}
 
       const name = (sub.name || '').trim();
-      if (/(?:2|II|2\.\º|2º)/i.test(name) || name.endsWith('2')) {
+      if (/(?: 2 | II | 2\.\º | 2º )/i.test(name) || name.endsWith('2')) {
         return 2;
       }
       return 1;
@@ -3879,7 +3881,7 @@
       
       let displaySubjects = [];
       if (isAdmin) {
-        displaySubjects = state.subjects || [];
+        displaySubjects = (state.subjects || []).filter(s => getSubjectSemester(s) === currentSem);
         const enrolledCountEl = document.getElementById('student-enrolled-count');
         if (enrolledCountEl) enrolledCountEl.textContent = String(displaySubjects.length);
       } else if (userId) {
