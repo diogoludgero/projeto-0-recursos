@@ -90,6 +90,106 @@
   </div>
 
   <!-- ============================================== -->
+  <!-- MODAL ADMIN: ADICIONAR / EDITAR AULA           -->
+  <!-- ============================================== -->
+  <div id="modal-schedule-class" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-4 animate-fade">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-5 sm:p-6 border border-slate-200 overflow-y-auto max-h-[92vh]">
+      <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
+        <h3 id="schedule-modal-title" class="font-bold text-slate-800 text-sm flex items-center gap-2">
+          <i class="fa-solid fa-calendar-plus text-indigo-600"></i> Adicionar Aula
+        </h3>
+        <button type="button" onclick="closeScheduleModal()" class="text-slate-400 hover:text-slate-600 transition cursor-pointer">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <form onsubmit="handleSaveScheduleClass(event)" class="space-y-4">
+        <input type="hidden" id="schedule-class-id">
+
+        <!-- Cadeira -->
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Cadeira</label>
+          <select id="schedule-class-subject" required class="w-full px-3.5 py-2.5 border rounded-xl text-xs sm:text-sm bg-slate-50 outline-none focus:border-indigo-600 focus:bg-white transition cursor-pointer">
+            <!-- Populado dinamicamente -->
+          </select>
+        </div>
+
+        <!-- Dia da Semana -->
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Dia da Semana</label>
+          <select id="schedule-class-day" required class="w-full px-3.5 py-2.5 border rounded-xl text-xs sm:text-sm bg-slate-50 outline-none focus:border-indigo-600 focus:bg-white transition cursor-pointer">
+            <option value="1">Segunda-feira</option>
+            <option value="2">Terça-feira</option>
+            <option value="3">Quarta-feira</option>
+            <option value="4">Quinta-feira</option>
+            <option value="5">Sexta-feira</option>
+          </select>
+        </div>
+
+        <!-- Tipo de Aula e Turma -->
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Tipo</label>
+            <select id="schedule-class-type" required class="w-full px-3.5 py-2.5 border rounded-xl text-xs sm:text-sm bg-slate-50 outline-none focus:border-indigo-600 focus:bg-white transition cursor-pointer">
+              <option value="T">Teórica (T)</option>
+              <option value="TP">Teórico-Prática (TP)</option>
+              <option value="P">Prática (P)</option>
+              <option value="L">Laboratório (L)</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Turma</label>
+            <select id="schedule-class-turma" class="w-full px-3.5 py-2.5 border rounded-xl text-xs sm:text-sm bg-slate-50 outline-none focus:border-indigo-600 focus:bg-white transition cursor-pointer">
+              <option value="all">Todas (Geral)</option>
+              <option value="1">Turma 1</option>
+              <option value="2">Turma 2</option>
+              <option value="3">Turma 3</option>
+              <option value="4">Turma 4</option>
+              <option value="5">Turma 5</option>
+              <option value="6">Turma 6</option>
+              <option value="1, 3, 5">Turmas 1, 3, 5</option>
+              <option value="2, 4, 6">Turmas 2, 4, 6</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Horas (Início e Fim) -->
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Hora de Início</label>
+            <input type="time" id="schedule-class-start" required class="w-full px-3.5 py-2.5 border rounded-xl text-xs sm:text-sm bg-slate-50 outline-none focus:border-indigo-600 focus:bg-white transition">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Hora de Fim</label>
+            <input type="time" id="schedule-class-end" required class="w-full px-3.5 py-2.5 border rounded-xl text-xs sm:text-sm bg-slate-50 outline-none focus:border-indigo-600 focus:bg-white transition">
+          </div>
+        </div>
+
+        <!-- Sala -->
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Sala</label>
+          <div class="relative">
+            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+              <i class="fa-solid fa-location-dot"></i>
+            </span>
+            <input type="text" id="schedule-class-room" required placeholder="Ex: B015, B202, B103" class="w-full pl-10 pr-3.5 py-2.5 border rounded-xl text-xs sm:text-sm bg-slate-50 outline-none focus:border-indigo-600 focus:bg-white transition">
+          </div>
+        </div>
+
+        <div class="flex justify-end gap-2 pt-3 border-t border-slate-100">
+          <button type="button" onclick="closeScheduleModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition cursor-pointer">
+            Cancelar
+          </button>
+          <button type="submit" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-xs transition flex items-center gap-1.5 cursor-pointer">
+            <i class="fa-solid fa-floppy-disk"></i> Guardar
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
   <!-- MODAL ADMIN: EDITAR AVALIAÇÃO                  -->
   <!-- ============================================== -->
   <div id="edit-test-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 animate-fade">
@@ -278,6 +378,27 @@
             <h3 class="text-lg font-bold">Quais cadeiras frequentas?</h3>
             <p class="text-xs text-slate-400 mt-0.5">Seleciona as disciplinas que estás a frequentar para organizar o teu boletim.</p>
           </div>
+        </div>
+      </div>
+
+      <!-- Seleção Rápida de Turma no Modal -->
+      <div class="px-5 py-3 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50/80">
+        <label for="enrolled-modal-turma-select" class="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+          <i class="fa-solid fa-users-rectangle text-indigo-600"></i>
+          Definir todas as disciplinas para:
+        </label>
+        <div class="flex items-center gap-2">
+          <select id="enrolled-modal-turma-select" class="px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-indigo-900 outline-none focus:border-indigo-600 cursor-pointer shadow-2xs">
+            <option value="1">Turma 1 (11M.EC1)</option>
+            <option value="2">Turma 2 (11M.EC2)</option>
+            <option value="3">Turma 3 (11M.EC3)</option>
+            <option value="4">Turma 4 (11M.EC4)</option>
+            <option value="5">Turma 5 (11M.EC5)</option>
+            <option value="6">Turma 6 (11M.EC6)</option>
+          </select>
+          <button type="button" onclick="applyModalTurmaToAll()" class="px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 text-xs font-bold rounded-xl transition cursor-pointer shrink-0">
+            Aplicar a Todas
+          </button>
         </div>
       </div>
 
@@ -730,7 +851,10 @@
   <!-- ============================================== -->
   <div class="bg-white border-b border-slate-200 hidden sm:block">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 flex gap-2">
-      <button onclick="switchTab('grades')" id="tab-btn-grades" class="py-3 px-5 border-b-2 border-indigo-600 font-bold text-indigo-600 flex items-center gap-2 text-sm transition">
+      <button onclick="switchTab('schedule')" id="tab-btn-schedule" class="py-3 px-5 border-b-2 border-indigo-600 font-bold text-indigo-600 flex items-center gap-2 text-sm transition">
+        <i class="fa-regular fa-calendar-days"></i> Horário
+      </button>
+      <button onclick="switchTab('grades')" id="tab-btn-grades" class="py-3 px-5 border-b-2 border-transparent font-medium text-slate-500 hover:text-indigo-600 flex items-center gap-2 text-sm transition">
         <i class="fa-solid fa-graduation-cap"></i> Cadeiras
       </button>
       <button onclick="switchTab('files')" id="tab-btn-files" class="py-3 px-5 border-b-2 border-transparent font-medium text-slate-500 hover:text-indigo-600 flex items-center gap-2 text-sm transition">
@@ -752,9 +876,83 @@
   <main class="max-w-6xl mx-auto px-3 sm:px-6 py-4 sm:py-6 flex-1 w-full">
 
     <!-- ============================================== -->
-    <!-- ABA 1: CADEIRAS                                -->
+    <!-- ABA 1: HORÁRIO (TIMELINE SEMANAL)              -->
     <!-- ============================================== -->
-    <section id="tab-grades" class="animate-fade">
+    <section id="tab-schedule" class="animate-fade space-y-5 sm:space-y-6">
+
+      <!-- Cabeçalho do Horário com Filtros e Ações -->
+      <div class="bg-white p-4 sm:p-6 rounded-2xl shadow-xs border border-slate-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 shrink-0">
+            <i class="fa-regular fa-calendar-days text-lg"></i>
+          </div>
+          <div>
+            <h2 class="text-base sm:text-lg font-black text-slate-800 tracking-tight flex items-center gap-2">
+              Horário Semanal
+              <span id="schedule-semester-badge" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">1.º Semestre</span>
+            </h2>
+            <p class="text-xs text-slate-500 font-medium">Salas e horários das aulas por dia da semana</p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end flex-wrap">
+          <!-- Filtro de Turma (Apenas Modo Admin) -->
+          <div id="schedule-turma-filter-box" class="flex items-center gap-1.5 text-xs">
+            <span class="text-slate-400 font-medium hidden sm:inline">Filtrar:</span>
+            <select id="schedule-turma-select" onchange="changeScheduleTurma(this.value)" class="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 outline-none focus:border-indigo-600 transition cursor-pointer">
+              <option value="all">Todas as turmas</option>
+              <option value="1">Turma 1 (11M.EC1)</option>
+              <option value="2">Turma 2 (11M.EC2)</option>
+              <option value="3">Turma 3 (11M.EC3)</option>
+              <option value="4">Turma 4 (11M.EC4)</option>
+              <option value="5">Turma 5 (11M.EC5)</option>
+              <option value="6">Turma 6 (11M.EC6)</option>
+            </select>
+          </div>
+
+          <!-- Indicador da Turma do Estudante (Modo Estudante: fixo na sua turma) -->
+          <div id="schedule-student-turma-badge" class="hidden flex items-center gap-2 px-3 py-1.5 bg-indigo-50 border border-indigo-200 rounded-xl text-xs font-bold text-indigo-800">
+            <i class="fa-solid fa-users-rectangle text-indigo-600"></i>
+            <span id="schedule-student-turma-text">A tua Turma: Turma 1</span>
+          </div>
+
+          <!-- Ação Admin: Adicionar Aula -->
+          <div id="admin-schedule-controls" class="hidden">
+            <button type="button" onclick="openAddClassModal()" class="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-xs transition flex items-center gap-1.5 cursor-pointer">
+              <i class="fa-solid fa-plus text-[11px]"></i> Adicionar Aula
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Seletor dos Dias da Semana Fixos (Segunda a Sexta sem números de dias) -->
+      <div class="bg-white p-2 sm:p-2.5 rounded-2xl shadow-xs border border-slate-200">
+        <div class="grid grid-cols-5 gap-1.5 sm:gap-2 text-center" id="schedule-day-tabs">
+          <!-- Renderizado dinamicamente -->
+        </div>
+      </div>
+
+      <!-- Cabeçalho do Dia Selecionado -->
+      <div class="flex items-center justify-between px-1">
+        <div class="flex items-center gap-2">
+          <h3 id="schedule-selected-day-title" class="text-base sm:text-lg font-black text-slate-800 tracking-tight">Terça-feira</h3>
+          <span id="schedule-today-badge" class="hidden inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Hoje
+          </span>
+        </div>
+        <span id="schedule-classes-count" class="text-xs font-bold text-slate-400"></span>
+      </div>
+
+      <!-- Contentor da Linha do Tempo -->
+      <div id="schedule-timeline-container" class="space-y-1">
+        <!-- Renderizado dinamicamente -->
+      </div>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- ABA 2: CADEIRAS                                -->
+    <!-- ============================================== -->
+    <section id="tab-grades" class="hidden animate-fade">
 
       <!-- Painel Admin: Criar Cadeira & Testes -->
       <div id="admin-grades-panel" class="hidden mb-6 sm:mb-8 bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-slate-200">
@@ -925,14 +1123,35 @@
         </div>
       </div>
 
-      <!-- Barra do Estudante: Gerir as Cadeiras Frequentas -->
-      <div id="student-actions-bar" class="hidden mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
-        <div class="flex items-center gap-2 text-xs text-slate-600 font-medium">
-          <i class="fa-solid fa-graduation-cap text-indigo-600 text-sm"></i>
-          <span>A frequentar: <strong id="student-enrolled-count" class="text-indigo-600 font-bold">0</strong> cadeiras</span>
+      <!-- Barra do Estudante: Gerir as Cadeiras Frequentadas e Escolha de Turma -->
+      <div id="student-actions-bar" class="hidden mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-3.5 bg-white p-4 sm:p-5 rounded-2xl shadow-xs border border-slate-200">
+        <div class="flex items-center gap-4 flex-wrap">
+          <div class="flex items-center gap-2 text-xs text-slate-600 font-medium">
+            <i class="fa-solid fa-graduation-cap text-indigo-600 text-sm"></i>
+            <span>A frequentar: <strong id="student-enrolled-count" class="text-indigo-600 font-bold">0</strong> cadeiras</span>
+          </div>
+
+          <div class="h-4 w-px bg-slate-200 hidden sm:block"></div>
+
+          <!-- Escolha Rápida da Turma (Todas as Cadeiras) -->
+          <div class="flex items-center gap-2">
+            <label for="student-my-turma-select" class="text-xs font-bold text-slate-700 flex items-center gap-1.5 cursor-pointer" title="Aplica a turma selecionada a todas as tuas disciplinas (também podes escolher cadeira a cadeira nos cartões abaixo)">
+              <i class="fa-solid fa-users-rectangle text-indigo-600 text-xs"></i>
+              Turma rápida (todas):
+            </label>
+            <select id="student-my-turma-select" onchange="setAllStudentSubjectTurmas(this.value)" class="px-3 py-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl text-xs font-bold text-indigo-900 outline-none focus:border-indigo-600 transition cursor-pointer shadow-2xs">
+              <option value="1">Turma 1 (11M.EC1)</option>
+              <option value="2">Turma 2 (11M.EC2)</option>
+              <option value="3">Turma 3 (11M.EC3)</option>
+              <option value="4">Turma 4 (11M.EC4)</option>
+              <option value="5">Turma 5 (11M.EC5)</option>
+              <option value="6">Turma 6 (11M.EC6)</option>
+            </select>
+          </div>
         </div>
-        <button onclick="openEnrolledModal()" class="w-full sm:w-auto px-4 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 text-xs font-bold rounded-xl transition flex items-center justify-center gap-1.5">
-          <i class="fa-solid fa-sliders"></i> Alterar as Minhas Cadeiras
+
+        <button onclick="openEnrolledModal()" class="w-full md:w-auto px-4 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 text-xs font-bold rounded-xl transition flex items-center justify-center gap-1.5 cursor-pointer">
+          <i class="fa-solid fa-sliders"></i> Alterar Cadeiras e Turmas
         </button>
       </div>
 
@@ -941,7 +1160,7 @@
     </section>
 
     <!-- ============================================== -->
-    <!-- ABA 2: ARQUIVO (ORGANIZADO COM ABAS EM CIMA)   -->
+    <!-- ABA 3: ARQUIVO (ORGANIZADO COM ABAS EM CIMA)   -->
     <!-- ============================================== -->
     <section id="tab-files" class="hidden animate-fade">
 
@@ -1200,7 +1419,11 @@
   <!-- BARRA DE NAVEGAÇÃO INFERIOR (MOBILE)           -->
   <!-- ============================================== -->
   <nav class="sm:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-slate-200 flex justify-around items-center py-2 px-1 shadow-lg">
-    <button onclick="switchTab('grades')" id="mob-btn-grades" class="flex flex-col items-center gap-1 text-indigo-600 px-2.5 py-1 text-[11px] font-bold">
+    <button onclick="switchTab('schedule')" id="mob-btn-schedule" class="flex flex-col items-center gap-1 text-indigo-600 px-2.5 py-1 text-[11px] font-bold">
+      <i class="fa-regular fa-calendar-days text-lg"></i>
+      <span>Horário</span>
+    </button>
+    <button onclick="switchTab('grades')" id="mob-btn-grades" class="flex flex-col items-center gap-1 text-slate-400 px-2.5 py-1 text-[11px] font-medium">
       <i class="fa-solid fa-graduation-cap text-lg"></i>
       <span>Cadeiras</span>
     </button>
@@ -1261,7 +1484,7 @@
       try {
         const value = JSON.parse(localStorage.getItem(key));
         if (value === null || typeof value === 'undefined') return null;
-        const arrayKeys = ['study_users', 'study_subjects', 'study_files', 'study_file_requests'];
+        const arrayKeys = ['study_users', 'study_subjects', 'study_files', 'study_file_requests', 'study_schedule'];
         if (arrayKeys.includes(key)) {
           return Array.isArray(value) && value.every(item => item && typeof item === 'object') ? value : null;
         }
@@ -1289,6 +1512,592 @@
         localStorage.setItem('study_archive_file_order', JSON.stringify(orderArray));
       } catch (e) {}
     }
+
+    // HORÁRIO SEMANAL PADRÃO (FEUP - ENGENHARIA CIVIL)
+    // Contém apenas as cadeiras com horário oficial fornecido (Engenharia Geotécnica, Engenharia de Estruturas, Engenharia do Território e dos Transportes, Hidrologia e Hidráulica Urbana e Patologia e Reabilitação de Edifícios)
+    const DEFAULT_SCHEDULE = [
+      // Segunda-feira (1)
+      {
+        id: 'class_eg_seg_t1',
+        subjectId: 'sub_1789071075077',
+        shortName: 'EG',
+        subjectName: 'Engenharia Geotécnica',
+        day: 1,
+        startTime: '11:00',
+        endTime: '12:00',
+        type: 'T',
+        room: 'B015',
+        turma: '1, 3, 5',
+        semester: 1
+      },
+      {
+        id: 'class_hhu_seg_t',
+        subjectId: 'sub_1789071048585',
+        shortName: 'HHU',
+        subjectName: 'Hidrologia e Hidráulica Urbana',
+        day: 1,
+        startTime: '12:00',
+        endTime: '13:00',
+        type: 'T',
+        room: 'B015',
+        turma: '1, 3, 5',
+        semester: 1
+      },
+      {
+        id: 'class_ees_seg_t',
+        subjectId: 'sub_1789071216689',
+        shortName: 'EES',
+        subjectName: 'Engenharia de Estruturas',
+        day: 1,
+        startTime: '13:00',
+        endTime: '15:00',
+        type: 'T',
+        room: 'B023',
+        turma: '2, 4, 6',
+        semester: 1
+      },
+      {
+        id: 'class_ett_seg_t',
+        subjectId: 'sub_1789071203695',
+        shortName: 'ETT',
+        subjectName: 'Engenharia do Território e dos Transportes',
+        day: 1,
+        startTime: '14:00',
+        endTime: '16:00',
+        type: 'T',
+        room: 'B010',
+        turma: '1, 3, 5',
+        semester: 1
+      },
+      {
+        id: 'class_eg_seg_t2',
+        subjectId: 'sub_1789071075077',
+        shortName: 'EG',
+        subjectName: 'Engenharia Geotécnica',
+        day: 1,
+        startTime: '15:00',
+        endTime: '16:00',
+        type: 'T',
+        room: 'B015',
+        turma: '2, 4, 6',
+        semester: 1
+      },
+      {
+        id: 'class_eg_seg_tp5',
+        subjectId: 'sub_1789071075077',
+        shortName: 'EG',
+        subjectName: 'Engenharia Geotécnica',
+        day: 1,
+        startTime: '16:00',
+        endTime: '18:00',
+        type: 'TP',
+        room: 'B343 / H006',
+        turma: '5',
+        semester: 1
+      },
+      {
+        id: 'class_ett_seg_tp4',
+        subjectId: 'sub_1789071203695',
+        shortName: 'ETT',
+        subjectName: 'Engenharia do Território e dos Transportes',
+        day: 1,
+        startTime: '16:00',
+        endTime: '18:00',
+        type: 'TP',
+        room: 'B202',
+        turma: '4',
+        semester: 1
+      },
+      {
+        id: 'class_pre_seg_tp1',
+        subjectId: 'sub_1789070615665',
+        shortName: 'PRE',
+        subjectName: 'Patologia e Reabilitação de Edifícios',
+        day: 1,
+        startTime: '16:00',
+        endTime: '18:00',
+        type: 'TP',
+        room: 'B334',
+        turma: '1',
+        semester: 1
+      },
+      {
+        id: 'class_pre_seg_tp3',
+        subjectId: 'sub_1789070615665',
+        shortName: 'PRE',
+        subjectName: 'Patologia e Reabilitação de Edifícios',
+        day: 1,
+        startTime: '16:00',
+        endTime: '18:00',
+        type: 'TP',
+        room: 'B344',
+        turma: '3',
+        semester: 1
+      },
+      {
+        id: 'class_ees_seg_tp5',
+        subjectId: 'sub_1789071216689',
+        shortName: 'EES',
+        subjectName: 'Engenharia de Estruturas',
+        day: 1,
+        startTime: '18:00',
+        endTime: '20:00',
+        type: 'TP',
+        room: 'B343',
+        turma: '5',
+        semester: 1
+      },
+      {
+        id: 'class_ett_seg_tp3',
+        subjectId: 'sub_1789071203695',
+        shortName: 'ETT',
+        subjectName: 'Engenharia do Território e dos Transportes',
+        day: 1,
+        startTime: '18:00',
+        endTime: '20:00',
+        type: 'TP',
+        room: 'B202',
+        turma: '3',
+        semester: 1
+      },
+
+      // Terça-feira (2)
+      {
+        id: 'class_ees_ter_tp6',
+        subjectId: 'sub_1789071216689',
+        shortName: 'EES',
+        subjectName: 'Engenharia de Estruturas',
+        day: 2,
+        startTime: '08:30',
+        endTime: '10:30',
+        type: 'TP',
+        room: 'B344',
+        turma: '6',
+        semester: 1
+      },
+      {
+        id: 'class_ees_ter_t',
+        subjectId: 'sub_1789071216689',
+        shortName: 'EES',
+        subjectName: 'Engenharia de Estruturas',
+        day: 2,
+        startTime: '08:30',
+        endTime: '10:30',
+        type: 'T',
+        room: 'B015',
+        turma: '1, 3, 5',
+        semester: 1
+      },
+      {
+        id: 'class_ees_ter_tp4',
+        subjectId: 'sub_1789071216689',
+        shortName: 'EES',
+        subjectName: 'Engenharia de Estruturas',
+        day: 2,
+        startTime: '08:30',
+        endTime: '10:30',
+        type: 'TP',
+        room: 'B232',
+        turma: '4',
+        semester: 1
+      },
+      {
+        id: 'class_pre_ter_tp2',
+        subjectId: 'sub_1789070615665',
+        shortName: 'PRE',
+        subjectName: 'Patologia e Reabilitação de Edifícios',
+        day: 2,
+        startTime: '08:30',
+        endTime: '10:30',
+        type: 'TP',
+        room: 'B223',
+        turma: '2',
+        semester: 1
+      },
+      {
+        id: 'class_hhu_ter_tp6',
+        subjectId: 'sub_1789071048585',
+        shortName: 'HHU',
+        subjectName: 'Hidrologia e Hidráulica Urbana',
+        day: 2,
+        startTime: '10:00',
+        endTime: '12:00',
+        type: 'TP',
+        room: 'B344',
+        turma: '6',
+        semester: 1
+      },
+      {
+        id: 'class_ees_ter_tp2',
+        subjectId: 'sub_1789071216689',
+        shortName: 'EES',
+        subjectName: 'Engenharia de Estruturas',
+        day: 2,
+        startTime: '10:30',
+        endTime: '12:30',
+        type: 'TP',
+        room: 'B334',
+        turma: '2',
+        semester: 1
+      },
+      {
+        id: 'class_pre_ter_tp4',
+        subjectId: 'sub_1789070615665',
+        shortName: 'PRE',
+        subjectName: 'Patologia e Reabilitação de Edifícios',
+        day: 2,
+        startTime: '10:30',
+        endTime: '12:30',
+        type: 'TP',
+        room: 'B223',
+        turma: '4',
+        semester: 1
+      },
+      {
+        id: 'class_ees_ter_tp3',
+        subjectId: 'sub_1789071216689',
+        shortName: 'EES',
+        subjectName: 'Engenharia de Estruturas',
+        day: 2,
+        startTime: '11:00',
+        endTime: '13:00',
+        type: 'TP',
+        room: 'B229',
+        turma: '3',
+        semester: 1
+      },
+      {
+        id: 'class_pre_ter_tp5',
+        subjectId: 'sub_1789070615665',
+        shortName: 'PRE',
+        subjectName: 'Patologia e Reabilitação de Edifícios',
+        day: 2,
+        startTime: '11:00',
+        endTime: '13:00',
+        type: 'TP',
+        room: 'B341',
+        turma: '5',
+        semester: 1
+      },
+      {
+        id: 'class_hhu_ter_tp1',
+        subjectId: 'sub_1789071048585',
+        shortName: 'HHU',
+        subjectName: 'Hidrologia e Hidráulica Urbana',
+        day: 2,
+        startTime: '11:30',
+        endTime: '13:30',
+        type: 'TP',
+        room: 'B323',
+        turma: '1',
+        semester: 1
+      },
+      {
+        id: 'class_eg_ter_t',
+        subjectId: 'sub_1789071075077',
+        shortName: 'EG',
+        subjectName: 'Engenharia Geotécnica',
+        day: 2,
+        startTime: '12:30',
+        endTime: '13:30',
+        type: 'T',
+        room: 'B015',
+        turma: '2, 4, 6',
+        semester: 1
+      },
+
+      // Quarta-feira (3)
+      {
+        id: 'class_hhu_qua_t',
+        subjectId: 'sub_1789071048585',
+        shortName: 'HHU',
+        subjectName: 'Hidrologia e Hidráulica Urbana',
+        day: 3,
+        startTime: '08:30',
+        endTime: '09:30',
+        type: 'T',
+        room: 'B015',
+        turma: '2, 4, 6',
+        semester: 1
+      },
+      {
+        id: 'class_ett_qua_tp1',
+        subjectId: 'sub_1789071203695',
+        shortName: 'ETT',
+        subjectName: 'Engenharia do Território e dos Transportes',
+        day: 3,
+        startTime: '08:30',
+        endTime: '10:30',
+        type: 'TP',
+        room: 'B206',
+        turma: '1',
+        semester: 1
+      },
+      {
+        id: 'class_hhu_qua_tp5',
+        subjectId: 'sub_1789071048585',
+        shortName: 'HHU',
+        subjectName: 'Hidrologia e Hidráulica Urbana',
+        day: 3,
+        startTime: '10:00',
+        endTime: '12:00',
+        type: 'TP',
+        room: 'B229',
+        turma: '5',
+        semester: 1
+      },
+      {
+        id: 'class_hhu_qua_tp4',
+        subjectId: 'sub_1789071048585',
+        shortName: 'HHU',
+        subjectName: 'Hidrologia e Hidráulica Urbana',
+        day: 3,
+        startTime: '10:00',
+        endTime: '12:00',
+        type: 'TP',
+        room: 'B232',
+        turma: '4',
+        semester: 1
+      },
+      {
+        id: 'class_ees_qua_tp1',
+        subjectId: 'sub_1789071216689',
+        shortName: 'EES',
+        subjectName: 'Engenharia de Estruturas',
+        day: 3,
+        startTime: '10:30',
+        endTime: '12:30',
+        type: 'TP',
+        room: 'B117',
+        turma: '1',
+        semester: 1
+      },
+      {
+        id: 'class_ett_qua_tp6',
+        subjectId: 'sub_1789071203695',
+        shortName: 'ETT',
+        subjectName: 'Engenharia do Território e dos Transportes',
+        day: 3,
+        startTime: '10:30',
+        endTime: '12:30',
+        type: 'TP',
+        room: 'B313',
+        turma: '6',
+        semester: 1
+      },
+
+      // Quinta-feira (4)
+      {
+        id: 'class_hhu_qui_t1',
+        subjectId: 'sub_1789071048585',
+        shortName: 'HHU',
+        subjectName: 'Hidrologia e Hidráulica Urbana',
+        day: 4,
+        startTime: '14:00',
+        endTime: '15:00',
+        type: 'T',
+        room: 'B015',
+        turma: '1, 3, 5',
+        semester: 1
+      },
+      {
+        id: 'class_ett_qui_t',
+        subjectId: 'sub_1789071203695',
+        shortName: 'ETT',
+        subjectName: 'Engenharia do Território e dos Transportes',
+        day: 4,
+        startTime: '14:00',
+        endTime: '16:00',
+        type: 'T',
+        room: 'B017',
+        turma: '2, 4, 6',
+        semester: 1
+      },
+      {
+        id: 'class_eg_qui_tp1',
+        subjectId: 'sub_1789071075077',
+        shortName: 'EG',
+        subjectName: 'Engenharia Geotécnica',
+        day: 4,
+        startTime: '15:00',
+        endTime: '17:00',
+        type: 'TP',
+        room: 'B033',
+        turma: '1',
+        semester: 1
+      },
+      {
+        id: 'class_eg_qui_tp3',
+        subjectId: 'sub_1789071075077',
+        shortName: 'EG',
+        subjectName: 'Engenharia Geotécnica',
+        day: 4,
+        startTime: '15:00',
+        endTime: '17:00',
+        type: 'TP',
+        room: 'B323 / H006',
+        turma: '3',
+        semester: 1
+      },
+      {
+        id: 'class_hhu_qui_t2',
+        subjectId: 'sub_1789071048585',
+        shortName: 'HHU',
+        subjectName: 'Hidrologia e Hidráulica Urbana',
+        day: 4,
+        startTime: '16:00',
+        endTime: '17:00',
+        type: 'T',
+        room: 'B015',
+        turma: '2, 4, 6',
+        semester: 1
+      },
+      {
+        id: 'class_ett_qui_tp5',
+        subjectId: 'sub_1789071203695',
+        shortName: 'ETT',
+        subjectName: 'Engenharia do Território e dos Transportes',
+        day: 4,
+        startTime: '16:00',
+        endTime: '18:00',
+        type: 'TP',
+        room: 'B202',
+        turma: '5',
+        semester: 1
+      },
+      {
+        id: 'class_eg_qui_tp4',
+        subjectId: 'sub_1789071075077',
+        shortName: 'EG',
+        subjectName: 'Engenharia Geotécnica',
+        day: 4,
+        startTime: '17:30',
+        endTime: '19:30',
+        type: 'TP',
+        room: 'B319 / H006',
+        turma: '4',
+        semester: 1
+      },
+      {
+        id: 'class_pre_qui_tp6',
+        subjectId: 'sub_1789070615665',
+        shortName: 'PRE',
+        subjectName: 'Patologia e Reabilitação de Edifícios',
+        day: 4,
+        startTime: '17:30',
+        endTime: '19:30',
+        type: 'TP',
+        room: 'B214',
+        turma: '6',
+        semester: 1
+      },
+      {
+        id: 'class_ett_qui_tp2',
+        subjectId: 'sub_1789071203695',
+        shortName: 'ETT',
+        subjectName: 'Engenharia do Território e dos Transportes',
+        day: 4,
+        startTime: '18:00',
+        endTime: '20:00',
+        type: 'TP',
+        room: 'B202',
+        turma: '2',
+        semester: 1
+      },
+      {
+        id: 'class_hhu_qui_tp3',
+        subjectId: 'sub_1789071048585',
+        shortName: 'HHU',
+        subjectName: 'Hidrologia e Hidráulica Urbana',
+        day: 4,
+        startTime: '18:00',
+        endTime: '20:00',
+        type: 'TP',
+        room: 'B220',
+        turma: '3',
+        semester: 1
+      },
+
+      // Sexta-feira (5)
+      {
+        id: 'class_pre_sex_t2',
+        subjectId: 'sub_1789070615665',
+        shortName: 'PRE',
+        subjectName: 'Patologia e Reabilitação de Edifícios',
+        day: 5,
+        startTime: '10:30',
+        endTime: '12:30',
+        type: 'T',
+        room: 'B015',
+        turma: '2, 4, 6',
+        semester: 1
+      },
+      {
+        id: 'class_eg_sex_t',
+        subjectId: 'sub_1789071075077',
+        shortName: 'EG',
+        subjectName: 'Engenharia Geotécnica',
+        day: 5,
+        startTime: '13:30',
+        endTime: '14:30',
+        type: 'T',
+        room: 'B015',
+        turma: '1, 3, 5',
+        semester: 1
+      },
+      {
+        id: 'class_hhu_sex_tp2',
+        subjectId: 'sub_1789071048585',
+        shortName: 'HHU',
+        subjectName: 'Hidrologia e Hidráulica Urbana',
+        day: 5,
+        startTime: '13:30',
+        endTime: '15:30',
+        type: 'TP',
+        room: 'B229',
+        turma: '2',
+        semester: 1
+      },
+      {
+        id: 'class_eg_sex_tp6',
+        subjectId: 'sub_1789071075077',
+        shortName: 'EG',
+        subjectName: 'Engenharia Geotécnica',
+        day: 5,
+        startTime: '14:30',
+        endTime: '16:30',
+        type: 'TP',
+        room: 'B343 / H006',
+        turma: '6',
+        semester: 1
+      },
+      {
+        id: 'class_pre_sex_t1',
+        subjectId: 'sub_1789070615665',
+        shortName: 'PRE',
+        subjectName: 'Patologia e Reabilitação de Edifícios',
+        day: 5,
+        startTime: '14:30',
+        endTime: '16:30',
+        type: 'T',
+        room: 'B020',
+        turma: '1, 3, 5',
+        semester: 1
+      },
+      {
+        id: 'class_eg_sex_tp2',
+        subjectId: 'sub_1789071075077',
+        shortName: 'EG',
+        subjectName: 'Engenharia Geotécnica',
+        day: 5,
+        startTime: '15:30',
+        endTime: '17:30',
+        type: 'TP',
+        room: 'B028',
+        turma: '2',
+        semester: 1
+      }
+    ];
 
     // LER SESSÃO ATIVA (LOCALSTORAGE OU SESSIONSTORAGE)
     let initialUser = null;
@@ -1364,7 +2173,11 @@
       fileRequests: readStoredJson('study_file_requests') || [],
       files: readStoredJson('study_files') || [],
       selectedArchiveSubject: '',
-      currentSemester: parseInt(localStorage.getItem('study_current_semester'), 10) || 1
+      currentSemester: parseInt(localStorage.getItem('study_current_semester'), 10) || 1,
+      schedule: readStoredJson('study_schedule') || DEFAULT_SCHEDULE,
+      selectedScheduleDay: null,
+      selectedScheduleTurma: 'all',
+      studentSubjectTurmas: readStoredJson('study_student_subject_turmas') || {}
     };
 
     // SINCRONIZAÇÃO AUTOMÁTICA DA CONTA DIOGOLUDGERO E PURGA DE DEMOS
@@ -1409,6 +2222,19 @@
         state.absences[diogo.id] = [];
       }
 
+      // Sincronizar aulas do horário padrão: manter apenas cadeiras com horário oficial fornecido (Engenharia Geotécnica, Engenharia de Estruturas, Engenharia do Território e dos Transportes, Hidrologia e Hidráulica Urbana e Patologia e Reabilitação de Edifícios)
+      const allowedClassIds = new Set(DEFAULT_SCHEDULE.map(c => c.id));
+      state.schedule = (state.schedule || []).filter(c => allowedClassIds.has(c.id));
+      if (state.schedule.length === 0) {
+        state.schedule = [...DEFAULT_SCHEDULE];
+      } else {
+        DEFAULT_SCHEDULE.forEach(defClass => {
+          if (!state.schedule.some(sc => sc.id === defClass.id)) {
+            state.schedule.push(defClass);
+          }
+        });
+      }
+
       saveState();
     })();
 
@@ -1419,6 +2245,7 @@
         study_subjects: state.subjects,
         study_grades: state.grades,
         study_enrolled_subjects: state.enrolledSubjects,
+        study_student_subject_turmas: state.studentSubjectTurmas,
         study_absences: state.absences,
         study_files: (state.files || []).map(f => {
           const { dataUrl, ...rest } = f;
@@ -1427,7 +2254,8 @@
         study_file_requests: (state.fileRequests || []).map(r => {
           const { dataUrl, ...rest } = r;
           return rest;
-        })
+        }),
+        study_schedule: state.schedule || []
       };
       Object.entries(cache).forEach(([key, value]) => {
         try {
@@ -1812,12 +2640,12 @@
       if (newRole === 'student') {
         const savedTab = sessionStorage.getItem('study_active_tab') || localStorage.getItem('study_active_tab');
         if (savedTab === 'students') {
-          sessionStorage.setItem('study_active_tab', 'grades');
-          localStorage.setItem('study_active_tab', 'grades');
+          sessionStorage.setItem('study_active_tab', 'schedule');
+          localStorage.setItem('study_active_tab', 'schedule');
         }
         const studentsTab = document.getElementById('tab-students');
         if (studentsTab && !studentsTab.classList.contains('hidden')) {
-          switchTab('grades');
+          switchTab('schedule');
         }
       }
 
@@ -1825,6 +2653,7 @@
       renderGrades();
       renderFiles();
       renderAbsences();
+      renderSchedule();
       showToast(newRole === 'admin' 
         ? "Modo Administrador ativado! Painéis de gestão disponíveis." 
         : "Modo Estudante ativado! A navegar como aluno.", "success");
@@ -2001,11 +2830,17 @@
       renderFiles();
       renderStudentsList();
       renderAbsences();
+      renderSchedule();
 
-      // Restaurar o separador ativo (preservar ao fazer F5 / recarregar)
-      let activeTab = sessionStorage.getItem('study_active_tab') || localStorage.getItem('study_active_tab') || 'grades';
+      const studentTurmaSelect = document.getElementById('student-my-turma-select');
+      if (studentTurmaSelect) {
+        studentTurmaSelect.value = getStudentTurma();
+      }
+
+      // Restaurar o separador ativo (preservar ao fazer F5 / recarregar, predefinido como Horário)
+      let activeTab = sessionStorage.getItem('study_active_tab') || localStorage.getItem('study_active_tab') || 'schedule';
       if (activeTab === 'students' && !isAdmin) {
-        activeTab = 'grades';
+        activeTab = 'schedule';
       }
       switchTab(activeTab);
     }
@@ -2039,19 +2874,46 @@
       } else {
         list.innerHTML = semesterSubjects.map(sub => {
           const isChecked = enrolled.includes(sub.id);
+          const subTurma = getStudentSubjectTurma(userId, sub.id);
           return `
-            <label class="flex items-center justify-between p-3.5 bg-slate-50 hover:bg-indigo-50/50 rounded-xl border border-slate-200 hover:border-indigo-300 cursor-pointer transition">
-              <div class="flex items-center gap-3">
-                <input type="checkbox" value="${sub.id}" class="subject-enrolled-checkbox w-4 h-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500" ${isChecked ? 'checked' : ''}>
-                <span class="text-sm font-bold text-slate-800">${escapeHtml(sub.name)}</span>
+            <div class="p-3 sm:p-3.5 bg-slate-50 hover:bg-indigo-50/30 rounded-xl border border-slate-200 transition flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <label class="flex items-center gap-3 cursor-pointer flex-1 min-w-0">
+                <input type="checkbox" value="${sub.id}" class="subject-enrolled-checkbox w-4 h-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500 shrink-0" ${isChecked ? 'checked' : ''}>
+                <div class="min-w-0">
+                  <span class="text-sm font-bold text-slate-800 block truncate">${escapeHtml(sub.name)}</span>
+                  <span class="text-[11px] text-slate-400 font-medium">${sub.tests.length} avaliação(ões)</span>
+                </div>
+              </label>
+              <div class="flex items-center gap-2 self-end sm:self-center shrink-0">
+                <label for="modal-turma-${sub.id}" class="text-xs font-bold text-slate-600">Turma:</label>
+                <select id="modal-turma-${sub.id}" data-subject-id="${sub.id}" class="modal-subject-turma-select px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-bold text-indigo-900 outline-none focus:border-indigo-600 cursor-pointer shadow-2xs">
+                  <option value="1" ${subTurma === '1' ? 'selected' : ''}>Turma 1 (11M.EC1)</option>
+                  <option value="2" ${subTurma === '2' ? 'selected' : ''}>Turma 2 (11M.EC2)</option>
+                  <option value="3" ${subTurma === '3' ? 'selected' : ''}>Turma 3 (11M.EC3)</option>
+                  <option value="4" ${subTurma === '4' ? 'selected' : ''}>Turma 4 (11M.EC4)</option>
+                  <option value="5" ${subTurma === '5' ? 'selected' : ''}>Turma 5 (11M.EC5)</option>
+                  <option value="6" ${subTurma === '6' ? 'selected' : ''}>Turma 6 (11M.EC6)</option>
+                </select>
               </div>
-              <span class="text-xs text-slate-400 font-medium">${sub.tests.length} avaliação(ões)</span>
-            </label>
+            </div>
           `;
         }).join('');
       }
 
+      const modalTurmaSelect = document.getElementById('enrolled-modal-turma-select');
+      if (modalTurmaSelect) {
+        modalTurmaSelect.value = getStudentTurma(userId);
+      }
+
       modal.classList.remove('hidden');
+    }
+
+    function applyModalTurmaToAll() {
+      const globalVal = document.getElementById('enrolled-modal-turma-select')?.value || '1';
+      document.querySelectorAll('.modal-subject-turma-select').forEach(sel => {
+        sel.value = globalVal;
+      });
+      showToast(`Todas as disciplinas do modal foram definidas para a Turma ${globalVal}!`, 'info');
     }
 
     function closeEnrolledModal() {
@@ -2088,9 +2950,22 @@
       const updatedEnrolled = [...otherSemestersEnrolled, ...validSemesterSelected];
 
       state.enrolledSubjects[userId] = updatedEnrolled;
+
+      // Guardar turmas individuais escolhidas por disciplina
+      if (!state.studentSubjectTurmas) state.studentSubjectTurmas = {};
+      if (!state.studentSubjectTurmas[userId]) state.studentSubjectTurmas[userId] = {};
+      const modalTurmaSelects = document.querySelectorAll('.modal-subject-turma-select');
+      modalTurmaSelects.forEach(sel => {
+        const sid = sel.getAttribute('data-subject-id');
+        if (sid && sel.value) {
+          state.studentSubjectTurmas[userId][sid] = String(sel.value);
+        }
+      });
+
       saveState();
       closeEnrolledModal();
       renderGrades();
+      renderSchedule();
       renderArchiveDropdown();
       renderFiles();
       updateSubjectSelects();
@@ -2103,7 +2978,7 @@
         }).then(() => {});
       }
 
-      showToast("Cadeiras atualizadas com sucesso!");
+      showToast("Cadeiras e turmas atualizadas com sucesso!");
     }
 
     // NAVEGAÇÃO DE ABAS
@@ -2122,7 +2997,7 @@
         localStorage.setItem('study_active_tab', tab);
       } catch(e) {}
 
-      const tabs = ['grades', 'files', 'absences', 'students'];
+      const tabs = ['schedule', 'grades', 'files', 'absences', 'students'];
       tabs.forEach(t => {
         const el = document.getElementById('tab-' + t);
         if (el) el.classList.add('hidden');
@@ -2156,6 +3031,7 @@
       }
 
       if (tab === 'students') renderStudentsList();
+      if (tab === 'schedule') renderSchedule();
       if (tab === 'files') { renderArchiveTabs(); renderFiles(); }
       if (tab === 'absences') renderAbsences();
       if (tab === 'grades') renderGrades();
@@ -2685,6 +3561,544 @@
 
 
     // ==============================================
+    // GESTÃO DO HORÁRIO SEMANAL (TIMELINE)
+    // ==============================================
+    const SCHEDULE_WEEKDAYS = [
+      { day: 1, short: 'Seg', name: 'Segunda', full: 'Segunda-feira' },
+      { day: 2, short: 'Ter', name: 'Terça', full: 'Terça-feira' },
+      { day: 3, short: 'Qua', name: 'Quarta', full: 'Quarta-feira' },
+      { day: 4, short: 'Qui', name: 'Quinta', full: 'Quinta-feira' },
+      { day: 5, short: 'Sex', name: 'Sexta', full: 'Sexta-feira' }
+    ];
+
+    function getTodayWeekday() {
+      const day = new Date().getDay(); // 0 = Dom, 1 = Seg, 2 = Ter, 3 = Qua, 4 = Qui, 5 = Sex, 6 = Sáb
+      return (day >= 1 && day <= 5) ? day : 1; // Ao fim de semana mostra Segunda-feira por defeito
+    }
+
+    function selectScheduleDay(day) {
+      state.selectedScheduleDay = Number(day);
+      renderSchedule();
+    }
+
+    function getStudentSubjectTurma(userId, subjectId) {
+      const uid = userId || (state.currentUser ? state.currentUser.id : null);
+      if (!uid) return '1';
+
+      if (state.studentSubjectTurmas && state.studentSubjectTurmas[uid] && subjectId && state.studentSubjectTurmas[uid][subjectId]) {
+        return String(state.studentSubjectTurmas[uid][subjectId]);
+      }
+
+      // Fallback para a turma global definida para o utilizador
+      return getStudentTurma(uid);
+    }
+
+    function getStudentTurma(userId) {
+      const uid = userId || (state.currentUser ? state.currentUser.id : null);
+      if (!uid) return '1';
+      
+      if (state.currentUser && state.currentUser.id === uid && state.currentUser.turma) {
+        return String(state.currentUser.turma);
+      }
+      
+      const u = (state.users || []).find(x => x.id === uid);
+      if (u && u.turma) return String(u.turma);
+      
+      try {
+        const stored = localStorage.getItem('study_student_turma_' + uid);
+        if (stored) return String(stored);
+      } catch(e) {}
+      
+      return '1';
+    }
+
+    function setStudentSubjectTurma(subjectId, newTurma, userId) {
+      const uid = userId || (state.currentUser ? state.currentUser.id : null);
+      if (!uid || !subjectId) return;
+      const turmaStr = String(newTurma || '1');
+
+      if (!state.studentSubjectTurmas) state.studentSubjectTurmas = {};
+      if (!state.studentSubjectTurmas[uid]) state.studentSubjectTurmas[uid] = {};
+
+      state.studentSubjectTurmas[uid][subjectId] = turmaStr;
+      saveState();
+
+      const sub = (state.subjects || []).find(s => s.id === subjectId);
+      const subName = sub ? (sub.shortName || sub.name) : 'Cadeira';
+
+      renderGrades();
+      renderSchedule();
+
+      showToast(`${subName}: Turma ${turmaStr} (11M.EC${turmaStr}) selecionada! Horário atualizado.`, 'success');
+    }
+
+    function setAllStudentSubjectTurmas(newTurma, userId) {
+      const uid = userId || (state.currentUser ? state.currentUser.id : null);
+      if (!uid) return;
+      const turmaStr = String(newTurma || '1');
+
+      if (!state.studentSubjectTurmas) state.studentSubjectTurmas = {};
+      if (!state.studentSubjectTurmas[uid]) state.studentSubjectTurmas[uid] = {};
+
+      (state.subjects || []).forEach(s => {
+        state.studentSubjectTurmas[uid][s.id] = turmaStr;
+      });
+
+      if (state.currentUser && state.currentUser.id === uid) {
+        state.currentUser.turma = turmaStr;
+      }
+      const u = (state.users || []).find(x => x.id === uid);
+      if (u) u.turma = turmaStr;
+
+      try {
+        localStorage.setItem('study_student_turma_' + uid, turmaStr);
+      } catch(e) {}
+
+      saveState();
+
+      const mySelect = document.getElementById('student-my-turma-select');
+      if (mySelect) mySelect.value = turmaStr;
+      const modalSelect = document.getElementById('enrolled-modal-turma-select');
+      if (modalSelect) modalSelect.value = turmaStr;
+
+      renderGrades();
+      renderSchedule();
+
+      showToast(`Todas as tuas cadeiras foram atualizadas para a Turma ${turmaStr} (11M.EC${turmaStr})!`, 'success');
+    }
+
+    function changeMyStudentTurma(newTurma) {
+      setAllStudentSubjectTurmas(newTurma);
+    }
+
+    function changeScheduleTurma(turma) {
+      state.selectedScheduleTurma = turma || 'all';
+      renderSchedule();
+    }
+
+    function getSubjectAcronym(name) {
+      if (!name) return 'CAD';
+      const map = {
+        'Engenharia de Estruturas': 'EES',
+        'Teoria das Estruturas': 'TE',
+        'Ambiente Urbano e Transportes': 'AUT',
+        'Vias de Comunicação': 'VC',
+        'Patologia e Reabilitação de Edifícios': 'PRE',
+        'Engenharia do Território e dos Transportes': 'ETT',
+        'Hidrologia e Hidráulica Urbana': 'HHU',
+        'Hidráulica 1': 'H1',
+        'Hidráulica 2': 'H2',
+        'Engenharia Geotécnica': 'EG'
+      };
+      for (const [key, val] of Object.entries(map)) {
+        if (name.toLowerCase().includes(key.toLowerCase()) || key.toLowerCase().includes(name.toLowerCase())) {
+          return val;
+        }
+      }
+      const words = name.replace(/\b(de|do|da|dos|das|e)\b/gi, '').trim().split(/\s+/);
+      return words.slice(0, 3).map(w => w.charAt(0).toUpperCase()).join('');
+    }
+
+    function renderScheduleDaySelector() {
+      const container = document.getElementById('schedule-day-tabs');
+      if (!container) return;
+      const todayWeekday = new Date().getDay();
+      const currentSelected = state.selectedScheduleDay || getTodayWeekday();
+
+      container.innerHTML = SCHEDULE_WEEKDAYS.map(d => {
+        const isSelected = currentSelected === d.day;
+        const isToday = todayWeekday === d.day;
+
+        const btnClass = isSelected
+          ? 'py-2 sm:py-2.5 px-1 sm:px-3 bg-indigo-600 text-white rounded-xl shadow-xs font-black text-xs sm:text-sm flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-1.5 transition select-none'
+          : 'py-2 sm:py-2.5 px-1 sm:px-3 bg-slate-50 hover:bg-slate-100 text-slate-700 rounded-xl font-bold text-xs sm:text-sm flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-1.5 transition cursor-pointer select-none';
+
+        return `
+          <button type="button" onclick="selectScheduleDay(${d.day})" class="${btnClass}">
+            <span class="sm:hidden">${d.short}</span>
+            <span class="hidden sm:inline">${d.name}</span>
+            ${isToday ? `<span class="w-1.5 h-1.5 rounded-full ${isSelected ? 'bg-white' : 'bg-emerald-500'}"></span>` : ''}
+          </button>
+        `;
+      }).join('');
+    }
+
+    function renderSchedule() {
+      const container = document.getElementById('schedule-timeline-container');
+      if (!container) return;
+
+      const activeRole = getActiveRole();
+      const isAdmin = activeRole === 'admin';
+      const myTurma = getStudentTurma();
+
+      const adminControls = document.getElementById('admin-schedule-controls');
+      if (adminControls) {
+        adminControls.className = isAdmin ? '' : 'hidden';
+      }
+
+      // Visibilidade dos controlos de turma: Admin vs Estudante
+      const turmaFilterBox = document.getElementById('schedule-turma-filter-box');
+      const studentTurmaBadge = document.getElementById('schedule-student-turma-badge');
+      const studentTurmaText = document.getElementById('schedule-student-turma-text');
+
+      if (isAdmin) {
+        if (turmaFilterBox) turmaFilterBox.classList.remove('hidden');
+        if (studentTurmaBadge) studentTurmaBadge.classList.add('hidden');
+      } else {
+        // Para estudantes: ocultar filtro geral e mostrar apenas a indicação da sua turma
+        if (turmaFilterBox) turmaFilterBox.classList.add('hidden');
+        if (studentTurmaBadge) studentTurmaBadge.classList.remove('hidden');
+        if (studentTurmaText) {
+          studentTurmaText.innerHTML = `<span>Horário personalizado pelas tuas turmas</span> <button type="button" onclick="switchTab('grades')" class="ml-1 text-[11px] underline text-indigo-700 hover:text-indigo-950 font-bold cursor-pointer">Ver / Alterar nas Cadeiras</button>`;
+        }
+      }
+
+      // Se nenhum dia foi selecionado ainda, verifica parâmetro de URL ou define para hoje (ou segunda)
+      if (!state.selectedScheduleDay) {
+        try {
+          const urlParams = new URLSearchParams(window.location.search);
+          const urlDay = parseInt(urlParams.get('day'), 10);
+          if (urlDay >= 1 && urlDay <= 5) {
+            state.selectedScheduleDay = urlDay;
+          }
+        } catch(e) {}
+      }
+      if (!state.selectedScheduleDay) {
+        state.selectedScheduleDay = getTodayWeekday();
+      }
+
+      renderScheduleDaySelector();
+
+      // Atualizar título do dia selecionado
+      const dayObj = SCHEDULE_WEEKDAYS.find(d => d.day === state.selectedScheduleDay) || SCHEDULE_WEEKDAYS[0];
+      const todayWeekday = new Date().getDay();
+      const isSelectedToday = todayWeekday === state.selectedScheduleDay;
+
+      const titleEl = document.getElementById('schedule-selected-day-title');
+      if (titleEl) titleEl.textContent = dayObj.full;
+
+      const todayBadge = document.getElementById('schedule-today-badge');
+      if (todayBadge) {
+        if (isSelectedToday) todayBadge.classList.remove('hidden');
+        else todayBadge.classList.add('hidden');
+      }
+
+      const semesterBadge = document.getElementById('schedule-semester-badge');
+      const curSem = getCurrentSemester();
+      if (semesterBadge) semesterBadge.textContent = `${curSem}.º Semestre`;
+
+      // Filtrar aulas pelo dia da semana e pelo semestre atual (se definido na aula)
+      let classes = (state.schedule || []).filter(c => {
+        if (c.day !== state.selectedScheduleDay) return false;
+        if (c.semester && c.semester !== curSem) return false;
+
+        if (!isAdmin) {
+          const userId = state.currentUser ? state.currentUser.id : null;
+
+          // Se tiver lista de inscrições, verificar se frequenta a cadeira
+          if (userId && state.enrolledSubjects && state.enrolledSubjects[userId]) {
+            const enrolled = state.enrolledSubjects[userId];
+            if (Array.isArray(enrolled) && enrolled.length > 0 && c.subjectId) {
+              if (!enrolled.includes(c.subjectId)) return false;
+            }
+          }
+
+          // Estudante: SÓ pode ver as aulas da turma em que está NESSA CADEIRA ESPECÍFICA!
+          const subjectTurma = getStudentSubjectTurma(userId, c.subjectId);
+          if (c.turma && c.turma !== 'all') {
+            const turmasList = String(c.turma).split(/[,/]+/).map(t => t.trim());
+            if (!turmasList.includes(subjectTurma)) return false;
+          }
+        } else {
+          // Administrador: com filtro de turma selecionado
+          if (state.selectedScheduleTurma && state.selectedScheduleTurma !== 'all') {
+            if (c.turma && c.turma !== 'all') {
+              const turmasList = String(c.turma).split(/[,/]+/).map(t => t.trim());
+              if (!turmasList.includes(state.selectedScheduleTurma)) return false;
+            }
+          }
+        }
+        return true;
+      });
+
+      // Ordenar por hora de início
+      classes.sort((a, b) => (a.startTime || '').localeCompare(b.startTime || ''));
+
+      const countEl = document.getElementById('schedule-classes-count');
+      if (countEl) {
+        countEl.textContent = classes.length === 1 ? '1 aula agendada' : `${classes.length} aulas agendadas`;
+      }
+
+      // Se não houver aulas para este dia
+      if (classes.length === 0) {
+        container.innerHTML = `
+          <div class="bg-white border border-slate-200 rounded-2xl p-8 sm:p-12 text-center shadow-xs">
+            <div class="w-14 h-14 mx-auto mb-3 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl">
+              <i class="fa-regular fa-calendar-check"></i>
+            </div>
+            <h4 class="text-base font-bold text-slate-800 mb-1">Sem aulas agendadas para ${escapeHtml(dayObj.full.toLowerCase())}</h4>
+            <p class="text-xs text-slate-400 max-w-sm mx-auto">Não há aulas registadas para este dia no ${curSem}.º semestre. Aproveita para rever conteúdos ou adiantar projetos.</p>
+            ${isAdmin ? `
+              <div class="mt-4">
+                <button type="button" onclick="openAddClassModal(${state.selectedScheduleDay})" class="inline-flex items-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-xs transition cursor-pointer">
+                  <i class="fa-solid fa-plus text-[11px]"></i> Adicionar Aula a este dia
+                </button>
+              </div>
+            ` : ''}
+          </div>
+        `;
+        return;
+      }
+
+      // Horas atuais para cálculo de "A decorrer agora"
+      const now = new Date();
+      const currentHoursStr = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+
+      container.innerHTML = classes.map((c, index) => {
+        const isLast = index === classes.length - 1;
+        const isOngoing = isSelectedToday && (currentHoursStr >= c.startTime && currentHoursStr <= c.endTime);
+
+        // Estilos para o tipo de aula
+        let typeBadgeClass = 'bg-slate-100 text-slate-700 border-slate-200';
+        const typeUpper = (c.type || 'T').toUpperCase();
+        if (typeUpper === 'T') {
+          typeBadgeClass = 'bg-amber-100 text-amber-800 border-amber-200';
+        } else if (typeUpper === 'TP') {
+          typeBadgeClass = 'bg-indigo-100 text-indigo-700 border-indigo-200';
+        } else if (typeUpper === 'P') {
+          typeBadgeClass = 'bg-emerald-100 text-emerald-700 border-emerald-200';
+        } else if (typeUpper === 'L') {
+          typeBadgeClass = 'bg-purple-100 text-purple-700 border-purple-200';
+        }
+
+        // Nome da cadeira e sigla
+        const subName = c.subjectName || (state.subjects.find(s => s.id === c.subjectId)?.name) || 'Disciplina';
+        const acronym = c.shortName || getSubjectAcronym(subName);
+
+        // Turma label
+        let turmaLabel = '';
+        if (c.turma && c.turma !== 'all') {
+          turmaLabel = String(c.turma).includes(',') ? `Turmas ${c.turma}` : `Turma ${c.turma}`;
+        }
+
+        // Duração em minutos / horas
+        let durationText = '';
+        if (c.startTime && c.endTime) {
+          const [sh, sm] = c.startTime.split(':').map(Number);
+          const [eh, em] = c.endTime.split(':').map(Number);
+          const totalMins = (eh * 60 + em) - (sh * 60 + sm);
+          if (totalMins > 0) {
+            const h = Math.floor(totalMins / 60);
+            const m = totalMins % 60;
+            durationText = h > 0 ? (m > 0 ? `${h}h${m}` : `${h}h`) : `${m}min`;
+          }
+        }
+
+        return `
+          <div class="flex gap-3 sm:gap-6 items-start relative group">
+            
+            <!-- Coluna de Horas e Linha do Tempo -->
+            <div class="flex flex-col items-center shrink-0 w-14 sm:w-18 pt-1">
+              <span class="text-xs sm:text-sm font-black text-slate-800 tracking-tight">${escapeHtml(c.startTime)}</span>
+              <span class="text-[10px] sm:text-xs font-semibold text-slate-400">${escapeHtml(c.endTime)}</span>
+              
+              <!-- Nó / Círculo da Linha do Tempo -->
+              <div class="my-2.5 w-4 h-4 rounded-full border-2 ${isOngoing ? 'border-emerald-500 bg-white ring-4 ring-emerald-100' : 'border-indigo-600 bg-white ring-4 ring-indigo-50'} flex items-center justify-center shrink-0 z-10 transition">
+                <div class="w-1.5 h-1.5 rounded-full ${isOngoing ? 'bg-emerald-500 animate-pulse' : 'bg-indigo-600'}"></div>
+              </div>
+              
+              <!-- Linha Vertical Conectora -->
+              ${!isLast ? `<div class="w-0.5 flex-1 bg-slate-200 -mb-2 min-h-[48px]"></div>` : ''}
+            </div>
+
+            <!-- Cartão da Aula (sem professores, apenas salas) -->
+            <div class="flex-1 bg-white border ${isOngoing ? 'border-emerald-300 ring-2 ring-emerald-100 shadow-md' : 'border-slate-200 shadow-xs hover:border-indigo-200 hover:shadow-md'} rounded-2xl p-4 sm:p-5 transition mb-3 sm:mb-4">
+              <div class="flex items-start justify-between gap-3">
+                <div class="space-y-1 min-w-0">
+                  <div class="flex items-center gap-2 flex-wrap">
+                    <span class="text-base sm:text-lg font-black text-slate-800 tracking-tight">${escapeHtml(acronym)}</span>
+                    <span class="px-2 py-0.5 rounded-full text-[11px] font-black uppercase tracking-wider border ${typeBadgeClass}">${escapeHtml(typeUpper)}</span>
+                    ${turmaLabel ? `<span class="text-[10px] font-bold text-slate-500 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded-md">${escapeHtml(turmaLabel)}</span>` : ''}
+                  </div>
+                  <h4 class="text-xs sm:text-sm font-semibold text-slate-600 truncate">${escapeHtml(subName)}</h4>
+                </div>
+
+                <!-- Bloco da Sala (Ícone + Número da Sala) -->
+                <div class="flex flex-col items-center justify-center bg-indigo-50/70 border border-indigo-100 px-3 py-2 rounded-xl text-center shrink-0 min-w-[64px]">
+                  <i class="fa-solid fa-location-dot text-indigo-600 text-sm mb-0.5"></i>
+                  <span class="text-xs sm:text-sm font-black text-slate-800 tracking-wide">${escapeHtml(c.room || 'TBA')}</span>
+                  <span class="text-[9px] font-semibold text-slate-400 uppercase">Sala</span>
+                </div>
+              </div>
+
+              <!-- Rodapé do Cartão com Duração, Estado e Ações Admin -->
+              <div class="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between gap-2 flex-wrap text-xs text-slate-400">
+                <div class="flex items-center gap-3">
+                  ${durationText ? `<span class="flex items-center gap-1 font-medium"><i class="fa-regular fa-clock text-slate-400"></i> ${escapeHtml(durationText)}</span>` : ''}
+                  ${isOngoing ? `
+                    <span class="inline-flex items-center gap-1.5 text-emerald-700 font-bold bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full text-[10px]">
+                      <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> A decorrer agora
+                    </span>
+                  ` : ''}
+                </div>
+
+                ${isAdmin ? `
+                  <div class="flex items-center gap-1">
+                    <button type="button" onclick="openEditClassModal('${c.id}')" class="p-1.5 text-indigo-600 hover:bg-indigo-50 rounded-lg transition cursor-pointer" title="Editar aula">
+                      <i class="fa-regular fa-pen-to-square text-xs"></i>
+                    </button>
+                    <button type="button" onclick="deleteScheduleClass('${c.id}')" class="p-1.5 text-rose-600 hover:bg-rose-50 rounded-lg transition cursor-pointer" title="Eliminar aula">
+                      <i class="fa-regular fa-trash-can text-xs"></i>
+                    </button>
+                  </div>
+                ` : ''}
+              </div>
+            </div>
+
+          </div>
+        `;
+      }).join('');
+    }
+
+    // MODAL DE ADICIONAR / EDITAR AULA (ADMIN)
+    function openAddClassModal(defaultDay) {
+      if (getActiveRole() !== 'admin') {
+        showToast('Apenas o Administrador pode adicionar aulas ao horário.', 'error');
+        return;
+      }
+      const selectSub = document.getElementById('schedule-class-subject');
+      if (selectSub) {
+        const curSem = getCurrentSemester();
+        const available = (state.subjects || []).filter(s => getSubjectSemester(s) === curSem);
+        selectSub.innerHTML = (available.length > 0 ? available : state.subjects).map(s => {
+          const acr = getSubjectAcronym(s.name);
+          return `<option value="${s.id}">[${acr}] ${escapeHtml(s.name)}</option>`;
+        }).join('');
+      }
+
+      document.getElementById('schedule-class-id').value = '';
+      document.getElementById('schedule-modal-title').innerHTML = '<i class="fa-solid fa-calendar-plus text-indigo-600"></i> Adicionar Aula';
+      document.getElementById('schedule-class-day').value = String(defaultDay || state.selectedScheduleDay || 1);
+      document.getElementById('schedule-class-type').value = 'T';
+      document.getElementById('schedule-class-turma').value = 'all';
+      document.getElementById('schedule-class-start').value = '08:30';
+      document.getElementById('schedule-class-end').value = '10:30';
+      document.getElementById('schedule-class-room').value = '';
+
+      const modal = document.getElementById('modal-schedule-class');
+      if (modal) modal.classList.remove('hidden');
+    }
+
+    function openEditClassModal(classId) {
+      if (getActiveRole() !== 'admin') {
+        showToast('Apenas o Administrador pode editar o horário.', 'error');
+        return;
+      }
+      const c = (state.schedule || []).find(item => item.id === classId);
+      if (!c) return;
+
+      const selectSub = document.getElementById('schedule-class-subject');
+      if (selectSub) {
+        selectSub.innerHTML = (state.subjects || []).map(s => {
+          const acr = getSubjectAcronym(s.name);
+          return `<option value="${s.id}" ${s.id === c.subjectId ? 'selected' : ''}>[${acr}] ${escapeHtml(s.name)}</option>`;
+        }).join('');
+      }
+
+      document.getElementById('schedule-class-id').value = c.id;
+      document.getElementById('schedule-modal-title').innerHTML = '<i class="fa-solid fa-pen-to-square text-indigo-600"></i> Editar Aula';
+      document.getElementById('schedule-class-day').value = String(c.day || 1);
+      document.getElementById('schedule-class-type').value = c.type || 'T';
+      document.getElementById('schedule-class-turma').value = c.turma || 'all';
+      document.getElementById('schedule-class-start').value = c.startTime || '08:30';
+      document.getElementById('schedule-class-end').value = c.endTime || '10:30';
+      document.getElementById('schedule-class-room').value = c.room || '';
+
+      const modal = document.getElementById('modal-schedule-class');
+      if (modal) modal.classList.remove('hidden');
+    }
+
+    function closeScheduleModal() {
+      const modal = document.getElementById('modal-schedule-class');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function handleSaveScheduleClass(event) {
+      event.preventDefault();
+      if (getActiveRole() !== 'admin') return;
+
+      const id = document.getElementById('schedule-class-id').value;
+      const subjectId = document.getElementById('schedule-class-subject').value;
+      const day = parseInt(document.getElementById('schedule-class-day').value, 10) || 1;
+      const type = document.getElementById('schedule-class-type').value;
+      const turma = document.getElementById('schedule-class-turma').value;
+      const startTime = document.getElementById('schedule-class-start').value;
+      const endTime = document.getElementById('schedule-class-end').value;
+      const room = document.getElementById('schedule-class-room').value.trim();
+
+      const subject = (state.subjects || []).find(s => s.id === subjectId);
+      const subjectName = subject ? subject.name : 'Disciplina';
+      const shortName = getSubjectAcronym(subjectName);
+      const semester = subject ? getSubjectSemester(subject) : getCurrentSemester();
+
+      if (!Array.isArray(state.schedule)) state.schedule = [];
+
+      if (id) {
+        const existing = state.schedule.find(item => item.id === id);
+        if (existing) {
+          existing.subjectId = subjectId;
+          existing.subjectName = subjectName;
+          existing.shortName = shortName;
+          existing.day = day;
+          existing.type = type;
+          existing.turma = turma;
+          existing.startTime = startTime;
+          existing.endTime = endTime;
+          existing.room = room;
+          existing.semester = semester;
+        }
+        showToast('Aula atualizada com sucesso!');
+      } else {
+        const newClass = {
+          id: 'class_' + Date.now(),
+          subjectId,
+          subjectName,
+          shortName,
+          day,
+          type,
+          turma,
+          startTime,
+          endTime,
+          room,
+          semester
+        };
+        state.schedule.push(newClass);
+        showToast('Aula adicionada ao horário com sucesso!');
+      }
+
+      state.selectedScheduleDay = day;
+      saveState();
+      closeScheduleModal();
+      renderSchedule();
+    }
+
+    function deleteScheduleClass(classId) {
+      if (getActiveRole() !== 'admin') {
+        showToast('Apenas o Administrador pode eliminar aulas.', 'error');
+        return;
+      }
+      const c = (state.schedule || []).find(item => item.id === classId);
+      if (!c) return;
+      if (!confirm(`Tens a certeza de que desejas remover a aula de "${c.shortName} - ${c.type}"?`)) return;
+
+      state.schedule = state.schedule.filter(item => item.id !== classId);
+      saveState();
+      renderSchedule();
+      showToast('Aula removida do horário.');
+    }
+
+
+    // ==============================================
     // GESTÃO DE FALTAS E CONTROLO DE LIMITES (T / P)
     // ==============================================
     function renderAbsences() {
@@ -3166,6 +4580,9 @@
     function getSubjectSemester(sub) {
       if (!sub) return 1;
       if (sub.id === 'sub_1789071216689' || (sub.name && sub.name.trim().toLowerCase() === 'engenharia de estruturas')) return 1;
+      if (sub.id === 'sub_1789071203695' || (sub.name && sub.name.trim().toLowerCase() === 'engenharia do território e dos transportes')) return 1;
+      if (sub.id === 'sub_1789071048585' || (sub.name && sub.name.trim().toLowerCase() === 'hidrologia e hidráulica urbana')) return 1;
+      if (sub.id === 'sub_1789070615665' || (sub.name && sub.name.trim().toLowerCase() === 'patologia e reabilitação de edifícios')) return 1;
       if (sub.id === 'sub_1789071274498' || (sub.name && sub.name.trim().toLowerCase() === 'teoria das estruturas')) return 1;
       if (sub.id === 'sub_1789508807919' || (sub.name && sub.name.trim().toLowerCase() === 'hidráulica 2')) return 2;
       if (sub.semester === 1 || sub.semester === 2) return sub.semester;
@@ -3887,6 +5304,11 @@
       const currentSem = getCurrentSemester();
       
       let displaySubjects = [];
+      const myTurmaSelect = document.getElementById('student-my-turma-select');
+      if (myTurmaSelect) {
+        myTurmaSelect.value = getStudentTurma();
+      }
+
       if (isAdmin) {
         displaySubjects = (state.subjects || []).filter(s => getSubjectSemester(s) === currentSem);
         const enrolledCountEl = document.getElementById('student-enrolled-count');
@@ -4019,6 +5441,23 @@
           }
         }
 
+        const curSubjectTurma = getStudentSubjectTurma(userId, subject.id);
+        const turmaSelectorHtml = `
+          <div class="flex items-center gap-1.5 bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 shadow-2xs" title="Escolhe a tua turma para ${escapeHtml(subject.name)}">
+            <label for="student-turma-${subject.id}" class="text-[11px] font-bold text-slate-700 flex items-center gap-1 cursor-pointer">
+              <i class="fa-solid fa-users-rectangle text-indigo-600 text-xs"></i> Turma:
+            </label>
+            <select id="student-turma-${subject.id}" onchange="setStudentSubjectTurma('${subject.id}', this.value)" class="text-xs font-bold text-indigo-900 bg-transparent outline-none cursor-pointer">
+              <option value="1" ${curSubjectTurma === '1' ? 'selected' : ''}>Turma 1 (11M.EC1)</option>
+              <option value="2" ${curSubjectTurma === '2' ? 'selected' : ''}>Turma 2 (11M.EC2)</option>
+              <option value="3" ${curSubjectTurma === '3' ? 'selected' : ''}>Turma 3 (11M.EC3)</option>
+              <option value="4" ${curSubjectTurma === '4' ? 'selected' : ''}>Turma 4 (11M.EC4)</option>
+              <option value="5" ${curSubjectTurma === '5' ? 'selected' : ''}>Turma 5 (11M.EC5)</option>
+              <option value="6" ${curSubjectTurma === '6' ? 'selected' : ''}>Turma 6 (11M.EC6)</option>
+            </select>
+          </div>
+        `;
+
         const card = document.createElement('div');
         card.className = "bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden transition";
         card.innerHTML = `
@@ -4043,6 +5482,7 @@
               ` : ''}
             </div>
             <div class="flex items-center flex-wrap justify-between sm:justify-end gap-2">
+              ${turmaSelectorHtml}
               <!-- BOTÃO MAIS INFORMAÇÕES -->
               <button onclick="openSubjectInfoModal('${subject.id}')" class="px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm cursor-pointer" title="Ver professores e contactos desta cadeira">
                 <i class="fa-solid fa-circle-info text-indigo-600"></i> Mais informações
@@ -6166,6 +7606,7 @@ ${480 + streamLen}
         renderPendingFiles();
         renderGrades();
         if (state.currentUser) renderAbsences();
+        renderSchedule();
 
         if (!silent) {
           console.log("Dados sincronizados com sucesso com o Supabase!");
@@ -6213,6 +7654,12 @@ ${480 + streamLen}
       fetchCloudState();
       setupCloudRealtime();
     }
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('openModal') === '1') {
+        openEnrolledModal();
+      }
+    } catch(e) {}
   </script>
 </body>
 </html>
