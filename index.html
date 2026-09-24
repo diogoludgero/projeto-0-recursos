@@ -148,8 +148,14 @@
               <option value="4">Turma 4</option>
               <option value="5">Turma 5</option>
               <option value="6">Turma 6</option>
+              <option value="7">Turma 7</option>
+              <option value="8">Turma 8</option>
               <option value="1, 3, 5">Turmas 1, 3, 5</option>
               <option value="2, 4, 6">Turmas 2, 4, 6</option>
+              <option value="1, 3, 5, 7">Turmas 1, 3, 5, 7</option>
+              <option value="2, 4, 6, 8">Turmas 2, 4, 6, 8</option>
+              <option value="5, 7">Turmas 5, 7</option>
+              <option value="6, 8">Turmas 6, 8</option>
             </select>
           </div>
         </div>
@@ -395,6 +401,8 @@
             <option value="4">Turma 4 (11M.EC4)</option>
             <option value="5">Turma 5 (11M.EC5)</option>
             <option value="6">Turma 6 (11M.EC6)</option>
+            <option value="7">Turma 7 (11M.EC7)</option>
+            <option value="8">Turma 8 (11M.EC8)</option>
           </select>
           <button type="button" onclick="applyModalTurmaToAll()" class="px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 text-xs font-bold rounded-xl transition cursor-pointer shrink-0">
             Aplicar a Todas
@@ -907,6 +915,8 @@
               <option value="4">Turma 4 (11M.EC4)</option>
               <option value="5">Turma 5 (11M.EC5)</option>
               <option value="6">Turma 6 (11M.EC6)</option>
+              <option value="7">Turma 7 (11M.EC7)</option>
+              <option value="8">Turma 8 (11M.EC8)</option>
             </select>
           </div>
 
@@ -1146,6 +1156,8 @@
               <option value="4">Turma 4 (11M.EC4)</option>
               <option value="5">Turma 5 (11M.EC5)</option>
               <option value="6">Turma 6 (11M.EC6)</option>
+              <option value="7">Turma 7 (11M.EC7)</option>
+              <option value="8">Turma 8 (11M.EC8)</option>
             </select>
           </div>
         </div>
@@ -1514,7 +1526,7 @@
     }
 
     // HORÁRIO SEMANAL PADRÃO (FEUP - ENGENHARIA CIVIL)
-    // Contém apenas as cadeiras com horário oficial fornecido (Engenharia Geotécnica, Engenharia de Estruturas, Engenharia do Território e dos Transportes, Hidrologia e Hidráulica Urbana e Patologia e Reabilitação de Edifícios)
+    // Contém apenas as cadeiras com horário oficial fornecido (Engenharia Geotécnica, Engenharia de Estruturas, Engenharia do Território e dos Transportes, Hidrologia e Hidráulica Urbana, Patologia e Reabilitação de Edifícios, Teoria das Estruturas, Hidráulica 1, Ambiente Urbano e Transportes e Vias de Comunicação)
     const DEFAULT_SCHEDULE = [
       // Segunda-feira (1)
       {
@@ -1557,6 +1569,19 @@
         semester: 1
       },
       {
+        id: 'class_h1_seg_tp1',
+        subjectId: 'sub_1789071281303',
+        shortName: 'H1',
+        subjectName: 'Hidráulica 1',
+        day: 1,
+        startTime: '13:30',
+        endTime: '16:00',
+        type: 'TP',
+        room: 'B334',
+        turma: '1',
+        semester: 1
+      },
+      {
         id: 'class_ett_seg_t',
         subjectId: 'sub_1789071203695',
         shortName: 'ETT',
@@ -1570,6 +1595,58 @@
         semester: 1
       },
       {
+        id: 'class_te_seg_tp3',
+        subjectId: 'sub_1789071274498',
+        shortName: 'TE',
+        subjectName: 'Teoria das Estruturas',
+        day: 1,
+        startTime: '14:00',
+        endTime: '15:30',
+        type: 'TP',
+        room: 'B222',
+        turma: '3',
+        semester: 1
+      },
+      {
+        id: 'class_aut_seg_tp5_7',
+        subjectId: 'sub_1789071290283',
+        shortName: 'AUT',
+        subjectName: 'Ambiente Urbano e Transportes',
+        day: 1,
+        startTime: '14:00',
+        endTime: '15:30',
+        type: 'TP',
+        room: 'B311',
+        turma: '5, 7',
+        semester: 1
+      },
+      {
+        id: 'class_te_seg_tp2',
+        subjectId: 'sub_1789071274498',
+        shortName: 'TE',
+        subjectName: 'Teoria das Estruturas',
+        day: 1,
+        startTime: '14:30',
+        endTime: '16:00',
+        type: 'TP',
+        room: 'B117',
+        turma: '2',
+        semester: 1
+      },
+      {
+        id: 'class_vc_seg_tp6_8',
+        subjectId: 'sub_1789071296530',
+        shortName: 'VC',
+        subjectName: 'Vias de Comunicação',
+        day: 1,
+        startTime: '14:30',
+        endTime: '16:00',
+        type: 'TP',
+        room: 'B232',
+        turma: '6, 8',
+        semester: 1
+      },
+      {
         id: 'class_eg_seg_t2',
         subjectId: 'sub_1789071075077',
         shortName: 'EG',
@@ -1580,6 +1657,19 @@
         type: 'T',
         room: 'B015',
         turma: '2, 4, 6',
+        semester: 1
+      },
+      {
+        id: 'class_h1_seg_tp4',
+        subjectId: 'sub_1789071281303',
+        shortName: 'H1',
+        subjectName: 'Hidráulica 1',
+        day: 1,
+        startTime: '15:00',
+        endTime: '17:30',
+        type: 'TP',
+        room: 'B340',
+        turma: '4',
         semester: 1
       },
       {
@@ -1635,6 +1725,84 @@
         semester: 1
       },
       {
+        id: 'class_te_seg_tp6_8',
+        subjectId: 'sub_1789071274498',
+        shortName: 'TE',
+        subjectName: 'Teoria das Estruturas',
+        day: 1,
+        startTime: '16:00',
+        endTime: '17:30',
+        type: 'TP',
+        room: 'B117',
+        turma: '6, 8',
+        semester: 1
+      },
+      {
+        id: 'class_vc_seg_tp2',
+        subjectId: 'sub_1789071296530',
+        shortName: 'VC',
+        subjectName: 'Vias de Comunicação',
+        day: 1,
+        startTime: '16:00',
+        endTime: '17:30',
+        type: 'TP',
+        room: 'B028',
+        turma: '2',
+        semester: 1
+      },
+      {
+        id: 'class_te_seg_tp1',
+        subjectId: 'sub_1789071274498',
+        shortName: 'TE',
+        subjectName: 'Teoria das Estruturas',
+        day: 1,
+        startTime: '16:30',
+        endTime: '18:00',
+        type: 'TP',
+        room: 'B318',
+        turma: '1',
+        semester: 1
+      },
+      {
+        id: 'class_h1_seg_tp3',
+        subjectId: 'sub_1789071281303',
+        shortName: 'H1',
+        subjectName: 'Hidráulica 1',
+        day: 1,
+        startTime: '17:30',
+        endTime: '20:00',
+        type: 'TP',
+        room: 'B222',
+        turma: '3',
+        semester: 1
+      },
+      {
+        id: 'class_h1_seg_tp2',
+        subjectId: 'sub_1789071281303',
+        shortName: 'H1',
+        subjectName: 'Hidráulica 1',
+        day: 1,
+        startTime: '17:30',
+        endTime: '20:00',
+        type: 'TP',
+        room: 'B319',
+        turma: '2',
+        semester: 1
+      },
+      {
+        id: 'class_vc_seg_tp7',
+        subjectId: 'sub_1789071296530',
+        shortName: 'VC',
+        subjectName: 'Vias de Comunicação',
+        day: 1,
+        startTime: '17:30',
+        endTime: '19:00',
+        type: 'TP',
+        room: 'B117',
+        turma: '7',
+        semester: 1
+      },
+      {
         id: 'class_ees_seg_tp5',
         subjectId: 'sub_1789071216689',
         shortName: 'EES',
@@ -1658,6 +1826,32 @@
         type: 'TP',
         room: 'B202',
         turma: '3',
+        semester: 1
+      },
+      {
+        id: 'class_te_seg_tp4',
+        subjectId: 'sub_1789071274498',
+        shortName: 'TE',
+        subjectName: 'Teoria das Estruturas',
+        day: 1,
+        startTime: '18:00',
+        endTime: '19:30',
+        type: 'TP',
+        room: 'B334',
+        turma: '4',
+        semester: 1
+      },
+      {
+        id: 'class_aut_seg_tp1',
+        subjectId: 'sub_1789071290283',
+        shortName: 'AUT',
+        subjectName: 'Ambiente Urbano e Transportes',
+        day: 1,
+        startTime: '18:30',
+        endTime: '20:00',
+        type: 'TP',
+        room: 'B311',
+        turma: '1',
         semester: 1
       },
 
@@ -1805,8 +1999,151 @@
         turma: '2, 4, 6',
         semester: 1
       },
+      {
+        id: 'class_te_ter_t_even',
+        subjectId: 'sub_1789071274498',
+        shortName: 'TE',
+        subjectName: 'Teoria das Estruturas',
+        day: 2,
+        startTime: '13:30',
+        endTime: '15:00',
+        type: 'T',
+        room: 'B026',
+        turma: '2, 4, 6, 8',
+        semester: 1
+      },
+      {
+        id: 'class_vc_ter_t_odd',
+        subjectId: 'sub_1789071296530',
+        shortName: 'VC',
+        subjectName: 'Vias de Comunicação',
+        day: 2,
+        startTime: '14:30',
+        endTime: '15:30',
+        type: 'T',
+        room: 'B029',
+        turma: '1, 3, 5, 7',
+        semester: 1
+      },
+      {
+        id: 'class_h1_ter_tp6_8',
+        subjectId: 'sub_1789071281303',
+        shortName: 'H1',
+        subjectName: 'Hidráulica 1',
+        day: 2,
+        startTime: '15:00',
+        endTime: '17:30',
+        type: 'TP',
+        room: 'B335',
+        turma: '6, 8',
+        semester: 1
+      },
+      {
+        id: 'class_h1_ter_t_odd',
+        subjectId: 'sub_1789071281303',
+        shortName: 'H1',
+        subjectName: 'Hidráulica 1',
+        day: 2,
+        startTime: '15:30',
+        endTime: '17:00',
+        type: 'T',
+        room: 'B029',
+        turma: '1, 3, 5, 7',
+        semester: 1
+      },
+      {
+        id: 'class_te_ter_tp2',
+        subjectId: 'sub_1789071274498',
+        shortName: 'TE',
+        subjectName: 'Teoria das Estruturas',
+        day: 2,
+        startTime: '15:30',
+        endTime: '17:00',
+        type: 'TP',
+        room: 'B336',
+        turma: '2',
+        semester: 1
+      },
+      {
+        id: 'class_te_ter_tp4',
+        subjectId: 'sub_1789071274498',
+        shortName: 'TE',
+        subjectName: 'Teoria das Estruturas',
+        day: 2,
+        startTime: '17:00',
+        endTime: '18:30',
+        type: 'TP',
+        room: 'B113',
+        turma: '4',
+        semester: 1
+      },
+      {
+        id: 'class_te_ter_tp5_7',
+        subjectId: 'sub_1789071274498',
+        shortName: 'TE',
+        subjectName: 'Teoria das Estruturas',
+        day: 2,
+        startTime: '18:30',
+        endTime: '20:00',
+        type: 'TP',
+        room: 'B229',
+        turma: '5, 7',
+        semester: 1
+      },
+      {
+        id: 'class_te_ter_tp6_8',
+        subjectId: 'sub_1789071274498',
+        shortName: 'TE',
+        subjectName: 'Teoria das Estruturas',
+        day: 2,
+        startTime: '18:30',
+        endTime: '20:00',
+        type: 'TP',
+        room: 'B113',
+        turma: '6, 8',
+        semester: 1
+      },
+      {
+        id: 'class_aut_ter_tp2',
+        subjectId: 'sub_1789071290283',
+        shortName: 'AUT',
+        subjectName: 'Ambiente Urbano e Transportes',
+        day: 2,
+        startTime: '18:30',
+        endTime: '20:00',
+        type: 'TP',
+        room: 'B111',
+        turma: '2',
+        semester: 1
+      },
 
       // Quarta-feira (3)
+      {
+        id: 'class_te_qua_t_even',
+        subjectId: 'sub_1789071274498',
+        shortName: 'TE',
+        subjectName: 'Teoria das Estruturas',
+        day: 3,
+        startTime: '08:00',
+        endTime: '09:30',
+        type: 'T',
+        room: 'B014',
+        turma: '2, 4, 6, 8',
+        semester: 1
+      },
+      {
+        id: 'class_h1_qua_tp5_7',
+        subjectId: 'sub_1789071281303',
+        shortName: 'H1',
+        subjectName: 'Hidráulica 1',
+        day: 3,
+        startTime: '08:00',
+        endTime: '10:30',
+        type: 'TP',
+        room: 'B219',
+        turma: '5, 7',
+        semester: 1
+      },
       {
         id: 'class_hhu_qua_t',
         subjectId: 'sub_1789071048585',
@@ -1831,6 +2168,19 @@
         type: 'TP',
         room: 'B206',
         turma: '1',
+        semester: 1
+      },
+      {
+        id: 'class_vc_qua_tp3',
+        subjectId: 'sub_1789071296530',
+        shortName: 'VC',
+        subjectName: 'Vias de Comunicação',
+        day: 3,
+        startTime: '09:30',
+        endTime: '11:00',
+        type: 'TP',
+        room: 'B343',
+        turma: '3',
         semester: 1
       },
       {
@@ -1860,6 +2210,19 @@
         semester: 1
       },
       {
+        id: 'class_vc_qua_t_even',
+        subjectId: 'sub_1789071296530',
+        shortName: 'VC',
+        subjectName: 'Vias de Comunicação',
+        day: 3,
+        startTime: '10:00',
+        endTime: '11:00',
+        type: 'T',
+        room: 'B029',
+        turma: '2, 4, 6, 8',
+        semester: 1
+      },
+      {
         id: 'class_ees_qua_tp1',
         subjectId: 'sub_1789071216689',
         shortName: 'EES',
@@ -1885,8 +2248,125 @@
         turma: '6',
         semester: 1
       },
+      {
+        id: 'class_vc_qua_t_odd',
+        subjectId: 'sub_1789071296530',
+        shortName: 'VC',
+        subjectName: 'Vias de Comunicação',
+        day: 3,
+        startTime: '11:00',
+        endTime: '12:00',
+        type: 'T',
+        room: 'B029',
+        turma: '1, 3, 5, 7',
+        semester: 1
+      },
+      {
+        id: 'class_te_qua_tp3',
+        subjectId: 'sub_1789071274498',
+        shortName: 'TE',
+        subjectName: 'Teoria das Estruturas',
+        day: 3,
+        startTime: '12:00',
+        endTime: '13:30',
+        type: 'TP',
+        room: 'B232',
+        turma: '3',
+        semester: 1
+      },
+      {
+        id: 'class_te_qua_tp5_7',
+        subjectId: 'sub_1789071274498',
+        shortName: 'TE',
+        subjectName: 'Teoria das Estruturas',
+        day: 3,
+        startTime: '12:00',
+        endTime: '13:30',
+        type: 'TP',
+        room: 'B229',
+        turma: '5, 7',
+        semester: 1
+      },
+      {
+        id: 'class_h1_qua_t_even',
+        subjectId: 'sub_1789071281303',
+        shortName: 'H1',
+        subjectName: 'Hidráulica 1',
+        day: 3,
+        startTime: '12:00',
+        endTime: '13:30',
+        type: 'T',
+        room: 'B029',
+        turma: '2, 4, 6, 8',
+        semester: 1
+      },
+      {
+        id: 'class_vc_qua_tp1',
+        subjectId: 'sub_1789071296530',
+        shortName: 'VC',
+        subjectName: 'Vias de Comunicação',
+        day: 3,
+        startTime: '12:00',
+        endTime: '13:30',
+        type: 'TP',
+        room: 'B335',
+        turma: '1',
+        semester: 1
+      },
 
       // Quinta-feira (4)
+      {
+        id: 'class_te_qui_t_odd',
+        subjectId: 'sub_1789071274498',
+        shortName: 'TE',
+        subjectName: 'Teoria das Estruturas',
+        day: 4,
+        startTime: '08:00',
+        endTime: '09:30',
+        type: 'T',
+        room: 'B014',
+        turma: '1, 3, 5, 7',
+        semester: 1
+      },
+      {
+        id: 'class_aut_qui_t_even',
+        subjectId: 'sub_1789071290283',
+        shortName: 'AUT',
+        subjectName: 'Ambiente Urbano e Transportes',
+        day: 4,
+        startTime: '09:30',
+        endTime: '11:30',
+        type: 'T',
+        room: 'B029',
+        turma: '2, 4, 6, 8',
+        semester: 1
+      },
+      {
+        id: 'class_aut_qui_tp4',
+        subjectId: 'sub_1789071290283',
+        shortName: 'AUT',
+        subjectName: 'Ambiente Urbano e Transportes',
+        day: 4,
+        startTime: '11:30',
+        endTime: '13:00',
+        type: 'TP',
+        room: 'B305',
+        turma: '4',
+        semester: 1
+      },
+      {
+        id: 'class_aut_qui_t_odd',
+        subjectId: 'sub_1789071290283',
+        shortName: 'AUT',
+        subjectName: 'Ambiente Urbano e Transportes',
+        day: 4,
+        startTime: '11:30',
+        endTime: '13:30',
+        type: 'T',
+        room: 'B026',
+        turma: '1, 3, 5, 7',
+        semester: 1
+      },
       {
         id: 'class_hhu_qui_t1',
         subjectId: 'sub_1789071048585',
@@ -2020,6 +2500,84 @@
 
       // Sexta-feira (5)
       {
+        id: 'class_vc_sex_t_even',
+        subjectId: 'sub_1789071296530',
+        shortName: 'VC',
+        subjectName: 'Vias de Comunicação',
+        day: 5,
+        startTime: '08:00',
+        endTime: '09:00',
+        type: 'T',
+        room: 'B029',
+        turma: '2, 4, 6, 8',
+        semester: 1
+      },
+      {
+        id: 'class_te_sex_tp1',
+        subjectId: 'sub_1789071274498',
+        shortName: 'TE',
+        subjectName: 'Teoria das Estruturas',
+        day: 5,
+        startTime: '09:00',
+        endTime: '10:30',
+        type: 'TP',
+        room: 'B117',
+        turma: '1',
+        semester: 1
+      },
+      {
+        id: 'class_h1_sex_t_even',
+        subjectId: 'sub_1789071281303',
+        shortName: 'H1',
+        subjectName: 'Hidráulica 1',
+        day: 5,
+        startTime: '09:00',
+        endTime: '10:00',
+        type: 'T',
+        room: 'B029',
+        turma: '2, 4, 6, 8',
+        semester: 1
+      },
+      {
+        id: 'class_aut_sex_tp3',
+        subjectId: 'sub_1789071290283',
+        shortName: 'AUT',
+        subjectName: 'Ambiente Urbano e Transportes',
+        day: 5,
+        startTime: '09:00',
+        endTime: '10:30',
+        type: 'TP',
+        room: 'B203',
+        turma: '3',
+        semester: 1
+      },
+      {
+        id: 'class_vc_sex_tp5',
+        subjectId: 'sub_1789071296530',
+        shortName: 'VC',
+        subjectName: 'Vias de Comunicação',
+        day: 5,
+        startTime: '09:00',
+        endTime: '10:30',
+        type: 'TP',
+        room: 'B335',
+        turma: '5',
+        semester: 1
+      },
+      {
+        id: 'class_vc_sex_tp4',
+        subjectId: 'sub_1789071296530',
+        shortName: 'VC',
+        subjectName: 'Vias de Comunicação',
+        day: 5,
+        startTime: '10:00',
+        endTime: '11:30',
+        type: 'TP',
+        room: 'B214',
+        turma: '4',
+        semester: 1
+      },
+      {
         id: 'class_pre_sex_t2',
         subjectId: 'sub_1789070615665',
         shortName: 'PRE',
@@ -2030,6 +2588,45 @@
         type: 'T',
         room: 'B015',
         turma: '2, 4, 6',
+        semester: 1
+      },
+      {
+        id: 'class_h1_sex_t_odd',
+        subjectId: 'sub_1789071281303',
+        shortName: 'H1',
+        subjectName: 'Hidráulica 1',
+        day: 5,
+        startTime: '10:30',
+        endTime: '11:30',
+        type: 'T',
+        room: 'B029',
+        turma: '1, 3, 5, 7',
+        semester: 1
+      },
+      {
+        id: 'class_te_sex_t_odd',
+        subjectId: 'sub_1789071274498',
+        shortName: 'TE',
+        subjectName: 'Teoria das Estruturas',
+        day: 5,
+        startTime: '11:30',
+        endTime: '13:00',
+        type: 'T',
+        room: 'B020',
+        turma: '1, 3, 5, 7',
+        semester: 1
+      },
+      {
+        id: 'class_aut_sex_tp6_8',
+        subjectId: 'sub_1789071290283',
+        shortName: 'AUT',
+        subjectName: 'Ambiente Urbano e Transportes',
+        day: 5,
+        startTime: '11:30',
+        endTime: '13:00',
+        type: 'TP',
+        room: 'B109',
+        turma: '6, 8',
         semester: 1
       },
       {
@@ -2222,7 +2819,7 @@
         state.absences[diogo.id] = [];
       }
 
-      // Sincronizar aulas do horário padrão: manter apenas cadeiras com horário oficial fornecido (Engenharia Geotécnica, Engenharia de Estruturas, Engenharia do Território e dos Transportes, Hidrologia e Hidráulica Urbana e Patologia e Reabilitação de Edifícios)
+      // Sincronizar aulas do horário padrão: manter apenas cadeiras com horário oficial fornecido (Engenharia Geotécnica, Engenharia de Estruturas, Engenharia do Território e dos Transportes, Hidrologia e Hidráulica Urbana, Patologia e Reabilitação de Edifícios, Teoria das Estruturas, Hidráulica 1, Ambiente Urbano e Transportes e Vias de Comunicação)
       const allowedClassIds = new Set(DEFAULT_SCHEDULE.map(c => c.id));
       state.schedule = (state.schedule || []).filter(c => allowedClassIds.has(c.id));
       if (state.schedule.length === 0) {
@@ -2893,6 +3490,8 @@
                   <option value="4" ${subTurma === '4' ? 'selected' : ''}>Turma 4 (11M.EC4)</option>
                   <option value="5" ${subTurma === '5' ? 'selected' : ''}>Turma 5 (11M.EC5)</option>
                   <option value="6" ${subTurma === '6' ? 'selected' : ''}>Turma 6 (11M.EC6)</option>
+                  <option value="7" ${subTurma === '7' ? 'selected' : ''}>Turma 7 (11M.EC7)</option>
+                  <option value="8" ${subTurma === '8' ? 'selected' : ''}>Turma 8 (11M.EC8)</option>
                 </select>
               </div>
             </div>
@@ -3718,6 +4317,15 @@
       }
       if (/Engenharia Geotécnica/i.test(trimmed)) {
         return `<span class="block sm:inline">Engenharia</span> <span class="block sm:inline">Geotécnica</span>`;
+      }
+      if (/Teoria das Estruturas/i.test(trimmed)) {
+        return `<span class="block sm:inline">Teoria</span> <span class="block sm:inline">das Estruturas</span>`;
+      }
+      if (/Ambiente Urbano e Transportes/i.test(trimmed)) {
+        return `<span class="block sm:inline">Ambiente Urbano</span> <span class="block sm:inline">e Transportes</span>`;
+      }
+      if (/Vias de Comunicação/i.test(trimmed)) {
+        return `<span class="block sm:inline">Vias de</span> <span class="block sm:inline">Comunicação</span>`;
       }
 
       // Para qualquer outra cadeira com nome longo (> 24 caracteres)
@@ -4617,6 +5225,9 @@
       if (sub.id === 'sub_1789071048585' || (sub.name && sub.name.trim().toLowerCase() === 'hidrologia e hidráulica urbana')) return 1;
       if (sub.id === 'sub_1789070615665' || (sub.name && sub.name.trim().toLowerCase() === 'patologia e reabilitação de edifícios')) return 1;
       if (sub.id === 'sub_1789071274498' || (sub.name && sub.name.trim().toLowerCase() === 'teoria das estruturas')) return 1;
+      if (sub.id === 'sub_1789071281303' || (sub.name && sub.name.trim().toLowerCase() === 'hidráulica 1')) return 1;
+      if (sub.id === 'sub_1789071290283' || (sub.name && sub.name.trim().toLowerCase() === 'ambiente urbano e transportes')) return 1;
+      if (sub.id === 'sub_1789071296530' || (sub.name && sub.name.trim().toLowerCase() === 'vias de comunicação')) return 1;
       if (sub.id === 'sub_1789508807919' || (sub.name && sub.name.trim().toLowerCase() === 'hidráulica 2')) return 2;
       if (sub.semester === 1 || sub.semester === 2) return sub.semester;
       if (typeof sub.semester === 'string') {
@@ -5487,6 +6098,8 @@
               <option value="4" ${curSubjectTurma === '4' ? 'selected' : ''}>Turma 4 (11M.EC4)</option>
               <option value="5" ${curSubjectTurma === '5' ? 'selected' : ''}>Turma 5 (11M.EC5)</option>
               <option value="6" ${curSubjectTurma === '6' ? 'selected' : ''}>Turma 6 (11M.EC6)</option>
+              <option value="7" ${curSubjectTurma === '7' ? 'selected' : ''}>Turma 7 (11M.EC7)</option>
+              <option value="8" ${curSubjectTurma === '8' ? 'selected' : ''}>Turma 8 (11M.EC8)</option>
             </select>
           </div>
         `;
